@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { loginUser } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
   /**
@@ -64,9 +65,9 @@ function LoginPage() {
       localStorage.setItem("user", JSON.stringify(userData));
 
       /**
-       * Temporary success feedback until routing/navigation is added.
+       * Redirects the user to the dashboard after successful authentication.
        */
-      alert("Login successful");
+      navigate("/dashboard");
     } catch (err) {
       /**
        * Handles known Axios errors and provides a readable message for the UI.
