@@ -7,18 +7,25 @@ import { useAuth } from "../context/AuthContext";
  */
 
 function ProtectedRoute({ children }) {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
 
   /**
-   * If there is no authenticated user, redirect to /login
+   * Waits until authentication state is loaded from localStorage.
    */
+  if (!isAuthReady) {
+    return (
+      <section className="section">
+        <div className="container">
+          <p>Loading session...</p>
+        </div>
+      </section>
+    );
+  }
+
   if (!user?.accessToken) {
     return <Navigate to="/login" replace />;
   }
 
-  /**
-   * If authentication exists, render the protected content.
-   */
   return children;
 }
 

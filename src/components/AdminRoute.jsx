@@ -6,7 +6,20 @@ import { useAuth } from "../context/AuthContext";
  * Redirects non-admin users to the dashboard.
  */
 function AdminRoute({ children }) {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
+
+  /**
+   * Waits until authentication state is loaded from localStorage.
+   */
+  if (!isAuthReady) {
+    return (
+      <section className="section">
+        <div className="container">
+          <p>Loading session...</p>
+        </div>
+      </section>
+    );
+  }
 
   if (!user?.accessToken) {
     return <Navigate to="/login" replace />;

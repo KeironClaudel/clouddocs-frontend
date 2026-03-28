@@ -15,6 +15,11 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   /**
+   * Indicates whether the authentication state has been loaded from localStorage.
+   */
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  /**
    * Loads the user from localStorage when the app starts.
    */
   useEffect(() => {
@@ -22,6 +27,7 @@ export function AuthProvider({ children }) {
     const parsedUser = storedUser ? JSON.parse(storedUser) : null;
 
     setUser(parsedUser);
+    setIsAuthReady(true);
   }, []);
 
   /**
@@ -41,7 +47,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthReady }}>
       {children}
     </AuthContext.Provider>
   );
