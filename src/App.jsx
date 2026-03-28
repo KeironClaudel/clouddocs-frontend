@@ -11,6 +11,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UploadDocumentPage from "./pages/UploadDocumentPage";
+import AuditLogsPage from "./pages/AuditLogsPage";
 
 function App() {
   return (
@@ -99,6 +100,19 @@ function App() {
               <AppLayout>
                 <UploadDocumentPage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/audit-logs"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <AuditLogsPage />
+                </AppLayout>
+              </AdminRoute>
             </ProtectedRoute>
           }
         />

@@ -7,6 +7,7 @@ import {
   updateCategory,
   reactivateCategory,
 } from "../services/categoryService";
+import { formatLocalDateForDisplay } from "../utils/dateUtils";
 
 function CategoriesPage() {
   /**
@@ -263,7 +264,7 @@ function CategoriesPage() {
           name: editForm.name,
           description: editForm.description || null,
           isActive: true,
-          createdAt: new Date().toISOString(),
+          createdAt: formatLocalDateForDisplay(category.createdAt),
         });
       }
 
@@ -535,9 +536,7 @@ function CategoriesPage() {
                             </span>
                           )}
                         </td>
-                        <td>
-                          {new Date(category.createdAt).toLocaleDateString()}
-                        </td>
+                        <td>{formatLocalDateForDisplay(category.createdAt)}</td>
                         <td>
                           <div className="buttons are-small">
                             <button

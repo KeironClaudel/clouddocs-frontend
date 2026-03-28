@@ -9,6 +9,7 @@ import {
   updateUser,
 } from "../services/userService";
 import { roleOptions } from "../utils/roleOptions";
+import { formatLocalDateForDisplay } from "../utils/dateUtils";
 
 function UsersPage() {
   /**
@@ -658,9 +659,7 @@ function UsersPage() {
                             </span>
                           )}
                         </td>
-                        <td>
-                          {new Date(userItem.createdAt).toLocaleDateString()}
-                        </td>
+                        <td>{formatLocalDateForDisplay(userItem.createdAt)}</td>
                         <td>
                           <div className="buttons are-small">
                             <button

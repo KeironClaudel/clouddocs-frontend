@@ -10,6 +10,7 @@ import {
   searchDocuments,
 } from "../services/documentService";
 import { getCategories } from "../services/categoryService";
+import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { Link } from "react-router-dom";
 
 function DocumentsPage() {
@@ -695,7 +696,7 @@ function DocumentsPage() {
                           <td>{document.uploadedByUserName}</td>
                           <td>{document.department || "N/A"}</td>
                           <td>
-                            {new Date(document.createdAt).toLocaleDateString()}
+                            {formatLocalDateForDisplay(document.createdAt)}
                           </td>
                           <td>
                             {document.isActive ? (
@@ -730,9 +731,7 @@ function DocumentsPage() {
                                 {(versionsByDocumentId[document.id] || []).map(
                                   (version) => (
                                     <option key={version.id} value={version.id}>
-                                      {`v${version.versionNumber} - ${new Date(
-                                        version.createdAt,
-                                      ).toLocaleDateString()}`}
+                                      {`v${version.versionNumber} - ${formatLocalDateForDisplay(version.createdAt)}`}
                                     </option>
                                   ),
                                 )}

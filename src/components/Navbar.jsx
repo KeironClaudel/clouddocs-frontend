@@ -69,6 +69,10 @@ function Navbar() {
               <Link to="/categories" className="navbar-item">
                 Categories
               </Link>
+
+              <Link to="/audit-logs" className="navbar-item">
+                Audit Logs
+              </Link>
             </>
           )}
 
