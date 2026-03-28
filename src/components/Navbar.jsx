@@ -48,6 +48,10 @@ function Navbar() {
             Documents
           </Link>
 
+          <Link to="/profile" className="navbar-item">
+            Profile
+          </Link>
+
           <div className="navbar-item">
             <button className="button is-primary" onClick={handleLogout}>
               Logout
