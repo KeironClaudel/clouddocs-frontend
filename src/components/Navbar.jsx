@@ -1,15 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 
-/**
- * Displays the main navigation bar for authenticated pages.
- * Provides navigation links and a logout action.
- */
-
-/**
- * Retrieves userData from localstorage for further usage.
- */
-const userData = JSON.parse(localStorage.getItem("user") || "{}");
-
 function Navbar() {
   const navigate = useNavigate();
 
@@ -51,6 +41,12 @@ function Navbar() {
           <Link to="/profile" className="navbar-item">
             Profile
           </Link>
+
+          {user?.role === "Admin" && (
+            <Link to="/users" className="navbar-item">
+              Users
+            </Link>
+          )}
 
           <div className="navbar-item">
             <button className="button is-primary" onClick={handleLogout}>

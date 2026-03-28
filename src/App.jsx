@@ -5,6 +5,8 @@ import DashboardPage from "./pages/DashboardPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
+import AdminRoute from "./components/AdminRoute";
+import UsersPage from "./pages/UsersPage";
 
 function App() {
   return (
@@ -43,6 +45,19 @@ function App() {
               <AppLayout>
                 <ProfilePage />
               </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <UsersPage />
+                </AppLayout>
+              </AdminRoute>
             </ProtectedRoute>
           }
         />
