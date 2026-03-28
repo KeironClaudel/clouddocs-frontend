@@ -30,3 +30,65 @@ export async function getUsers() {
 
   return response.data;
 }
+
+/**
+ * Sends a request to deactivate a user account.
+ */
+export async function deactivateUser(userId) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+
+  await axios.patch(
+    `${API_BASE_URL}/users/${userId}/deactivate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+}
+
+/**
+ * Sends a request to reactivate a user account.
+ */
+export async function reactivateUser(userId) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+
+  await axios.patch(
+    `${API_BASE_URL}/users/${userId}/reactivate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+}
+
+/**
+ * Sends a request to create a new user.
+ */
+export async function createUser(userData) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+
+  const response = await axios.post(`${API_BASE_URL}/users`, userData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.data;
+}
