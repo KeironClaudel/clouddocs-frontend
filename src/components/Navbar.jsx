@@ -14,23 +14,46 @@ function Navbar() {
   const navigate = useNavigate();
 
   /**
-   * Clears persisted authentication data and redirects the user to the login page.
+   * Clears the persisted authenticated user and redirects to the login page.
    */
   function handleLogout() {
     localStorage.removeItem("user");
     navigate("/login");
   }
 
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
   return (
-    <nav>
-      <h1>CloudDocs</h1>
+    <nav
+      className="navbar is-dark"
+      role="navigation"
+      aria-label="main navigation"
+    >
+      <div className="navbar-brand">
+        <div className="navbar-item has-text-weight-bold is-size-4">
+          CloudDocs
+        </div>
+      </div>
 
-      <div>
-        {userData && <span>Welcome, {userData.fullName}</span>}
+      <div className="navbar-menu is-active">
+        <div className="navbar-end">
+          <div className="navbar-item">Welcome, {user?.fullName || "User"}</div>
 
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/documents">Documents</Link>
-        <button onClick={handleLogout}>Logout</button>
+          <Link to="/dashboard" className="navbar-item">
+            Dashboard
+          </Link>
+
+          <Link to="/documents" className="navbar-item">
+            Documents
+          </Link>
+
+          <div className="navbar-item">
+            <button className="button is-primary" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
     </nav>
   );
