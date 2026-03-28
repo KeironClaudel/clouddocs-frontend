@@ -52,6 +52,24 @@ export async function downloadDocument(documentId) {
 }
 
 /**
+ * Requests the available versions for a specific document.
+ */
+export async function getDocumentVersions(documentId) {
+  const token = getAccessToken();
+
+  const response = await axios.get(
+    `${API_BASE_URL}/documents/${documentId}/versions`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+/**
  * Requests the document list from the backend API using the stored access token.
  * Returns the response payload from the API.
  */
