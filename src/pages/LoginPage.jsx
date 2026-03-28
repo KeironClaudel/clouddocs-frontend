@@ -1,19 +1,22 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faLock } from "@fortawesome/free-solid-svg-icons";
+import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
+import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 
 function LoginPage() {
-  const { login } = useAuth();
-
   /**
-   * Stores the current email input value
+   * Stores the current email input value.
    */
   const [email, setEmail] = useState("");
 
   /**
-   * Stores the current password input value
+   * Stores the current password input value.
    */
   const [password, setPassword] = useState("");
 
@@ -27,37 +30,21 @@ function LoginPage() {
    */
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   /**
-   * Handles the form submission and sends credentials to the backend.
+   * Handles the form submission and signs in the user.
    */
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-    /**
-     * Clears any previous error before starting a new request.
-     */
     setError("");
-
-    /**
-     * Activates the loading state to disable inputs and prevent duplicate submissions.
-     */
     setLoading(true);
 
     try {
-      const credentials = {
-        email,
-        password,
-      };
+      const data = await loginUser({ email, password });
 
-      /**
-       * Calls the authentication service to perform login request
-       */
-      const data = await loginUser(credentials);
-      console.log("Logging Succesful: ", data);
-
-      /**
-       * Persists the JWT locally for future authenticated requests.
-       */
       const userData = {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
@@ -65,64 +52,114 @@ function LoginPage() {
         email: data.email,
         role: data.role,
       };
-      login(userData);
 
-      /**
-       * Redirects the user to the dashboard after successful authentication.
-       */
+      login(userData);
       navigate("/dashboard");
     } catch (err) {
-      /**
-       * Handles known Axios errors and provides a readable message for the UI.
-       */
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "Login failed.");
       } else {
         setError("An unexpected error occurred.");
       }
     } finally {
-      /**
-       * Ends the loading state regardless of the request result.
-       */
       setLoading(false);
     }
   }
 
   return (
-    <div>
-      <h2> Login </h2>
-      <p>Enter your credentials to access CloudDocs.</p>
+    <section className="login-page section is-flex is-align-items-center is-justify-content-center">
+      <div className="container">
+        <div className="columns is-centered">
+          <div className="column is-11-mobile is-8-tablet is-5-desktop is-4-widescreen">
+            <div className="box login-box">
+              <div className="has-text-centered mb-5">
+                <h1 className="title is-3 mb-2">CloudDocs</h1>
+                <p className="subtitle is-6 mb-0">
+                  Sign in to access your document management panel.
+                </p>
+              </div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            disabled={loading}
-          />
+              {error && (
+                <article className="message is-danger">
+                  <div className="message-body">{error}</div>
+                </article>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div className="field">
+                  <label className="label">Email</label>
+                  <div className="control has-icons-left">
+                    <input
+                      className="input"
+                      type="email"
+                      placeholder="you@company.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      disabled={loading}
+                      required
+                    />
+                    <span className="icon is-small is-left">
+                      <FontAwesomeIcon icon={faEnvelope} />
+                    </span>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label className="label">Password</label>
+                  <div className="control has-icons-left">
+                    <input
+                      className="input"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      disabled={loading}
+                      required
+                    />
+                    <span className="icon is-small is-left">
+                      <FontAwesomeIcon icon={faLock} />
+                    </span>
+                  </div>
+                </div>
+
+                <div className="field is-grouped is-grouped-right mb-4">
+                  <div className="control">
+                    <Link to="/forgot-password" className="is-size-7">
+                      Forgot your password?
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <div className="control">
+                    <button
+                      type="submit"
+                      className={`button is-primary is-fullwidth ${
+                        loading ? "is-loading" : ""
+                      }`}
+                      disabled={loading}
+                    >
+                      <span className="icon">
+                        <FontAwesomeIcon icon={faRightToBracket} />
+                      </span>
+                      <span>Sign In</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <hr />
+
+              <div className="has-text-centered">
+                <p className="is-size-7 has-text-grey">
+                  Secure internal access for authorized users only.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* PASSWORD */}
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={loading}
-          />
-        </div>
-
-        {/* SUBMIT BUTTON */}
-        <button type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Login"}
-        </button>
-
-        {error && <p>{error}</p>}
-      </form>
-    </div>
+      </div>
+    </section>
   );
 }
 

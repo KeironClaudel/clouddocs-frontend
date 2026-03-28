@@ -30,3 +30,25 @@ export async function logoutUser(refreshTokenValue) {
 
   return response.data;
 }
+
+/**
+ * Requests a password reset link for the provided email address.
+ */
+export async function forgotPassword(email) {
+  const response = await axiosInstance.post("/auth/forgot-password", {
+    email,
+  });
+
+  return response.data;
+}
+
+/**
+ * Sends a password change request for the authenticated user.
+ */
+export async function changePassword(passwordData) {
+  const response = await axiosInstance.post(
+    "/auth/change-password",
+    passwordData,
+  );
+  return response.data;
+}

@@ -1,4 +1,10 @@
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faKey } from "@fortawesome/free-solid-svg-icons";
+
 function ProfilePage() {
+  const navigate = useNavigate();
+
   /**
    * Retrieves the stored user from localStorage.
    */
@@ -28,6 +34,17 @@ function ProfilePage() {
               <p>
                 <strong>Role:</strong> {user.role}
               </p>
+            </div>
+            <div className="mt-4">
+              <button
+                className="button is-primary is-light"
+                onClick={() => navigate("/change-password")}
+              >
+                <span className="icon">
+                  <FontAwesomeIcon icon={faKey} />
+                </span>
+                <span>Change Password</span>
+              </button>
             </div>
           </div>
         )}

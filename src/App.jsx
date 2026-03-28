@@ -7,6 +7,8 @@ import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import AdminRoute from "./components/AdminRoute";
 import UsersPage from "./pages/UsersPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 
 function App() {
   return (
@@ -58,6 +60,19 @@ function App() {
                   <UsersPage />
                 </AppLayout>
               </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ChangePasswordPage />
+              </AppLayout>
             </ProtectedRoute>
           }
         />

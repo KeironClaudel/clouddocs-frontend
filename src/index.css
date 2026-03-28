@@ -1,9 +1,124 @@
-html,
-body,
-#root {
-  min-height: 100vh;
-}
-
 body {
   margin: 0;
+  background-color: var(--app-bg);
+  color: var(--text-main);
+}
+
+/* Global surfaces */
+.box,
+.table,
+.card,
+.modal-card,
+.message {
+  border-radius: 14px;
+}
+
+.box,
+.card,
+.modal-card {
+  background-color: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--navbar-bg);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.navbar-item,
+.navbar-link,
+.navbar-brand .navbar-item {
+  color: var(--navbar-text);
+}
+
+.navbar-item:hover,
+.navbar-link:hover,
+a.navbar-item:hover {
+  background-color: var(--navbar-link-hover) !important;
+  color: var(--navbar-text) !important;
+}
+
+/* Titles and text */
+.title,
+.subtitle,
+.label,
+.table th,
+.table td,
+.content,
+p,
+span,
+strong {
+  color: var(--text-main);
+}
+
+.has-text-grey,
+.has-text-grey-light,
+.has-text-grey-dark {
+  color: var(--text-soft) !important;
+}
+
+/* Tables */
+.table {
+  background-color: var(--surface);
+}
+
+.table thead th {
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.table td {
+  color: var(--text-main);
+  border-color: var(--border-soft);
+}
+
+.table.is-striped tbody tr:not(.is-selected):nth-child(even) {
+  background-color: var(--surface-muted);
+}
+
+/* Inputs and selects */
+.input,
+.textarea,
+.select select {
+  background-color: #ffffff;
+  border-color: var(--border-soft);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.input:focus,
+.textarea:focus,
+.select select:focus {
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 0.125em rgba(72, 95, 199, 0.15);
+}
+
+.button.is-light:hover {
+  background-color: #e5e7eb;
+}
+
+/* Login page */
+.login-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(72, 95, 199, 0.08), transparent 30%),
+    var(--app-bg);
+}
+
+.login-box {
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+/* Dashboard cards */
+.dashboard-stat .title,
+.dashboard-stat .subtitle,
+.dashboard-stat p {
+  color: var(--text-main);
+}
+
+/* Utility */
+.app-section {
+  background-color: var(--app-bg);
 }
