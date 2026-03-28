@@ -11,13 +11,25 @@ import {
 } from "../services/documentService";
 import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
+import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { canManageDocuments } from "../utils/permissionUtils";
 
 function DocumentsPage() {
   /**
    * Stores the document list returned by the API.
    */
   const [documents, setDocuments] = useState([]);
+
+  /**
+   * Integrates de AuthContext module for use
+   */
+  const { user } = useAuth();
+
+  /**
+   * Checks if current user can manage documents
+   */
+  const canManageDocumentActions = canManageDocuments(user);
 
   /**
    * Indicates whether the document request is currently in progress.
@@ -740,16 +752,18 @@ function DocumentsPage() {
                           </td>
                           <td>
                             <div className="buttons are-small">
-                              <button
-                                className="button is-link is-light"
-                                onClick={() => handleStartRename(document)}
-                                disabled={
-                                  !document.isActive ||
-                                  renamingDocumentId === document.id
-                                }
-                              >
-                                Rename
-                              </button>
+                              {canManageDocumentActions && (
+                                <button
+                                  className="button is-link is-light"
+                                  onClick={() => handleStartRename(document)}
+                                  disabled={
+                                    !document.isActive ||
+                                    renamingDocumentId === document.id
+                                  }
+                                >
+                                  Rename
+                                </button>
+                              )}
 
                               <button
                                 className="button is-info is-light"
@@ -772,35 +786,36 @@ function DocumentsPage() {
                                 Download
                               </button>
 
-                              {document.isActive ? (
-                                <button
-                                  className="button is-warning is-light"
-                                  onClick={() =>
-                                    handleDeactivateDocument(document.id)
-                                  }
-                                  disabled={
-                                    deactivatingDocumentId === document.id
-                                  }
-                                >
-                                  {deactivatingDocumentId === document.id
-                                    ? "Processing..."
-                                    : "Deactivate"}
-                                </button>
-                              ) : (
-                                <button
-                                  className="button is-success is-light"
-                                  onClick={() =>
-                                    handleReactivateDocument(document.id)
-                                  }
-                                  disabled={
-                                    reactivatingDocumentId === document.id
-                                  }
-                                >
-                                  {reactivatingDocumentId === document.id
-                                    ? "Processing..."
-                                    : "Reactivate"}
-                                </button>
-                              )}
+                              {canManageDocumentActions &&
+                                (document.isActive ? (
+                                  <button
+                                    className="button is-warning is-light"
+                                    onClick={() =>
+                                      handleDeactivateDocument(document.id)
+                                    }
+                                    disabled={
+                                      deactivatingDocumentId === document.id
+                                    }
+                                  >
+                                    {deactivatingDocumentId === document.id
+                                      ? "Processing..."
+                                      : "Deactivate"}
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="button is-success is-light"
+                                    onClick={() =>
+                                      handleReactivateDocument(document.id)
+                                    }
+                                    disabled={
+                                      reactivatingDocumentId === document.id
+                                    }
+                                  >
+                                    {reactivatingDocumentId === document.id
+                                      ? "Processing..."
+                                      : "Reactivate"}
+                                  </button>
+                                ))}
                             </div>
                           </td>
                         </tr>

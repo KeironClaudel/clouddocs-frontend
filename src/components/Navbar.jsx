@@ -4,10 +4,18 @@ import { useAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import {
+  canManageCategories,
+  canManageUsers,
+  canViewAuditLogs,
+} from "../utils/permissionUtils";
 
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const showUsersLink = canManageUsers(user);
+  const showCategoriesLink = canManageCategories(user);
+  const showAuditLogsLink = canViewAuditLogs(user);
 
   /**
    * Invalidates the current session in the backend and clears local storage.
@@ -60,20 +68,22 @@ function Navbar() {
             Profile
           </Link>
 
-          {user?.role === "Admin" && (
-            <>
-              <Link to="/users" className="navbar-item">
-                Users
-              </Link>
+          {showUsersLink && (
+            <Link to="/users" className="navbar-item">
+              Users
+            </Link>
+          )}
 
-              <Link to="/categories" className="navbar-item">
-                Categories
-              </Link>
+          {showCategoriesLink && (
+            <Link to="/categories" className="navbar-item">
+              Categories
+            </Link>
+          )}
 
-              <Link to="/audit-logs" className="navbar-item">
-                Audit Logs
-              </Link>
-            </>
+          {showAuditLogsLink && (
+            <Link to="/audit-logs" className="navbar-item">
+              Audit Logs
+            </Link>
           )}
 
           <div className="navbar-item">
