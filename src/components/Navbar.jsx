@@ -61,9 +61,15 @@ function Navbar() {
           </Link>
 
           {user?.role === "Admin" && (
-            <Link to="/users" className="navbar-item">
-              Users
-            </Link>
+            <>
+              <Link to="/users" className="navbar-item">
+                Users
+              </Link>
+
+              <Link to="/categories" className="navbar-item">
+                Categories
+              </Link>
+            </>
           )}
 
           <div className="navbar-item">

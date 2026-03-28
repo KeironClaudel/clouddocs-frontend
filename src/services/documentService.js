@@ -41,3 +41,74 @@ export async function getDocuments() {
   const response = await axiosInstance.get("/documents");
   return response.data;
 }
+
+/**
+ * Sends a multipart/form-data request to upload a document and its metadata.
+ */
+export async function uploadDocument(documentData) {
+  const formData = new FormData();
+
+  formData.append("file", documentData.file);
+  formData.append("originalFileName", documentData.originalFileName);
+  formData.append("contentType", documentData.contentType);
+  formData.append("fileSize", String(documentData.fileSize));
+  formData.append("categoryId", documentData.categoryId);
+  formData.append("documentType", String(documentData.documentType));
+  formData.append(
+    "expirationDatePendingDefinition",
+    String(documentData.expirationDatePendingDefinition),
+  );
+  formData.append("accessLevel", String(documentData.accessLevel));
+
+  if (documentData.expirationDate) {
+    formData.append("expirationDate", documentData.expirationDate);
+  }
+
+  if (documentData.department) {
+    formData.append("department", documentData.department);
+  }
+
+  const response = await axiosInstance.post("/documents/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * Sends a request to rename an existing document.
+ */
+export async function renameDocument(documentId, newName) {
+  const response = await axiosInstance.put(`/documents/${documentId}/rename`, {
+    newName,
+  });
+
+  return response.data;
+}
+
+/**
+ * Sends a request to deactivate an existing document.
+ */
+export async function deactivateDocument(documentId) {
+  await axiosInstance.patch(`/documents/${documentId}/deactivate`);
+}
+
+/**
+ * Sends a request to reactivate an existing document.
+ */
+export async function reactivateDocument(documentId) {
+  await axiosInstance.patch(`/documents/${documentId}/reactivate`);
+}
+
+/**
+ * Requests a paginated and filtered document list from the backend API.
+ */
+export async function searchDocuments(params) {
+  const response = await axiosInstance.get("/documents", {
+    params,
+  });
+
+  return response.data;
+}

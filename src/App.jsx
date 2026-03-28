@@ -9,6 +9,8 @@ import AdminRoute from "./components/AdminRoute";
 import UsersPage from "./pages/UsersPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import UploadDocumentPage from "./pages/UploadDocumentPage";
 
 function App() {
   return (
@@ -72,6 +74,30 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <ChangePasswordPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <CategoriesPage />
+                </AppLayout>
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/documents/upload"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UploadDocumentPage />
               </AppLayout>
             </ProtectedRoute>
           }
