@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Prevents access to protected pages when no authenticated user exists.
@@ -6,13 +7,12 @@ import { Navigate } from "react-router-dom";
  */
 
 function ProtectedRoute({ children }) {
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { user } = useAuth();
 
   /**
    * If there is no authenticated user, redirect to /login
    */
-  if (!user || !user.accessToken) {
+  if (!user?.accessToken) {
     return <Navigate to="/login" replace />;
   }
 

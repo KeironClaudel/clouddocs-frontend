@@ -1,18 +1,27 @@
 import { Link, useNavigate } from "react-router-dom";
+import { logoutUser } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
+
+const { user, logout } = useAuth();
 
 function Navbar() {
   const navigate = useNavigate();
 
   /**
-   * Clears the persisted authenticated user and redirects to the login page.
+   * Invalidates the current session in the backend and clears local storage.
    */
-  function handleLogout() {
-    localStorage.removeItem("user");
-    navigate("/login");
+  async function handleLogout() {
+    try {
+      if (user?.refreshToken) {
+        await logoutUser(user.refreshToken);
+      }
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      logout();
+      navigate("/login");
+    }
   }
-
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
 
   return (
     <nav

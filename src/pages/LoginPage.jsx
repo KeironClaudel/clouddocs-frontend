@@ -2,8 +2,11 @@ import { useState } from "react";
 import axios from "axios";
 import { loginUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function LoginPage() {
+  const { login } = useAuth();
+
   /**
    * Stores the current email input value
    */
@@ -62,7 +65,7 @@ function LoginPage() {
         email: data.email,
         role: data.role,
       };
-      localStorage.setItem("user", JSON.stringify(userData));
+      login(userData);
 
       /**
        * Redirects the user to the dashboard after successful authentication.

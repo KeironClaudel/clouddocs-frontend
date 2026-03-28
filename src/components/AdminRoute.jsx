@@ -1,14 +1,14 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 /**
  * Restricts access to admin-only pages.
  * Redirects non-admin users to the dashboard.
  */
 function AdminRoute({ children }) {
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { user } = useAuth();
 
-  if (!user || !user.accessToken) {
+  if (!user?.accessToken) {
     return <Navigate to="/login" replace />;
   }
 
