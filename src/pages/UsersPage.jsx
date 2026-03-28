@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   createUser,
-  getUsers,
   deactivateUser,
+  getUserById,
+  getUsers,
   reactivateUser,
+  updateUser,
 } from "../services/userService";
 import { roleOptions } from "../utils/roleOptions";
 
@@ -56,12 +58,80 @@ function UsersPage() {
   });
 
   /**
+   * Controls whether the edit user form is visible.
+   */
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  /**
+   * Stores whether the selected user is being loaded for editing.
+   */
+  const [loadingEditUser, setLoadingEditUser] = useState(false);
+
+  /**
+   * Stores whether the update request is currently in progress.
+   */
+  const [updatingUser, setUpdatingUser] = useState(false);
+
+  /**
+   * Stores the ID of the user currently being edited.
+   */
+  const [editingUserId, setEditingUserId] = useState(null);
+
+  /**
+   * Stores the edit user form values.
+   */
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    email: "",
+    department: "",
+    roleId: "",
+  });
+
+  /**
+   * Loads the user list when the page is rendered for the first time.
+   */
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const data = await getUsers();
+
+        const normalizedUsers = Array.isArray(data)
+          ? data
+          : data.users || data.items || [];
+
+        setUsers(normalizedUsers);
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || "Failed to load users.");
+        } else {
+          setError(err.message || "An unexpected error occurred.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUsers();
+  }, []);
+
+  /**
    * Updates a user's active status in local state after a successful API request.
    */
   function updateUserStatusInState(userId, isActive) {
     setUsers((prevUsers) =>
       prevUsers.map((userItem) =>
         userItem.id === userId ? { ...userItem, isActive } : userItem,
+      ),
+    );
+  }
+
+  /**
+   * Updates the selected user in local state after a successful edit.
+   */
+  function updateUserInState(updatedUser) {
+    setUsers((prevUsers) =>
+      prevUsers.map((userItem) =>
+        userItem.id === updatedUser.id ? updatedUser : userItem,
       ),
     );
   }
@@ -113,56 +183,6 @@ function UsersPage() {
       setUpdatingUserId(null);
     }
   }
-  /**
-   * Handles user reactivation.
-   */
-  async function handleReactivate(userId) {
-    setActionMessage("");
-    setUpdatingUserId(userId);
-
-    try {
-      await reactivateUser(userId);
-      updateUserStatusInState(userId, true);
-      setActionMessage("User reactivated successfully.");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to reactivate user.",
-        );
-      } else {
-        setActionMessage("An unexpected error occurred.");
-      }
-    } finally {
-      setUpdatingUserId(null);
-    }
-  }
-
-  /**
-   * Loads the user list when the page is rendered for the first time.
-   */
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        const data = await getUsers();
-
-        const normalizedUsers = Array.isArray(data)
-          ? data
-          : data.users || data.items || [];
-
-        setUsers(normalizedUsers);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load users.");
-        } else {
-          setError(err.message || "An unexpected error occurred.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadUsers();
-  }, []);
 
   /**
    * Updates the create user form state when an input changes.
@@ -229,6 +249,113 @@ function UsersPage() {
     }
   }
 
+  /**
+   * Updates the edit user form state when an input changes.
+   */
+  function handleEditFormChange(event) {
+    const { name, value } = event.target;
+
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  /**
+   * Resets the edit user form to its initial state.
+   */
+  function resetEditForm() {
+    setEditForm({
+      fullName: "",
+      email: "",
+      department: "",
+      roleId: "",
+    });
+
+    setEditingUserId(null);
+    setShowEditForm(false);
+  }
+
+  /**
+   * Opens the edit form and loads the selected user's details.
+   */
+  async function handleOpenEditForm(userId) {
+    setActionMessage("");
+    setLoadingEditUser(true);
+    setShowEditForm(true);
+
+    try {
+      const userData = await getUserById(userId);
+
+      const matchedRole = roleOptions.find(
+        (role) => role.label === userData.role,
+      );
+
+      setEditForm({
+        fullName: userData.fullName || "",
+        email: userData.email || "",
+        department: userData.department || "",
+        roleId: userData.roleId || matchedRole?.value || "",
+      });
+
+      setEditingUserId(userId);
+    } catch (err) {
+      setShowEditForm(false);
+
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          err.response?.data?.message || "Failed to load user details.",
+        );
+      } else {
+        setActionMessage("An unexpected error occurred.");
+      }
+    } finally {
+      setLoadingEditUser(false);
+    }
+  }
+
+  /**
+   * Handles the edit user form submission.
+   */
+  async function handleUpdateUser(event) {
+    event.preventDefault();
+
+    if (!editingUserId) {
+      return;
+    }
+
+    setActionMessage("");
+    setUpdatingUser(true);
+
+    try {
+      const payload = {
+        fullName: editForm.fullName,
+        email: editForm.email,
+        department: editForm.department || null,
+        roleId: editForm.roleId,
+      };
+
+      const updatedUser = await updateUser(editingUserId, payload);
+
+      if (updatedUser && updatedUser.id) {
+        updateUserInState(updatedUser);
+      }
+
+      setActionMessage("User updated successfully.");
+      resetEditForm();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          err.response?.data?.message || "Failed to update user.",
+        );
+      } else {
+        setActionMessage("An unexpected error occurred.");
+      }
+    } finally {
+      setUpdatingUser(false);
+    }
+  }
+
   return (
     <section className="section">
       <div className="container">
@@ -237,11 +364,13 @@ function UsersPage() {
           <p className="subtitle is-6">
             View registered users and their account information.
           </p>
+
           {actionMessage && (
             <article className="message is-info">
               <div className="message-body">{actionMessage}</div>
             </article>
           )}
+
           <div className="mb-4">
             <button
               className="button is-primary"
@@ -374,6 +503,113 @@ function UsersPage() {
           </div>
         )}
 
+        {showEditForm && (
+          <div className="box">
+            <h2 className="title is-5">Edit User</h2>
+
+            {loadingEditUser ? (
+              <p>Loading user details...</p>
+            ) : (
+              <form onSubmit={handleUpdateUser}>
+                <div className="columns is-multiline">
+                  <div className="column is-half">
+                    <div className="field">
+                      <label className="label">Full Name</label>
+                      <div className="control">
+                        <input
+                          className="input"
+                          type="text"
+                          name="fullName"
+                          value={editForm.fullName}
+                          onChange={handleEditFormChange}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="column is-half">
+                    <div className="field">
+                      <label className="label">Email</label>
+                      <div className="control">
+                        <input
+                          className="input"
+                          type="email"
+                          name="email"
+                          value={editForm.email}
+                          onChange={handleEditFormChange}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="column is-half">
+                    <div className="field">
+                      <label className="label">Department</label>
+                      <div className="control">
+                        <input
+                          className="input"
+                          type="text"
+                          name="department"
+                          value={editForm.department}
+                          onChange={handleEditFormChange}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="column is-half">
+                    <div className="field">
+                      <label className="label">Role</label>
+                      <div className="control">
+                        <div className="select is-fullwidth">
+                          <select
+                            name="roleId"
+                            value={editForm.roleId}
+                            onChange={handleEditFormChange}
+                            required
+                          >
+                            <option value="">Select a role</option>
+                            {roleOptions.map((role) => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="field is-grouped mt-4">
+                  <div className="control">
+                    <button
+                      type="submit"
+                      className="button is-link"
+                      disabled={updatingUser}
+                    >
+                      {updatingUser ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+
+                  <div className="control">
+                    <button
+                      type="button"
+                      className="button is-light"
+                      onClick={resetEditForm}
+                      disabled={updatingUser}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
         {loading && (
           <article className="message is-info">
             <div className="message-body">Loading users...</div>
@@ -401,6 +637,7 @@ function UsersPage() {
                       <th>Role</th>
                       <th>Status</th>
                       <th>Created At</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -425,27 +662,40 @@ function UsersPage() {
                           {new Date(userItem.createdAt).toLocaleDateString()}
                         </td>
                         <td>
-                          {userItem.isActive ? (
+                          <div className="buttons are-small">
                             <button
-                              className="button is-warning is-light is-small"
-                              onClick={() => handleDeactivate(userItem.id)}
-                              disabled={updatingUserId === userItem.id}
+                              className="button is-link is-light"
+                              onClick={() => handleOpenEditForm(userItem.id)}
+                              disabled={
+                                loadingEditUser ||
+                                updatingUserId === userItem.id
+                              }
                             >
-                              {updatingUserId === userItem.id
-                                ? "Processing..."
-                                : "Deactivate"}
+                              Edit
                             </button>
-                          ) : (
-                            <button
-                              className="button is-success is-light is-small"
-                              onClick={() => handleReactivate(userItem.id)}
-                              disabled={updatingUserId === userItem.id}
-                            >
-                              {updatingUserId === userItem.id
-                                ? "Processing..."
-                                : "Reactivate"}
-                            </button>
-                          )}
+
+                            {userItem.isActive ? (
+                              <button
+                                className="button is-warning is-light is-small"
+                                onClick={() => handleDeactivate(userItem.id)}
+                                disabled={updatingUserId === userItem.id}
+                              >
+                                {updatingUserId === userItem.id
+                                  ? "Processing..."
+                                  : "Deactivate"}
+                              </button>
+                            ) : (
+                              <button
+                                className="button is-success is-light is-small"
+                                onClick={() => handleReactivate(userItem.id)}
+                                disabled={updatingUserId === userItem.id}
+                              >
+                                {updatingUserId === userItem.id
+                                  ? "Processing..."
+                                  : "Reactivate"}
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

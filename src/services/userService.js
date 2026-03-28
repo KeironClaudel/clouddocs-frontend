@@ -92,3 +92,46 @@ export async function createUser(userData) {
 
   return response.data;
 }
+
+/**
+ * Requests a single user's details by ID.
+ */
+export async function getUserById(userId) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+
+  const response = await axios.get(`${API_BASE_URL}/users/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * Sends a request to update an existing user.
+ */
+export async function updateUser(userId, userData) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+
+  const response = await axios.put(
+    `${API_BASE_URL}/users/${userId}`,
+    userData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  return response.data;
+}
