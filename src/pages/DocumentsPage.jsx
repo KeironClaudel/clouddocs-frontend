@@ -8,6 +8,7 @@ import {
   reactivateDocument,
   renameDocument,
   searchDocuments,
+  uploadDocumentVersion,
 } from "../services/documentService";
 import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
@@ -209,7 +210,10 @@ function DocumentsPage() {
    */
   async function handlePreview(documentId) {
     try {
-      const blob = await previewDocument(documentId);
+      const selectedVersionId = selectedVersionByDocumentId[documentId] || null;
+
+      const blob = await previewDocument(documentId, selectedVersionId);
+
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (error) {
@@ -222,7 +226,10 @@ function DocumentsPage() {
    */
   async function handleDownload(documentId, fileName) {
     try {
-      const blob = await downloadDocument(documentId);
+      const selectedVersionId = selectedVersionByDocumentId[documentId] || null;
+
+      const blob = await downloadDocument(documentId, selectedVersionId);
+
       const url = window.URL.createObjectURL(blob);
 
       const link = document.createElement("a");
@@ -304,6 +311,63 @@ function DocumentsPage() {
 
     loadDocuments();
   }, [currentPage, pageSize, filters]);
+
+  /**
+   * Tracks which document is currently uploading a new version.
+   */
+  const [uploadingVersionDocumentId, setUploadingVersionDocumentId] =
+    useState(null);
+
+  /**
+   * Uploads a new version for an existing document.
+   */
+  async function handleUploadVersion(documentId, file) {
+    if (!file) {
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      setActionMessage("Only PDF files are allowed for new versions.");
+      return;
+    }
+
+    setActionMessage("");
+    setUploadingVersionDocumentId(documentId);
+
+    try {
+      await uploadDocumentVersion(documentId, file);
+
+      /**
+       * Clear cached versions so the dropdown reloads updated data.
+       */
+      setVersionsByDocumentId((prev) => {
+        const updated = { ...prev };
+        delete updated[documentId];
+        return updated;
+      });
+
+      /**
+       * Reset selected version to Current after uploading a new one.
+       */
+      setSelectedVersionByDocumentId((prev) => ({
+        ...prev,
+        [documentId]: "",
+      }));
+
+      setActionMessage("New document version uploaded successfully.");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          err.response?.data?.message ||
+            "Failed to upload new document version.",
+        );
+      } else {
+        setActionMessage("An unexpected error occurred.");
+      }
+    } finally {
+      setUploadingVersionDocumentId(null);
+    }
+  }
 
   /**
    * Moves to the previous page if possible.
@@ -808,6 +872,37 @@ function DocumentsPage() {
                                 >
                                   Rename
                                 </button>
+                              )}
+
+                              {canManageDocumentActions && (
+                                <>
+                                  <input
+                                    id={`upload-version-${document.id}`}
+                                    type="file"
+                                    accept="application/pdf,.pdf"
+                                    style={{ display: "none" }}
+                                    onChange={(event) => {
+                                      const file = event.target.files?.[0];
+                                      if (file) {
+                                        handleUploadVersion(document.id, file);
+                                      }
+
+                                      event.target.value = "";
+                                    }}
+                                  />
+
+                                  <label
+                                    htmlFor={`upload-version-${document.id}`}
+                                    className={`button is-info is-light ${
+                                      uploadingVersionDocumentId === document.id
+                                        ? "is-loading"
+                                        : ""
+                                    }`}
+                                    style={{ marginBottom: 0 }}
+                                  >
+                                    Upload Version
+                                  </label>
+                                </>
                               )}
 
                               <button

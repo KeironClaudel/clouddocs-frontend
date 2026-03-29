@@ -3,9 +3,10 @@ import axiosInstance from "../api/axiosInstance";
 /**
  * Requests a document preview (PDF) as a blob.
  */
-export async function previewDocument(documentId) {
+export async function previewDocument(documentId, versionId = null) {
   const response = await axiosInstance.get(`/documents/${documentId}/preview`, {
     responseType: "blob",
+    params: versionId ? { versionId } : {},
   });
 
   return response.data;
@@ -14,11 +15,12 @@ export async function previewDocument(documentId) {
 /**
  * Requests a document download as a blob.
  */
-export async function downloadDocument(documentId) {
+export async function downloadDocument(documentId, versionId = null) {
   const response = await axiosInstance.get(
     `/documents/${documentId}/download`,
     {
       responseType: "blob",
+      params: versionId ? { versionId } : {},
     },
   );
 
@@ -109,6 +111,26 @@ export async function searchDocuments(params) {
   const response = await axiosInstance.get("/documents", {
     params,
   });
+
+  return response.data;
+}
+
+/**
+ * Uploads a new version for an existing document.
+ */
+export async function uploadDocumentVersion(documentId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axiosInstance.post(
+    `/documents/${documentId}/versions`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
 
   return response.data;
 }
