@@ -13,7 +13,7 @@ import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
-import { canManageDocuments } from "../utils/permissionUtils";
+import { canManageDocuments, isAdmin } from "../utils/permissionUtils";
 
 function DocumentsPage() {
   /**
@@ -30,6 +30,11 @@ function DocumentsPage() {
    * Checks if current user can manage documents
    */
   const canManageDocumentActions = canManageDocuments(user);
+
+  /**
+   * Checks if the current user is admin
+   */
+  const adminUser = isAdmin(user);
 
   /**
    * Indicates whether the document request is currently in progress.
@@ -109,6 +114,7 @@ function DocumentsPage() {
     year: "",
     documentType: "",
     expirationPending: "",
+    isActive: "",
   });
 
   /**
@@ -270,6 +276,13 @@ function DocumentsPage() {
         if (filters.expirationPending !== "") {
           params.expirationPendingDefinition =
             filters.expirationPending === "true";
+        }
+
+        /**
+         * Admin users can request inactive documents too.
+         */
+        if (adminUser) {
+          params.includeInactive = true;
         }
 
         const data = await searchDocuments(params);
@@ -468,10 +481,21 @@ function DocumentsPage() {
       year: "",
       documentType: "",
       expirationPending: "",
+      isActive: "",
     });
 
     setCurrentPage(1);
   }
+
+  /**
+   * Applies the local status filter to the current page of documents.
+   */
+  const visibleDocuments =
+    filters.isActive === ""
+      ? documents
+      : documents.filter(
+          (document) => String(document.isActive) === filters.isActive,
+        );
 
   return (
     <section className="section">
@@ -609,6 +633,27 @@ function DocumentsPage() {
                   </div>
                 </div>
               </div>
+
+              {adminUser && (
+                <div className="column is-12-mobile is-6-tablet is-4-desktop">
+                  <div className="field">
+                    <label className="label">Status</label>
+                    <div className="control">
+                      <div className="select is-fullwidth">
+                        <select
+                          name="isActive"
+                          value={filters.isActive}
+                          onChange={handleFilterChange}
+                        >
+                          <option value="">All</option>
+                          <option value="true">Active</option>
+                          <option value="false">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="field mt-3">
@@ -664,7 +709,7 @@ function DocumentsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {documents.map((document) => (
+                      {visibleDocuments.map((document) => (
                         <tr key={document.id}>
                           <td>
                             {renamingDocumentId === document.id ? (
@@ -825,7 +870,7 @@ function DocumentsPage() {
                 </div>
 
                 <p className="mb-3">
-                  Showing {documents.length} of {totalCount} documents.
+                  Showing {visibleDocuments.length} of {totalCount} documents.
                 </p>
 
                 <nav
