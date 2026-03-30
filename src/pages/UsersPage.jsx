@@ -10,6 +10,7 @@ import {
 } from "../services/userService";
 import { roleOptions } from "../utils/roleOptions";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 function UsersPage() {
   /**
@@ -103,9 +104,9 @@ function UsersPage() {
         setUsers(normalizedUsers);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load users.");
+          setActionMessage(getApiErrorMessage(err, "Failed to load user."));
         } else {
-          setError(err.message || "An unexpected error occurred.");
+          setActionMessage("An unexpected error occurred.");
         }
       } finally {
         setLoading(false);
@@ -150,9 +151,7 @@ function UsersPage() {
       setActionMessage("User deactivated successfully.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to deactivate user.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to deactivate user."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -174,9 +173,7 @@ function UsersPage() {
       setActionMessage("User reactivated successfully.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to reactivate user.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to reactivate user."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -239,9 +236,7 @@ function UsersPage() {
       setShowCreateForm(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to create user.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to create user."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -302,10 +297,9 @@ function UsersPage() {
       setEditingUserId(userId);
     } catch (err) {
       setShowEditForm(false);
-
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to load user details.",
+          getApiErrorMessage(err, "Failed to load user details."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");

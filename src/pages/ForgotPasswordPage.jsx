@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { forgotPassword } from "../services/authService";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 function ForgotPasswordPage() {
   /**
@@ -45,8 +46,10 @@ function ForgotPasswordPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(
-          err.response?.data?.message ||
+          getApiErrorMessage(
+            err,
             "Failed to process the password reset request.",
+          ),
         );
       } else {
         setError("An unexpected error occurred.");

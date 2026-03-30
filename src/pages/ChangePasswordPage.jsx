@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { changePassword } from "../services/authService";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 function ChangePasswordPage() {
   /**
@@ -61,7 +62,7 @@ function ChangePasswordPage() {
       setConfirmPassword("");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Failed to change password.");
+        setError(getApiErrorMessage(err, "Failed to change password."));
       } else {
         setError("An unexpected error occurred.");
       }

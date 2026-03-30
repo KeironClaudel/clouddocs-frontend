@@ -8,6 +8,7 @@ import {
   reactivateCategory,
 } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 function CategoriesPage() {
   /**
@@ -211,9 +212,7 @@ function CategoriesPage() {
       resetCreateForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to create category.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to create category."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -272,9 +271,7 @@ function CategoriesPage() {
       resetEditForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to update category.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to update category."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -297,7 +294,7 @@ function CategoriesPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to deactivate category.",
+          getApiErrorMessage(err, "Failed to deactivate category."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -329,7 +326,7 @@ function CategoriesPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to reactivate category.",
+          getApiErrorMessage(err, "Failed to reactivate category."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");

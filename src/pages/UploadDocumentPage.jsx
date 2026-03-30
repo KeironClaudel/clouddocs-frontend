@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getCategories } from "../services/categoryService";
 import { uploadDocument } from "../services/documentService";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
 
@@ -223,7 +224,7 @@ function UploadDocumentPage() {
       resetForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Failed to upload document.");
+        setError(getApiErrorMessage(err, "Failed to upload document."));
       } else {
         setError("An unexpected error occurred.");
       }

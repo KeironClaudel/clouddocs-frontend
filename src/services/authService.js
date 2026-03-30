@@ -52,3 +52,11 @@ export async function changePassword(passwordData) {
   );
   return response.data;
 }
+
+/**
+ * Sends a password reset request using the token provided in the reset link.
+ */
+export async function resetPassword(resetData) {
+  const response = await axiosInstance.post("/auth/reset-password", resetData);
+  return response.data;
+}

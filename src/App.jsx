@@ -12,14 +12,15 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import UploadDocumentPage from "./pages/UploadDocumentPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route
           path="/dashboard"

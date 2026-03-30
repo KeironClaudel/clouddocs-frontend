@@ -15,6 +15,7 @@ import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { canManageDocuments, isAdmin } from "../utils/permissionUtils";
+import { getApiErrorMessage } from "../utils/errorUtils";
 
 function DocumentsPage() {
   /**
@@ -300,7 +301,7 @@ function DocumentsPage() {
         setTotalCount(data?.totalCount || 0);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load documents.");
+          setError(getApiErrorMessage(err, "Failed to load documents."));
         } else {
           setError("An unexpected error occurred.");
         }
@@ -358,8 +359,7 @@ function DocumentsPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message ||
-            "Failed to upload new document version.",
+          getApiErrorMessage(err, "Failed to upload new document version."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -451,9 +451,7 @@ function DocumentsPage() {
       handleCancelRename();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(
-          err.response?.data?.message || "Failed to rename document.",
-        );
+        setActionMessage(getApiErrorMessage(err, "Failed to rename document."));
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -474,7 +472,7 @@ function DocumentsPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to deactivate document.",
+          getApiErrorMessage(err, "Failed to deactivate document."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -500,7 +498,7 @@ function DocumentsPage() {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to reactivate document.",
+          getApiErrorMessage(err, "Failed to reactivate document."),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
