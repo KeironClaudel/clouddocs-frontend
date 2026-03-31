@@ -16,6 +16,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { canManageDocuments, isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import DataTable from "../components/DataTable";
 
 function DocumentsPage() {
   /**
@@ -123,6 +124,22 @@ function DocumentsPage() {
    * Stores the category list used by the filter dropdown.
    */
   const [categories, setCategories] = useState([]);
+
+  /**
+   * Defines the columns to display in the document table, including the key to access the value and the label to show in the header.
+   * The "actions" column is a special case that doesn't correspond to a document property but indicates where action buttons will be rendered.
+   */
+  const documentTableColumns = [
+    { key: "name", label: "Name" },
+    { key: "category", label: "Category" },
+    { key: "uploadedBy", label: "Uploaded By" },
+    { key: "department", label: "Department" },
+    { key: "created", label: "Created" },
+    { key: "status", label: "Status" },
+    { key: "version", label: "Version" },
+    { key: "actions", label: "Actions" },
+  ];
+
   /*
   Load categories to DropDownList
    */
@@ -560,455 +577,343 @@ function DocumentsPage() {
         );
 
   return (
-    <section className="section">
-      <div className="container">
-        <div className="mb-5">
-          <div className="level mb-4">
-            <div className="level-left">
-              <div>
-                <h1 className="title is-2">Documents</h1>
-                <p className="subtitle is-6">
-                  View available documents and access file actions.
-                </p>
-              </div>
-            </div>
-
-            <div className="level-right">
-              <Link to="/documents/upload" className="button is-primary">
-                Upload Document
-              </Link>
-            </div>
+    <section className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto max-w-7xl">
+        {/* HEADER */}
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              View available documents and access file actions.
+            </p>
           </div>
 
-          <div className="box">
-            <h2 className="title is-5">Search & Filters</h2>
-
-            <div className="columns is-multiline">
-              <div className="column is-12-mobile is-6-tablet is-4-desktop">
-                <div className="field">
-                  <label className="label">Search by Name</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="text"
-                      name="searchTerm"
-                      placeholder="Search document name..."
-                      value={filters.searchTerm}
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-12-mobile is-6-tablet is-4-desktop">
-                <div className="field">
-                  <label className="label">Category</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="categoryId"
-                        value={filters.categoryId}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">All categories</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6-mobile is-3-tablet is-2-desktop">
-                <div className="field">
-                  <label className="label">Month</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="number"
-                      name="month"
-                      min="1"
-                      max="12"
-                      value={filters.month}
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6-mobile is-3-tablet is-2-desktop">
-                <div className="field">
-                  <label className="label">Year</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="number"
-                      name="year"
-                      value={filters.year}
-                      onChange={handleFilterChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-12-mobile is-6-tablet is-4-desktop">
-                <div className="field">
-                  <label className="label">Document Type</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="documentType"
-                        value={filters.documentType}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">All types</option>
-                        <option value="0">General</option>
-                        <option value="1">Contract</option>
-                        <option value="2">Permit</option>
-                        <option value="3">Policy</option>
-                        <option value="4">Legal Document</option>
-                        <option value="5">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-12-mobile is-6-tablet is-4-desktop">
-                <div className="field">
-                  <label className="label">Expiration Pending</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="expirationPending"
-                        value={filters.expirationPending}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">All</option>
-                        <option value="true">Pending definition</option>
-                        <option value="false">Defined expiration</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {adminUser && (
-                <div className="column is-12-mobile is-6-tablet is-4-desktop">
-                  <div className="field">
-                    <label className="label">Status</label>
-                    <div className="control">
-                      <div className="select is-fullwidth">
-                        <select
-                          name="isActive"
-                          value={filters.isActive}
-                          onChange={handleFilterChange}
-                        >
-                          <option value="">All</option>
-                          <option value="true">Active</option>
-                          <option value="false">Inactive</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="field mt-3">
-              <div className="control">
-                <button
-                  type="button"
-                  className="button is-light"
-                  onClick={handleClearFilters}
-                >
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {actionMessage && (
-            <article className="message is-info">
-              <div className="message-body">{actionMessage}</div>
-            </article>
-          )}
+          <Link
+            to="/documents/upload"
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+          >
+            Upload Document
+          </Link>
         </div>
 
+        {/* FILTERS */}
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            Search & Filters
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              type="text"
+              name="searchTerm"
+              placeholder="Search document name..."
+              value={filters.searchTerm}
+              onChange={handleFilterChange}
+            />
+
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              name="categoryId"
+              value={filters.categoryId}
+              onChange={handleFilterChange}
+            >
+              <option value="">All categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              type="number"
+              name="month"
+              placeholder="Month"
+              value={filters.month}
+              onChange={handleFilterChange}
+            />
+
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              type="number"
+              name="year"
+              placeholder="Year"
+              value={filters.year}
+              onChange={handleFilterChange}
+            />
+
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              name="documentType"
+              value={filters.documentType}
+              onChange={handleFilterChange}
+            >
+              <option value="">All types</option>
+              <option value="0">General</option>
+              <option value="1">Contract</option>
+              <option value="2">Permit</option>
+              <option value="3">Policy</option>
+              <option value="4">Legal Document</option>
+              <option value="5">Other</option>
+            </select>
+
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              name="expirationPending"
+              value={filters.expirationPending}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              <option value="true">Pending</option>
+              <option value="false">Defined</option>
+            </select>
+
+            {adminUser && (
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                name="isActive"
+                value={filters.isActive}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            )}
+          </div>
+
+          <button
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
+            onClick={handleClearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        {actionMessage && (
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            {actionMessage}
+          </div>
+        )}
+
         {loading && (
-          <article className="message is-info">
-            <div className="message-body">Loading documents...</div>
-          </article>
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            Loading documents...
+          </div>
         )}
 
         {!loading && error && (
-          <article className="message is-danger">
-            <div className="message-body">{error}</div>
-          </article>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
         )}
 
         {!loading && !error && (
-          <div className="box">
-            {documents.length === 0 ? (
-              <p>No documents found.</p>
-            ) : (
-              <>
-                <div className="table-container">
-                  <table className="table is-fullwidth is-hoverable is-striped">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Uploaded By</th>
-                        <th>Department</th>
-                        <th>Created At</th>
-                        <th>Status</th>
-                        <th>Version</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleDocuments.map((document) => (
-                        <tr key={document.id}>
-                          <td>
-                            {renamingDocumentId === document.id ? (
-                              <div className="field has-addons mb-0">
-                                <div className="control is-expanded">
-                                  <input
-                                    className="input is-small"
-                                    type="text"
-                                    value={renameValue}
-                                    onChange={(event) =>
-                                      setRenameValue(event.target.value)
-                                    }
-                                  />
-                                </div>
-
-                                <div className="control">
-                                  <button
-                                    className="button is-link is-light is-small"
-                                    onClick={() =>
-                                      handleConfirmRename(document.id)
-                                    }
-                                  >
-                                    Save
-                                  </button>
-                                </div>
-
-                                <div className="control">
-                                  <button
-                                    className="button is-light is-small"
-                                    onClick={handleCancelRename}
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              document.originalFileName
-                            )}
-                          </td>
-                          <td>{document.categoryName}</td>
-                          <td>{document.uploadedByUserName}</td>
-                          <td>{document.department || "N/A"}</td>
-                          <td>
-                            {formatLocalDateForDisplay(document.createdAt)}
-                          </td>
-                          <td>
-                            {document.isActive ? (
-                              <span className="tag is-success is-light">
-                                Active
-                              </span>
-                            ) : (
-                              <span className="tag is-danger is-light">
-                                Inactive
-                              </span>
-                            )}
-                          </td>
-                          <td>
-                            <div className="select is-small">
-                              <select
-                                value={
-                                  selectedVersionByDocumentId[document.id] || ""
-                                }
-                                onFocus={() => handleLoadVersions(document.id)}
-                                onChange={(event) =>
-                                  handleVersionChange(
-                                    document.id,
-                                    event.target.value,
-                                  )
-                                }
-                                disabled={
-                                  versionLoadingByDocumentId[document.id]
-                                }
-                              >
-                                <option value="">Current</option>
-
-                                {(versionsByDocumentId[document.id] || []).map(
-                                  (version) => (
-                                    <option key={version.id} value={version.id}>
-                                      {`v${version.versionNumber} - ${formatLocalDateForDisplay(version.createdAt)}`}
-                                    </option>
-                                  ),
-                                )}
-                              </select>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="buttons are-small">
-                              {canManageDocumentActions && (
-                                <button
-                                  className="button is-link is-light"
-                                  onClick={() => handleStartRename(document)}
-                                  disabled={
-                                    !document.isActive ||
-                                    renamingDocumentId === document.id
-                                  }
-                                >
-                                  Rename
-                                </button>
-                              )}
-
-                              {canManageDocumentActions && (
-                                <>
-                                  <input
-                                    id={`upload-version-${document.id}`}
-                                    type="file"
-                                    accept="application/pdf,.pdf"
-                                    style={{ display: "none" }}
-                                    onChange={(event) => {
-                                      const file = event.target.files?.[0];
-                                      if (file) {
-                                        handleUploadVersion(document.id, file);
-                                      }
-
-                                      event.target.value = "";
-                                    }}
-                                  />
-
-                                  <label
-                                    htmlFor={`upload-version-${document.id}`}
-                                    className={`button is-info is-light ${
-                                      uploadingVersionDocumentId === document.id
-                                        ? "is-loading"
-                                        : ""
-                                    }`}
-                                    style={{ marginBottom: 0 }}
-                                  >
-                                    Upload Version
-                                  </label>
-                                </>
-                              )}
-
-                              <button
-                                className="button is-info is-light"
-                                onClick={() => handlePreview(document.id)}
-                                disabled={!document.isActive}
-                              >
-                                Preview
-                              </button>
-
-                              <button
-                                className="button is-primary is-light"
-                                onClick={() =>
-                                  handleDownload(
-                                    document.id,
-                                    document.originalFileName,
-                                  )
-                                }
-                                disabled={!document.isActive}
-                              >
-                                Download
-                              </button>
-
-                              {canManageDocumentActions &&
-                                (document.isActive ? (
-                                  <button
-                                    className="button is-warning is-light"
-                                    onClick={() =>
-                                      handleDeactivateDocument(document.id)
-                                    }
-                                    disabled={
-                                      deactivatingDocumentId === document.id
-                                    }
-                                  >
-                                    {deactivatingDocumentId === document.id
-                                      ? "Processing..."
-                                      : "Deactivate"}
-                                  </button>
-                                ) : (
-                                  <button
-                                    className="button is-success is-light"
-                                    onClick={() =>
-                                      handleReactivateDocument(document.id)
-                                    }
-                                    disabled={
-                                      reactivatingDocumentId === document.id
-                                    }
-                                  >
-                                    {reactivatingDocumentId === document.id
-                                      ? "Processing..."
-                                      : "Reactivate"}
-                                  </button>
-                                ))}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <p className="mb-3">
-                  Showing {visibleDocuments.length} of {totalCount} documents.
+          <DataTable
+            columns={documentTableColumns}
+            hasData={visibleDocuments.length > 0}
+            emptyMessage="No documents found."
+            footer={
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <p>
+                  Showing {visibleDocuments.length} of {totalCount} documents
                 </p>
 
-                <nav
-                  className="pagination is-centered mt-5"
-                  role="navigation"
-                  aria-label="pagination"
-                >
+                <div className="flex items-center gap-2">
                   <button
-                    className="pagination-previous"
                     onClick={handlePreviousPage}
                     disabled={currentPage === 1}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Previous
+                    Prev
                   </button>
 
                   <button
-                    className="pagination-next"
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages || totalPages === 0}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Next page
+                    Next
                   </button>
+                </div>
+              </div>
+            }
+          >
+            {visibleDocuments.map((document) => (
+              <tr key={document.id} className="transition hover:bg-gray-50/80">
+                <td className="px-6 py-4">
+                  {renamingDocumentId === document.id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                      />
+                      <button
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
+                        onClick={() => handleConfirmRename(document.id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
+                        onClick={handleCancelRename}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="font-medium text-gray-900">
+                      {document.originalFileName}
+                    </p>
+                  )}
+                </td>
 
-                  <ul className="pagination-list">
-                    {Array.from({ length: totalPages }, (_, index) => {
-                      const pageNumber = index + 1;
+                <td className="px-6 py-4 text-gray-700">
+                  {document.categoryName}
+                </td>
 
-                      return (
-                        <li key={pageNumber}>
-                          <button
-                            className={`pagination-link ${
-                              currentPage === pageNumber ? "is-current" : ""
-                            }`}
-                            onClick={() => handleGoToPage(pageNumber)}
-                          >
-                            {pageNumber}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </nav>
-              </>
-            )}
-          </div>
+                <td className="px-6 py-4 text-gray-700">
+                  {document.uploadedByUserName}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {document.department || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {formatLocalDateForDisplay(document.createdAt)}
+                </td>
+
+                <td className="px-6 py-4">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                      document.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {document.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+
+                <td className="px-6 py-4">
+                  <select
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    value={selectedVersionByDocumentId[document.id] || ""}
+                    onMouseDown={() => handleLoadVersions(document.id)}
+                    onChange={(e) =>
+                      handleVersionChange(document.id, e.target.value)
+                    }
+                  >
+                    <option value="">Current</option>
+                    {versionLoadingByDocumentId[document.id] && (
+                      <option value="" disabled>
+                        Loading versions...
+                      </option>
+                    )}
+
+                    {(versionsByDocumentId[document.id] || []).map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {`v${v.versionNumber} - ${formatLocalDateForDisplay(v.createdAt)}`}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-2">
+                    {canManageDocumentActions && (
+                      <button
+                        className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
+                        onClick={() => handleStartRename(document)}
+                        disabled={
+                          !document.isActive ||
+                          renamingDocumentId === document.id
+                        }
+                      >
+                        Rename
+                      </button>
+                    )}
+
+                    {canManageDocumentActions && (
+                      <>
+                        <input
+                          id={`upload-version-${document.id}`}
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (file) {
+                              handleUploadVersion(document.id, file);
+                            }
+                            event.target.value = "";
+                          }}
+                        />
+
+                        <label
+                          htmlFor={`upload-version-${document.id}`}
+                          className={`cursor-pointer rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-700 transition hover:bg-sky-100 ${
+                            uploadingVersionDocumentId === document.id
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }`}
+                        >
+                          {uploadingVersionDocumentId === document.id
+                            ? "Uploading..."
+                            : "Upload Version"}
+                        </label>
+                      </>
+                    )}
+
+                    <button
+                      className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-cyan-100"
+                      onClick={() => handlePreview(document.id)}
+                      disabled={!document.isActive}
+                    >
+                      Preview
+                    </button>
+
+                    <button
+                      className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
+                      onClick={() =>
+                        handleDownload(document.id, document.originalFileName)
+                      }
+                      disabled={!document.isActive}
+                    >
+                      Download
+                    </button>
+
+                    {canManageDocumentActions &&
+                      (document.isActive ? (
+                        <button
+                          className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
+                          onClick={() => handleDeactivateDocument(document.id)}
+                          disabled={deactivatingDocumentId === document.id}
+                        >
+                          {deactivatingDocumentId === document.id
+                            ? "Processing..."
+                            : "Deactivate"}
+                        </button>
+                      ) : (
+                        <button
+                          className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100"
+                          onClick={() => handleReactivateDocument(document.id)}
+                          disabled={reactivatingDocumentId === document.id}
+                        >
+                          {reactivatingDocumentId === document.id
+                            ? "Processing..."
+                            : "Reactivate"}
+                        </button>
+                      ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </DataTable>
         )}
       </div>
     </section>

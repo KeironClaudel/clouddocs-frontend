@@ -234,196 +234,160 @@ function UploadDocumentPage() {
   }
 
   return (
-    <section className="section app-section">
-      <div className="container">
-        <div className="mb-5">
-          <h1 className="title is-2">Upload Document</h1>
-          <p className="subtitle is-6">
+    <section className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto max-w-5xl">
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Upload Document</h1>
+          <p className="mt-2 text-sm text-gray-600">
             Upload PDF files and register their metadata securely.
           </p>
         </div>
 
+        {/* MESSAGES */}
         {successMessage && (
-          <article className="message is-success">
-            <div className="message-body">{successMessage}</div>
-          </article>
+          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            {successMessage}
+          </div>
         )}
 
         {error && (
-          <article className="message is-danger">
-            <div className="message-body">{error}</div>
-          </article>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
         )}
 
-        <div className="box">
-          <form onSubmit={handleSubmit}>
-            <div className="columns is-multiline">
-              <div className="column is-12">
-                <div className="field">
-                  <label className="label">PDF File</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="file"
-                      accept="application/pdf,.pdf"
-                      onChange={handleFileChange}
-                      disabled={uploading}
-                      required
-                    />
-                  </div>
-                  {selectedFile && (
-                    <p className="help is-success mt-2">
-                      Selected file: {selectedFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
+        {/* FORM */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* FILE */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                PDF File
+              </label>
 
-              <div className="column is-6">
-                <div className="field">
-                  <label className="label">Category</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="categoryId"
-                        value={form.categoryid}
-                        onChange={handleInputChange}
-                        disabled={loadingCategories || uploading}
-                        required
-                      >
-                        <option value="">Select a category</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={handleFileChange}
+                disabled={uploading}
+                required
+              />
 
-              <div className="column is-6">
-                <div className="field">
-                  <label className="label">Document Type</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="documentType"
-                        value={form.documentType}
-                        onChange={handleInputChange}
-                        disabled={uploading}
-                        required
-                      >
-                        <option value="">Select document type</option>
-                        {documentTypeOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6">
-                <div className="field">
-                  <label className="label">Access Level</label>
-                  <div className="control">
-                    <div className="select is-fullwidth">
-                      <select
-                        name="accessLevel"
-                        value={form.accessLevel}
-                        onChange={handleInputChange}
-                        disabled={uploading}
-                        required
-                      >
-                        <option value="">Select access level</option>
-                        {accessLevelOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6">
-                <div className="field">
-                  <label className="label">Department</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="text"
-                      name="department"
-                      value={form.department}
-                      onChange={handleInputChange}
-                      disabled={uploading}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6">
-                <div className="field">
-                  <label className="label">Expiration Date</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="date"
-                      name="expirationDate"
-                      value={form.expirationDate}
-                      onChange={handleInputChange}
-                      disabled={
-                        uploading || form.expirationDatePendingDefinition
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="column is-6">
-                <div className="field mt-5">
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      name="expirationDatePendingDefinition"
-                      checked={form.expirationDatePendingDefinition}
-                      onChange={handleInputChange}
-                      disabled={uploading}
-                    />{" "}
-                    Expiration date pending definition
-                  </label>
-                </div>
-              </div>
+              {selectedFile && (
+                <p className="mt-2 text-sm text-green-600">
+                  Selected file: {selectedFile.name}
+                </p>
+              )}
             </div>
 
-            <div className="field is-grouped mt-5">
-              <div className="control">
-                <button
-                  type="submit"
-                  className={`button is-primary ${
-                    uploading ? "is-loading" : ""
-                  }`}
-                  disabled={uploading || loadingCategories}
-                >
-                  Upload Document
-                </button>
-              </div>
+            {/* GRID */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* CATEGORY */}
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                name="categoryId"
+                value={form.categoryid}
+                onChange={handleInputChange}
+                disabled={loadingCategories || uploading}
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
 
-              <div className="control">
-                <button
-                  type="button"
-                  className="button is-light"
-                  onClick={resetForm}
-                  disabled={uploading}
-                >
-                  Reset
-                </button>
-              </div>
+              {/* TYPE */}
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                name="documentType"
+                value={form.documentType}
+                onChange={handleInputChange}
+                disabled={uploading}
+                required
+              >
+                <option value="">Select document type</option>
+                {documentTypeOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+
+              {/* ACCESS */}
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                name="accessLevel"
+                value={form.accessLevel}
+                onChange={handleInputChange}
+                disabled={uploading}
+                required
+              >
+                <option value="">Select access level</option>
+                {accessLevelOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+
+              {/* DEPARTMENT */}
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                type="text"
+                name="department"
+                placeholder="Department"
+                value={form.department}
+                onChange={handleInputChange}
+                disabled={uploading}
+              />
+
+              {/* EXP DATE */}
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                type="date"
+                name="expirationDate"
+                value={form.expirationDate}
+                onChange={handleInputChange}
+                disabled={uploading || form.expirationDatePendingDefinition}
+              />
+            </div>
+
+            {/* CHECKBOX */}
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="expirationDatePendingDefinition"
+                checked={form.expirationDatePendingDefinition}
+                onChange={handleInputChange}
+                disabled={uploading}
+                className="h-4 w-4"
+              />
+              Expiration date pending definition
+            </label>
+
+            {/* ACTIONS */}
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition disabled:bg-blue-300"
+                disabled={uploading || loadingCategories}
+              >
+                {uploading ? "Uploading..." : "Upload Document"}
+              </button>
+
+              <button
+                type="button"
+                className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+                onClick={resetForm}
+                disabled={uploading}
+              >
+                Reset
+              </button>
             </div>
           </form>
         </div>

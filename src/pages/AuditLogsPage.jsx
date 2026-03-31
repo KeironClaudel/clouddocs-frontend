@@ -1,16 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { getAuditLogs } from "../services/auditService";
-import {
-  formatLocalDate,
-  formatLocalDateTimeForDisplay,
-} from "../utils/dateUtils";
+import { formatLocalDateTimeForDisplay } from "../utils/dateUtils";
+import DataTable from "../components/DataTable";
+import { useSearchParams } from "react-router-dom";
 
 function AuditLogsPage() {
   /**
    * Stores the audit log list returned by the API.
    */
   const [auditLogs, setAuditLogs] = useState([]);
+
+  /**
+   * Pagination state.
+   */
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
+
+  /**
+   * Stores URL search parameters.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /**
+   * Stores the current filter values for the audit table.
+   */
+  const [filters, setFilters] = useState({
+    userId: "",
+    action: "",
+    module: "",
+    date: "",
+  });
+
+  /**
+   * Debounced filters used for API requests.
+   */
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
   /**
    * Indicates whether audit logs are currently loading.
@@ -23,76 +48,148 @@ function AuditLogsPage() {
   const [error, setError] = useState("");
 
   /**
-   * Stores the current filter values for the audit table.
+   * Defines the columns displayed in the audit log table.
    */
-  const [filters, setFilters] = useState({
-    user: "",
-    action: "",
-    module: "",
-    date: "",
-  });
+  const auditLogTableColumns = [
+    { key: "userId", label: "User Id" },
+    { key: "action", label: "Action" },
+    { key: "module", label: "Module" },
+    { key: "entityName", label: "Entity" },
+    { key: "entityId", label: "Entity Id" },
+    { key: "details", label: "Details" },
+    { key: "ipAddress", label: "IP" },
+    { key: "date", label: "Date" },
+  ];
 
   /**
-   * Loads audit logs when the page is rendered for the first time.
+   * Calculates total pages based on backend metadata.
+   */
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  /**
+   * Loads audit logs from the backend using pagination and filters.
+   */
+  async function loadAuditLogs({
+    pageParam,
+    filtersParam,
+    pageSizeParam,
+  } = {}) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const effectivePage = pageParam ?? 1;
+      const effectiveFilters = filtersParam ?? debouncedFilters;
+      const effectivePageSize = pageSizeParam ?? pageSize;
+
+      const params = {
+        page: effectivePage,
+        pageSize: effectivePageSize,
+        userId: effectiveFilters.userId || undefined,
+        action: effectiveFilters.action || undefined,
+        module: effectiveFilters.module || undefined,
+        date: effectiveFilters.date || undefined,
+      };
+
+      const data = await getAuditLogs(params);
+
+      setAuditLogs(data.items || []);
+      setPage(data.page || effectivePage);
+      setTotalCount(data.totalCount || 0);
+    } catch (err) {
+      setError("Failed to load audit logs.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Debounces filters to avoid sending a request on every keystroke/change immediately.
    */
   useEffect(() => {
-    async function loadAuditLogs() {
-      try {
-        const data = await getAuditLogs();
+    const timeout = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 400);
 
-        const normalizedLogs = Array.isArray(data)
-          ? data
-          : data.auditLogs || data.items || [];
+    return () => clearTimeout(timeout);
+  }, [filters]);
 
-        setAuditLogs(normalizedLogs);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load audit logs.");
-        } else {
-          setError("An unexpected error occurred.");
-        }
-      } finally {
-        setLoading(false);
-      }
+  /**
+   * Syncs API loading with URL page and debounced filters.
+   * This is the single source of truth for fetching data.
+   */
+  useEffect(() => {
+    const pageFromUrl = Number(searchParams.get("page")) || 1;
+
+    loadAuditLogs({
+      pageParam: pageFromUrl,
+      filtersParam: debouncedFilters,
+      pageSizeParam: pageSize,
+    });
+  }, [searchParams, debouncedFilters, pageSize]);
+
+  /**
+   * Moves to the next page by updating the URL.
+   */
+  function handleNextPage() {
+    const currentPage = Number(searchParams.get("page")) || 1;
+
+    if (currentPage < totalPages) {
+      setSearchParams({ page: String(currentPage + 1) });
     }
+  }
 
-    loadAuditLogs();
-  }, []);
+  /**
+   * Moves to the previous page by updating the URL.
+   */
+  function handlePreviousPage() {
+    const currentPage = Number(searchParams.get("page")) || 1;
+
+    if (currentPage > 1) {
+      setSearchParams({ page: String(currentPage - 1) });
+    }
+  }
 
   /**
    * Updates audit filter state when an input changes.
+   * Resets pagination back to page 1.
    */
-  function handleFilterChange(event) {
-    const { name, value } = event.target;
+  function handleFilterChange(e) {
+    const { name, value } = e.target;
 
     setFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    setSearchParams({ page: "1" });
   }
 
   /**
-   * Clears all audit filters.
+   * Clears all audit filters and resets pagination.
    */
   function handleClearFilters() {
     setFilters({
-      user: "",
+      userId: "",
       action: "",
       module: "",
       date: "",
     });
+
+    setSearchParams({ page: "1" });
   }
 
   /**
-   * Builds unique user ID options from loaded logs.
+   * Builds unique user ID options from currently loaded logs.
    */
   const userOptions = useMemo(() => {
     return [...new Set(auditLogs.map((log) => log.userId))]
       .filter(Boolean)
       .sort();
   }, [auditLogs]);
+
   /**
-   * Builds unique action options from loaded logs.
+   * Builds unique action options from currently loaded logs.
    */
   const actionOptions = useMemo(() => {
     return [...new Set(auditLogs.map((log) => log.action))]
@@ -101,7 +198,7 @@ function AuditLogsPage() {
   }, [auditLogs]);
 
   /**
-   * Builds unique module options from loaded logs.
+   * Builds unique module options from currently loaded logs.
    */
   const moduleOptions = useMemo(() => {
     return [...new Set(auditLogs.map((log) => log.module))]
@@ -109,198 +206,187 @@ function AuditLogsPage() {
       .sort();
   }, [auditLogs]);
 
-  /**
-   * Applies all active filters to the loaded audit log list.
-   */
-  const filteredAuditLogs = useMemo(() => {
-    return auditLogs.filter((log) => {
-      const logUserId = log.userId || "";
-      const logDate = formatLocalDate(log.createdAt);
-
-      const matchesUser = !filters.user || logUserId === filters.user;
-      const matchesAction = !filters.action || log.action === filters.action;
-      const matchesModule = !filters.module || log.module === filters.module;
-      const matchesDate = !filters.date || logDate === filters.date;
-
-      return matchesUser && matchesAction && matchesModule && matchesDate;
-    });
-  }, [auditLogs, filters]);
-
   return (
-    <section className="section app-section">
-      <div className="container">
-        <div className="mb-5">
-          <h1 className="title is-2">Audit Logs</h1>
-          <p className="subtitle is-6">
+    <section className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Audit Logs</h1>
+          <p className="mt-2 text-sm text-gray-600">
             Review system activity records in read-only mode.
           </p>
         </div>
 
-        <div className="box">
-          <h2 className="title is-5">Filters</h2>
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Filters</h2>
 
-          <div className="columns is-multiline">
-            <div className="column is-12-mobile is-6-tablet is-3-desktop">
-              <div className="field">
-                <label className="label">User Id</label>
-                <div className="control">
-                  <div className="select is-fullwidth">
-                    <select
-                      name="user"
-                      value={filters.user}
-                      onChange={handleFilterChange}
-                    >
-                      <option value="">All users</option>
-                      {userOptions.map((userId) => (
-                        <option key={userId} value={userId}>
-                          {userId}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="userId"
+              value={filters.userId}
+              onChange={handleFilterChange}
+            >
+              <option value="">All users</option>
+              {userOptions.map((userId) => (
+                <option key={userId} value={userId}>
+                  {userId}
+                </option>
+              ))}
+            </select>
 
-            <div className="column is-12-mobile is-6-tablet is-3-desktop">
-              <div className="field">
-                <label className="label">Action</label>
-                <div className="control">
-                  <div className="select is-fullwidth">
-                    <select
-                      name="action"
-                      value={filters.action}
-                      onChange={handleFilterChange}
-                    >
-                      <option value="">All actions</option>
-                      {actionOptions.map((action) => (
-                        <option key={action} value={action}>
-                          {action}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="action"
+              value={filters.action}
+              onChange={handleFilterChange}
+            >
+              <option value="">All actions</option>
+              {actionOptions.map((action) => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </select>
 
-            <div className="column is-12-mobile is-6-tablet is-3-desktop">
-              <div className="field">
-                <label className="label">Module</label>
-                <div className="control">
-                  <div className="select is-fullwidth">
-                    <select
-                      name="module"
-                      value={filters.module}
-                      onChange={handleFilterChange}
-                    >
-                      <option value="">All modules</option>
-                      {moduleOptions.map((module) => (
-                        <option key={module} value={module}>
-                          {module}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <select
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              name="module"
+              value={filters.module}
+              onChange={handleFilterChange}
+            >
+              <option value="">All modules</option>
+              {moduleOptions.map((module) => (
+                <option key={module} value={module}>
+                  {module}
+                </option>
+              ))}
+            </select>
 
-            <div className="column is-12-mobile is-6-tablet is-3-desktop">
-              <div className="field">
-                <label className="label">Date</label>
-                <div className="control">
-                  <input
-                    className="input"
-                    type="date"
-                    name="date"
-                    value={filters.date}
-                    onChange={handleFilterChange}
-                  />
-                </div>
-              </div>
-            </div>
+            <input
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              type="date"
+              name="date"
+              value={filters.date}
+              onChange={handleFilterChange}
+            />
           </div>
 
-          <div className="field mt-3">
-            <div className="control">
-              <button
-                type="button"
-                className="button is-light"
-                onClick={handleClearFilters}
-              >
-                Clear Filters
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+            onClick={handleClearFilters}
+          >
+            Clear Filters
+          </button>
         </div>
 
         {loading && (
-          <article className="message is-info">
-            <div className="message-body">Loading audit logs...</div>
-          </article>
+          <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            Loading audit logs...
+          </div>
         )}
 
         {!loading && error && (
-          <article className="message is-danger">
-            <div className="message-body">{error}</div>
-          </article>
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
         )}
 
         {!loading && !error && (
-          <div className="box">
-            {filteredAuditLogs.length === 0 ? (
-              <p>No audit logs found.</p>
-            ) : (
-              <>
-                <div className="table-container">
-                  <table className="table is-fullwidth is-hoverable is-striped">
-                    <thead>
-                      <tr>
-                        <th>User Id</th>
-                        <th>Action</th>
-                        <th>Module</th>
-                        <th>Entity Name</th>
-                        <th>Entity Id</th>
-                        <th>Details</th>
-                        <th>IP Address</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredAuditLogs.map((log) => (
-                        <tr key={log.id}>
-                          <td title={log.userId || ""}>
-                            {log.userId
-                              ? `${log.userId.slice(0, 8)}...`
-                              : "N/A"}
-                          </td>
-                          <td>{log.action || "N/A"}</td>
-                          <td>{log.module || "N/A"}</td>
-                          <td>{log.entityName || "N/A"}</td>
-                          <td title={log.entityId || ""}>
-                            {log.entityId
-                              ? `${log.entityId.slice(0, 8)}...`
-                              : "N/A"}
-                          </td>
-                          <td>{log.details || "N/A"}</td>
-                          <td>{log.ipAddress || "N/A"}</td>
-                          <td>
-                            {formatLocalDateTimeForDisplay(log.createdAt)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          <DataTable
+            columns={auditLogTableColumns}
+            hasData={auditLogs.length > 0}
+            emptyMessage="No audit logs found."
+            footer={
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-4">
+                  <p>
+                    Showing {auditLogs.length} of {totalCount} audit records
+                  </p>
+
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      const newSize = Number(e.target.value);
+                      setPageSize(newSize);
+                      setSearchParams({ page: "1" });
+                    }}
+                    className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
                 </div>
 
-                <p className="mt-4">
-                  Showing {filteredAuditLogs.length} of {auditLogs.length} audit
-                  records.
-                </p>
-              </>
-            )}
-          </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePreviousPage}
+                    disabled={page === 1}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+
+                  <span className="text-sm text-gray-600">
+                    Page {page} of {totalPages || 1}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={handleNextPage}
+                    disabled={page === totalPages || totalPages === 0}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            }
+          >
+            {auditLogs.map((log) => (
+              <tr key={log.id} className="transition hover:bg-gray-50/80">
+                <td
+                  className="px-6 py-4 text-gray-700"
+                  title={log.userId || ""}
+                >
+                  {log.userId ? `${log.userId.slice(0, 8)}...` : "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {log.action || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {log.module || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {log.entityName || "N/A"}
+                </td>
+
+                <td
+                  className="px-6 py-4 text-gray-700"
+                  title={log.entityId || ""}
+                >
+                  {log.entityId ? `${log.entityId.slice(0, 8)}...` : "N/A"}
+                </td>
+
+                <td className="max-w-[220px] truncate px-6 py-4 text-gray-600">
+                  {log.details || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {log.ipAddress || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {formatLocalDateTimeForDisplay(log.createdAt)}
+                </td>
+              </tr>
+            ))}
+          </DataTable>
         )}
       </div>
     </section>

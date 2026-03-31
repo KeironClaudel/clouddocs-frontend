@@ -72,91 +72,79 @@ function ChangePasswordPage() {
   }
 
   return (
-    <section className="section app-section">
-      <div className="container">
-        <div className="columns is-centered">
-          <div className="column is-12-mobile is-8-tablet is-6-desktop">
-            <div className="box">
-              <h1 className="title is-3">Change Password</h1>
-              <p className="subtitle is-6">
-                Update your current password securely.
-              </p>
+    <section className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto flex min-h-[80vh] max-w-3xl items-center justify-center">
+        <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-900">Change Password</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Update your current password securely.
+          </p>
 
-              {successMessage && (
-                <article className="message is-success">
-                  <div className="message-body">{successMessage}</div>
-                </article>
-              )}
-
-              {error && (
-                <article className="message is-danger">
-                  <div className="message-body">{error}</div>
-                </article>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="field">
-                  <label className="label">Current Password</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(event) =>
-                        setCurrentPassword(event.target.value)
-                      }
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="field">
-                  <label className="label">New Password</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="field">
-                  <label className="label">Confirm New Password</label>
-                  <div className="control">
-                    <input
-                      className="input"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="field mt-5">
-                  <div className="control">
-                    <button
-                      type="submit"
-                      className={`button is-primary ${
-                        loading ? "is-loading" : ""
-                      }`}
-                      disabled={loading}
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-              </form>
+          {successMessage && (
+            <div className="mt-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              {successMessage}
             </div>
-          </div>
+          )}
+
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Current Password
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Confirm New Password
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                disabled={loading}
+                required
+              />
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

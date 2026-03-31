@@ -12,37 +12,39 @@ function ProfilePage() {
   const user = storedUser ? JSON.parse(storedUser) : null;
 
   return (
-    <section className="section">
-      <div className="container">
-        <h1 className="title is-3">My Profile</h1>
+    <section className="min-h-screen bg-gray-100 px-4 py-8">
+      <div className="mx-auto max-w-3xl">
+        <h1 className="mb-6 text-3xl font-bold text-gray-900">My Profile</h1>
 
         {!user ? (
-          <article className="message is-danger">
-            <div className="message-body">User information not available.</div>
-          </article>
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            User information not available.
+          </div>
         ) : (
-          <div className="box">
-            <div className="content">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="space-y-4 text-sm text-gray-700">
               <p>
-                <strong>Full Name:</strong> {user.fullName}
+                <span className="font-semibold text-gray-900">Full Name:</span>{" "}
+                {user.fullName}
               </p>
 
               <p>
-                <strong>Email:</strong> {user.email}
+                <span className="font-semibold text-gray-900">Email:</span>{" "}
+                {user.email}
               </p>
 
               <p>
-                <strong>Role:</strong> {user.role}
+                <span className="font-semibold text-gray-900">Role:</span>{" "}
+                {user.role}
               </p>
             </div>
-            <div className="mt-4">
+
+            <div className="mt-6">
               <button
-                className="button is-primary is-light"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
                 onClick={() => navigate("/change-password")}
               >
-                <span className="icon">
-                  <FontAwesomeIcon icon={faKey} />
-                </span>
+                <FontAwesomeIcon icon={faKey} />
                 <span>Change Password</span>
               </button>
             </div>
