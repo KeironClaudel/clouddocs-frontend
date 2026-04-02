@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { canManageDocuments, isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
+import { t } from "../i18n";
 
 function DocumentsPage() {
   /**
@@ -130,16 +131,15 @@ function DocumentsPage() {
    * The "actions" column is a special case that doesn't correspond to a document property but indicates where action buttons will be rendered.
    */
   const documentTableColumns = [
-    { key: "name", label: "Name" },
-    { key: "category", label: "Category" },
-    { key: "uploadedBy", label: "Uploaded By" },
-    { key: "department", label: "Department" },
-    { key: "created", label: "Created" },
-    { key: "status", label: "Status" },
-    { key: "version", label: "Version" },
-    { key: "actions", label: "Actions" },
+    { key: "name", label: t("documents.table.name") },
+    { key: "category", label: t("documents.table.category") },
+    { key: "uploadedBy", label: t("documents.table.uploadedBy") },
+    { key: "department", label: t("documents.table.department") },
+    { key: "created", label: t("documents.table.created") },
+    { key: "status", label: t("documents.table.status") },
+    { key: "version", label: t("documents.table.version") },
+    { key: "actions", label: t("documents.table.actions") },
   ];
-
   /*
   Load categories to DropDownList
    */
@@ -345,7 +345,7 @@ function DocumentsPage() {
     }
 
     if (file.type !== "application/pdf") {
-      setActionMessage("Only PDF files are allowed for new versions.");
+      setActionMessage(t("documents.messages.onlyPdf"));
       return;
     }
 
@@ -372,11 +372,11 @@ function DocumentsPage() {
         [documentId]: "",
       }));
 
-      setActionMessage("New document version uploaded successfully.");
+      setActionMessage(t("documents.messages.uploadSuccess"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to upload new document version."),
+          getApiErrorMessage(err, t("documents.messages.uploadError")),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -398,13 +398,6 @@ function DocumentsPage() {
    */
   function handleNextPage() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  }
-
-  /**
-   * Moves directly to a specific page.
-   */
-  function handleGoToPage(pageNumber) {
-    setCurrentPage(pageNumber);
   }
 
   /**
@@ -455,7 +448,7 @@ function DocumentsPage() {
    */
   async function handleConfirmRename(documentId) {
     if (!renameValue.trim()) {
-      setActionMessage("Document name cannot be empty.");
+      setActionMessage(t("documents.messages.emptyName"));
       return;
     }
 
@@ -464,11 +457,13 @@ function DocumentsPage() {
     try {
       await renameDocument(documentId, renameValue.trim());
       updateDocumentNameInState(documentId, renameValue.trim());
-      setActionMessage("Document renamed successfully.");
+      setActionMessage(t("documents.messages.renameSuccess"));
       handleCancelRename();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to rename document."));
+        setActionMessage(
+          getApiErrorMessage(err, t("documents.messages.renameError")),
+        );
       } else {
         setActionMessage("An unexpected error occurred.");
       }
@@ -485,11 +480,11 @@ function DocumentsPage() {
     try {
       await deactivateDocument(documentId);
       deactivateDocumentInState(documentId);
-      setActionMessage("Document deactivated successfully.");
+      setActionMessage(t("documents.messages.deactivateSuccess"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to deactivate document."),
+          getApiErrorMessage(err, t("documents.messages.deactivateError")),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -511,11 +506,11 @@ function DocumentsPage() {
 
       reactivateDocumentInState(documentId);
 
-      setActionMessage("Document reactivated successfully.");
+      setActionMessage(t("documents.messages.reactivateSuccess"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to reactivate document."),
+          getApiErrorMessage(err, t("documents.messages.reactivateError")),
         );
       } else {
         setActionMessage("An unexpected error occurred.");
@@ -582,9 +577,11 @@ function DocumentsPage() {
         {/* HEADER */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("documents.title")}
+            </h1>
             <p className="mt-2 text-sm text-gray-600">
-              View available documents and access file actions.
+              {t("documents.subtitle")}
             </p>
           </div>
 
@@ -592,14 +589,14 @@ function DocumentsPage() {
             to="/documents/upload"
             className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
           >
-            Upload Document
+            {t("documents.buttons.upload")}
           </Link>
         </div>
 
         {/* FILTERS */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
-            Search & Filters
+            {t("documents.filters.title")}
           </h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -607,7 +604,7 @@ function DocumentsPage() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               type="text"
               name="searchTerm"
-              placeholder="Search document name..."
+              placeholder={t("documents.filters.search")}
               value={filters.searchTerm}
               onChange={handleFilterChange}
             />
@@ -618,7 +615,7 @@ function DocumentsPage() {
               value={filters.categoryId}
               onChange={handleFilterChange}
             >
-              <option value="">All categories</option>
+              <option value="">{t("documents.filters.allCategories")}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -630,7 +627,7 @@ function DocumentsPage() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               type="number"
               name="month"
-              placeholder="Month"
+              placeholder={t("documents.filters.month")}
               value={filters.month}
               onChange={handleFilterChange}
             />
@@ -639,7 +636,7 @@ function DocumentsPage() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
               type="number"
               name="year"
-              placeholder="Year"
+              placeholder={t("documents.filters.year")}
               value={filters.year}
               onChange={handleFilterChange}
             />
@@ -650,13 +647,7 @@ function DocumentsPage() {
               value={filters.documentType}
               onChange={handleFilterChange}
             >
-              <option value="">All types</option>
-              <option value="0">General</option>
-              <option value="1">Contract</option>
-              <option value="2">Permit</option>
-              <option value="3">Policy</option>
-              <option value="4">Legal Document</option>
-              <option value="5">Other</option>
+              /* CHANGE TO RECOVER FROM BACKEND *\/
             </select>
 
             <select
@@ -665,9 +656,9 @@ function DocumentsPage() {
               value={filters.expirationPending}
               onChange={handleFilterChange}
             >
-              <option value="">All</option>
-              <option value="true">Pending</option>
-              <option value="false">Defined</option>
+              <option value="">{t("documents.filters.all")}</option>
+              <option value="true">{t("documents.filters.pending")}</option>
+              <option value="false">{t("documents.filters.defined")}</option>
             </select>
 
             {adminUser && (
@@ -677,9 +668,9 @@ function DocumentsPage() {
                 value={filters.isActive}
                 onChange={handleFilterChange}
               >
-                <option value="">All</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
+                <option value="">{t("documents.filters.all")}</option>
+                <option value="true">{t("documents.filters.active")}</option>
+                <option value="false">{t("documents.filters.inactive")}</option>
               </select>
             )}
           </div>
@@ -688,7 +679,7 @@ function DocumentsPage() {
             className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
             onClick={handleClearFilters}
           >
-            Clear Filters
+            {t("documents.filters.clear")}
           </button>
         </div>
 
@@ -700,13 +691,13 @@ function DocumentsPage() {
 
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Loading documents...
+            {t("documents.loading")}
           </div>
         )}
 
         {!loading && error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
+            {t("documents.error")}
           </div>
         )}
 
@@ -714,11 +705,12 @@ function DocumentsPage() {
           <DataTable
             columns={documentTableColumns}
             hasData={visibleDocuments.length > 0}
-            emptyMessage="No documents found."
+            emptyMessage={t("documents.empty")}
             footer={
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p>
-                  Showing {visibleDocuments.length} of {totalCount} documents
+                  {t("documents.pagination.showing")} {visibleDocuments.length}{" "}
+                  {t("documents.pagination.of")} {totalCount}
                 </p>
 
                 <div className="flex items-center gap-2">
@@ -727,7 +719,7 @@ function DocumentsPage() {
                     disabled={currentPage === 1}
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Prev
+                    {t("documents.pagination.prev")}
                   </button>
 
                   <button
@@ -735,7 +727,7 @@ function DocumentsPage() {
                     disabled={currentPage === totalPages || totalPages === 0}
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Next
+                    {t("documents.pagination.next")}
                   </button>
                 </div>
               </div>
@@ -755,13 +747,13 @@ function DocumentsPage() {
                         className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
                         onClick={() => handleConfirmRename(document.id)}
                       >
-                        Save
+                        {t("documents.buttons.save")}
                       </button>
                       <button
                         className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
                         onClick={handleCancelRename}
                       >
-                        Cancel
+                        {t("documents.buttons.cancel")}
                       </button>
                     </div>
                   ) : (
@@ -795,7 +787,9 @@ function DocumentsPage() {
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {document.isActive ? "Active" : "Inactive"}
+                    {document.isActive
+                      ? t("documents.table.active")
+                      : t("documents.table.inactive")}
                   </span>
                 </td>
 
@@ -808,10 +802,10 @@ function DocumentsPage() {
                       handleVersionChange(document.id, e.target.value)
                     }
                   >
-                    <option value="">Current</option>
+                    <option value="">{t("documents.table.current")}</option>
                     {versionLoadingByDocumentId[document.id] && (
                       <option value="" disabled>
-                        Loading versions...
+                        {t("documents.table.loadingVersions")}
                       </option>
                     )}
 
@@ -834,7 +828,7 @@ function DocumentsPage() {
                           renamingDocumentId === document.id
                         }
                       >
-                        Rename
+                        {t("documents.buttons.rename")}
                       </button>
                     )}
 
@@ -863,8 +857,8 @@ function DocumentsPage() {
                           }`}
                         >
                           {uploadingVersionDocumentId === document.id
-                            ? "Uploading..."
-                            : "Upload Version"}
+                            ? t("documents.buttons.uploading")
+                            : t("documents.buttons.uploadVersion")}
                         </label>
                       </>
                     )}
@@ -874,7 +868,7 @@ function DocumentsPage() {
                       onClick={() => handlePreview(document.id)}
                       disabled={!document.isActive}
                     >
-                      Preview
+                      {t("documents.buttons.preview")}
                     </button>
 
                     <button
@@ -884,7 +878,7 @@ function DocumentsPage() {
                       }
                       disabled={!document.isActive}
                     >
-                      Download
+                      {t("documents.buttons.download")}
                     </button>
 
                     {canManageDocumentActions &&
@@ -895,8 +889,8 @@ function DocumentsPage() {
                           disabled={deactivatingDocumentId === document.id}
                         >
                           {deactivatingDocumentId === document.id
-                            ? "Processing..."
-                            : "Deactivate"}
+                            ? t("documents.buttons.processing")
+                            : t("documents.buttons.deactivate")}
                         </button>
                       ) : (
                         <button
@@ -905,8 +899,8 @@ function DocumentsPage() {
                           disabled={reactivatingDocumentId === document.id}
                         >
                           {reactivatingDocumentId === document.id
-                            ? "Processing..."
-                            : "Reactivate"}
+                            ? t("documents.buttons.processing")
+                            : t("documents.buttons.reactivate")}
                         </button>
                       ))}
                   </div>

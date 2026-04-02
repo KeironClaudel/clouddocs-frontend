@@ -3,6 +3,7 @@ import axios from "axios";
 import { getCategories } from "../services/categoryService";
 import { uploadDocument } from "../services/documentService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
 
@@ -94,9 +95,12 @@ function UploadDocumentPage() {
         setCategories(activeCategories);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load categories.");
+          setError(
+            err.response?.data?.message ||
+              t("uploadDocument.messages.loadCategoriesError"),
+          );
         } else {
-          setError("An unexpected error occurred.");
+          setError(t("uploadDocument.messages.unexpected"));
         }
       } finally {
         setLoadingCategories(false);
@@ -133,13 +137,13 @@ function UploadDocumentPage() {
     }
 
     if (file.type !== "application/pdf") {
-      setError("Only PDF files are allowed.");
+      setError(t("uploadDocument.messages.onlyPdf"));
       setSelectedFile(null);
       return;
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError("The selected file exceeds the maximum allowed size.");
+      setError(t("uploadDocument.messages.fileTooLarge"));
       setSelectedFile(null);
       return;
     }
@@ -172,22 +176,22 @@ function UploadDocumentPage() {
     setSuccessMessage("");
 
     if (!selectedFile) {
-      setError("Please select a PDF file.");
+      setError(t("uploadDocument.messages.selectFile"));
       return;
     }
 
     if (!form.categoryId) {
-      setError("Please select a category.");
+      setError(t("uploadDocument.messages.selectCategory"));
       return;
     }
 
     if (!form.documentType) {
-      setError("Please select a document type.");
+      setError(t("uploadDocument.messages.selectType"));
       return;
     }
 
     if (!form.accessLevel) {
-      setError("Please select an access level.");
+      setError(t("uploadDocument.messages.expirationRequired"));
       return;
     }
 
@@ -220,13 +224,13 @@ function UploadDocumentPage() {
 
       await uploadDocument(payload);
 
-      setSuccessMessage("Document uploaded successfully.");
+      setSuccessMessage(t("uploadDocument.messages.success"));
       resetForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, "Failed to upload document."));
+        getApiErrorMessage(err, t("uploadDocument.messages.uploadError"));
       } else {
-        setError("An unexpected error occurred.");
+        setError(t("uploadDocument.messages.unexpected"));
       }
     } finally {
       setUploading(false);
@@ -238,9 +242,11 @@ function UploadDocumentPage() {
       <div className="mx-auto max-w-5xl">
         {/* HEADER */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Upload Document</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("uploadDocument.title")}
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Upload PDF files and register their metadata securely.
+            {t("uploadDocument.subtitle")}
           </p>
         </div>
 
@@ -263,7 +269,7 @@ function UploadDocumentPage() {
             {/* FILE */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                PDF File
+                {t("uploadDocument.title")}
               </label>
 
               <input
@@ -277,7 +283,7 @@ function UploadDocumentPage() {
 
               {selectedFile && (
                 <p className="mt-2 text-sm text-green-600">
-                  Selected file: {selectedFile.name}
+                  {t("uploadDocument.form.selectedFile")}: {selectedFile.name}
                 </p>
               )}
             </div>
@@ -288,12 +294,12 @@ function UploadDocumentPage() {
               <select
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 name="categoryId"
-                value={form.categoryid}
+                value={form.categoryId}
                 onChange={handleInputChange}
                 disabled={loadingCategories || uploading}
                 required
               >
-                <option value="">Select a category</option>
+                <option value="">{t("uploadDocument.form.category")}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -310,7 +316,9 @@ function UploadDocumentPage() {
                 disabled={uploading}
                 required
               >
-                <option value="">Select document type</option>
+                <option value="">
+                  {t("uploadDocument.form.documentType")}
+                </option>
                 {documentTypeOptions.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
@@ -327,7 +335,7 @@ function UploadDocumentPage() {
                 disabled={uploading}
                 required
               >
-                <option value="">Select access level</option>
+                <option value="">{t("uploadDocument.form.accessLevel")}</option>
                 {accessLevelOptions.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
@@ -340,7 +348,7 @@ function UploadDocumentPage() {
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 type="text"
                 name="department"
-                placeholder="Department"
+                placeholder={t("uploadDocument.form.department")}
                 value={form.department}
                 onChange={handleInputChange}
                 disabled={uploading}
@@ -367,7 +375,7 @@ function UploadDocumentPage() {
                 disabled={uploading}
                 className="h-4 w-4"
               />
-              Expiration date pending definition
+              {t("uploadDocument.form.expirationPending")}
             </label>
 
             {/* ACTIONS */}
@@ -377,7 +385,9 @@ function UploadDocumentPage() {
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition disabled:bg-blue-300"
                 disabled={uploading || loadingCategories}
               >
-                {uploading ? "Uploading..." : "Upload Document"}
+                {uploading
+                  ? t("uploadDocument.buttons.uploading")
+                  : t("uploadDocument.buttons.submit")}
               </button>
 
               <button
@@ -386,7 +396,7 @@ function UploadDocumentPage() {
                 onClick={resetForm}
                 disabled={uploading}
               >
-                Reset
+                {t("uploadDocument.buttons.reset")}
               </button>
             </div>
           </form>

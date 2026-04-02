@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useSearchParams } from "react-router-dom";
 import { resetPassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { t } from "../i18n";
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -47,12 +48,12 @@ function ResetPasswordPage() {
     setSuccessMessage("");
 
     if (!token) {
-      setError("The reset token is missing or invalid.");
+      setError(t("resetPassword.messages.invalidToken"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("The new password and confirmation password do not match.");
+      setError(t("resetPassword.messages.mismatch"));
       return;
     }
 
@@ -67,14 +68,14 @@ function ResetPasswordPage() {
         newPassword,
       });
 
-      setSuccessMessage("Your password has been reset successfully.");
+      setSuccessMessage(t("resetPassword.messages.success"));
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, "Failed to reset password."));
+        setError(getApiErrorMessage(err, t("resetPassword.messages.error")));
       } else {
-        setError("An unexpected error occurred.");
+        setError(t("resetPassword.messages.unexpected"));
       }
     } finally {
       setLoading(false);
@@ -86,9 +87,11 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Reset Password</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("resetPassword.title")}
+            </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Enter your new password to restore access to your account.
+              {t("resetPassword.subtitle")}
             </p>
           </div>
 
@@ -106,13 +109,13 @@ function ResetPasswordPage() {
 
           {!token ? (
             <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-700">
-              The reset link is invalid or incomplete.
+              {t("resetPassword.messages.invalidLink")}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  New Password
+                  {t("resetPassword.form.newPassword")}
                 </label>
                 <input
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
@@ -126,7 +129,7 @@ function ResetPasswordPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Confirm New Password
+                  {t("resetPassword.form.confirmPassword")}
                 </label>
                 <input
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
@@ -143,7 +146,9 @@ function ResetPasswordPage() {
                 className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
                 disabled={loading}
               >
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading
+                  ? t("resetPassword.buttons.loading")
+                  : t("resetPassword.buttons.submit")}
               </button>
             </form>
           )}
@@ -155,7 +160,7 @@ function ResetPasswordPage() {
               to="/login"
               className="text-sm text-blue-600 transition hover:text-blue-700 hover:underline"
             >
-              Back to login
+              {t("resetPassword.navigation.backToLogin")}
             </Link>
           </div>
         </div>

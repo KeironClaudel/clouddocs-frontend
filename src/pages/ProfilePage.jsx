@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKey } from "@fortawesome/free-solid-svg-icons";
+import { t } from "../i18n";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -14,27 +15,35 @@ function ProfilePage() {
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-3xl">
-        <h1 className="mb-6 text-3xl font-bold text-gray-900">My Profile</h1>
+        <h1 className="mb-6 text-3xl font-bold text-gray-900">
+          {t("profile.title")}
+        </h1>
 
         {!user ? (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            User information not available.
+            {t("profile.unavailable")}
           </div>
         ) : (
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="space-y-4 text-sm text-gray-700">
               <p>
-                <span className="font-semibold text-gray-900">Full Name:</span>{" "}
+                <span className="font-semibold text-gray-900">
+                  {t("profile.fields.fullName")}:
+                </span>{" "}
                 {user.fullName}
               </p>
 
               <p>
-                <span className="font-semibold text-gray-900">Email:</span>{" "}
+                <span className="font-semibold text-gray-900">
+                  {t("profile.fields.email")}:
+                </span>{" "}
                 {user.email}
               </p>
 
               <p>
-                <span className="font-semibold text-gray-900">Role:</span>{" "}
+                <span className="font-semibold text-gray-900">
+                  {t("profile.fields.role")}:
+                </span>{" "}
                 {user.role}
               </p>
             </div>
@@ -45,7 +54,7 @@ function ProfilePage() {
                 onClick={() => navigate("/change-password")}
               >
                 <FontAwesomeIcon icon={faKey} />
-                <span>Change Password</span>
+                <span>{t("profile.buttons.changePassword")}</span>
               </button>
             </div>
           </div>

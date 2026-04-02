@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { forgotPassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { t } from "../i18n";
 
 function ForgotPasswordPage() {
   /**
@@ -40,19 +41,12 @@ function ForgotPasswordPage() {
     try {
       const data = await forgotPassword(email);
 
-      setSuccessMessage(
-        data?.message || "Password reset instructions were sent successfully.",
-      );
+      setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(
-          getApiErrorMessage(
-            err,
-            "Failed to process the password reset request.",
-          ),
-        );
+        setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
       } else {
-        setError("An unexpected error occurred.");
+        setError(t("forgotPassword.messages.unexpected"));
       }
     } finally {
       setLoading(false);
@@ -65,10 +59,10 @@ function ForgotPasswordPage() {
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
           <div className="mb-6 text-center">
             <h1 className="text-3xl font-bold text-gray-900">
-              Forgot Password
+              {t("forgotPassword.title")}
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Enter your institutional email to receive a reset link.
+              {t("forgotPassword.subtitle")}
             </p>
           </div>
 
@@ -87,7 +81,7 @@ function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Email
+                {t("forgotPassword.form.email")}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -110,7 +104,9 @@ function ForgotPasswordPage() {
               className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
               disabled={loading}
             >
-              {loading ? "Sending..." : "Send Reset Link"}
+              {loading
+                ? t("forgotPassword.buttons.loading")
+                : t("forgotPassword.buttons.submit")}
             </button>
           </form>
 
@@ -122,7 +118,7 @@ function ForgotPasswordPage() {
               className="inline-flex items-center gap-1 text-sm text-blue-600 transition hover:text-blue-700 hover:underline"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
-              <span>Back to login</span>
+              <span>{t("forgotPassword.links.backToLogin")}</span>
             </Link>
           </div>
         </div>

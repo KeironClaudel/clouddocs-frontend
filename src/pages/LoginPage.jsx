@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
-import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { t } from "../i18n";
 
 function LoginPage() {
   /**
@@ -57,9 +57,9 @@ function LoginPage() {
       navigate("/dashboard");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Login failed.");
+        setError(err.response?.data?.message || t("login.messages.error"));
       } else {
-        setError("An unexpected error occurred.");
+        setError(t("login.messages.unexpected"));
       }
     } finally {
       setLoading(false);
@@ -71,10 +71,10 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">CloudDocs</h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Sign in to access your document management panel.
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("login.title")}
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">{t("login.subtitle")}</p>
           </div>
 
           {error && (
@@ -86,7 +86,7 @@ function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Email
+                {t("login.form.email")}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -95,7 +95,7 @@ function LoginPage() {
                 <input
                   className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder={t("login.form.emailPlaceholder")}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   disabled={loading}
@@ -106,7 +106,7 @@ function LoginPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Password
+                {t("login.form.password")}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -115,7 +115,7 @@ function LoginPage() {
                 <input
                   className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("login.form.passwordPlaceholder")}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   disabled={loading}
@@ -129,7 +129,7 @@ function LoginPage() {
                 to="/forgot-password"
                 className="text-sm text-blue-600 transition hover:text-blue-700 hover:underline"
               >
-                Forgot your password?
+                {t("login.links.forgotPassword")}
               </Link>
             </div>
 
@@ -141,7 +141,11 @@ function LoginPage() {
               <span className={loading ? "hidden" : "inline-flex items-center"}>
                 <FontAwesomeIcon icon={faRightToBracket} />
               </span>
-              <span>{loading ? "Signing in..." : "Sign In"}</span>
+              <span>
+                {loading
+                  ? t("login.buttons.loading")
+                  : t("login.buttons.submit")}
+              </span>
             </button>
           </form>
 
@@ -149,7 +153,7 @@ function LoginPage() {
 
           <div className="text-center">
             <p className="text-xs text-gray-500">
-              Secure internal access for authorized users only.
+              {t("login.footer.secureAccess")}
             </p>
           </div>
         </div>

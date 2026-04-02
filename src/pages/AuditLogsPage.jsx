@@ -3,6 +3,8 @@ import { getAuditLogs } from "../services/auditService";
 import { formatLocalDateTimeForDisplay } from "../utils/dateUtils";
 import DataTable from "../components/DataTable";
 import { useSearchParams } from "react-router-dom";
+import { getApiErrorMessage } from "../utils/errorUtils";
+import { t } from "../i18n";
 
 function AuditLogsPage() {
   /**
@@ -51,14 +53,14 @@ function AuditLogsPage() {
    * Defines the columns displayed in the audit log table.
    */
   const auditLogTableColumns = [
-    { key: "userId", label: "User Id" },
-    { key: "action", label: "Action" },
-    { key: "module", label: "Module" },
-    { key: "entityName", label: "Entity" },
-    { key: "entityId", label: "Entity Id" },
-    { key: "details", label: "Details" },
-    { key: "ipAddress", label: "IP" },
-    { key: "date", label: "Date" },
+    { key: "userId", label: t("auditLogs.table.userId") },
+    { key: "action", label: t("auditLogs.table.action") },
+    { key: "module", label: t("auditLogs.table.module") },
+    { key: "entityName", label: t("auditLogs.table.entity") },
+    { key: "entityId", label: t("auditLogs.table.entityId") },
+    { key: "details", label: t("auditLogs.table.details") },
+    { key: "ipAddress", label: t("auditLogs.table.ip") },
+    { key: "date", label: t("auditLogs.table.date") },
   ];
 
   /**
@@ -97,7 +99,7 @@ function AuditLogsPage() {
       setPage(data.page || effectivePage);
       setTotalCount(data.totalCount || 0);
     } catch (err) {
-      setError("Failed to load audit logs.");
+      setError(getApiErrorMessage(err, t("auditLogs.loadError")));
     } finally {
       setLoading(false);
     }
@@ -210,14 +212,19 @@ function AuditLogsPage() {
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Audit Logs</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("auditLogs.title")}
+          </h1>
+
           <p className="mt-2 text-sm text-gray-600">
-            Review system activity records in read-only mode.
+            {t("auditLogs.subtitle")}
           </p>
         </div>
 
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Filters</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            {t("auditLogs.filters")}
+          </h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <select
@@ -226,7 +233,7 @@ function AuditLogsPage() {
               value={filters.userId}
               onChange={handleFilterChange}
             >
-              <option value="">All users</option>
+              <option value="">{t("auditLogs.allUsers")}</option>
               {userOptions.map((userId) => (
                 <option key={userId} value={userId}>
                   {userId}
@@ -240,7 +247,7 @@ function AuditLogsPage() {
               value={filters.action}
               onChange={handleFilterChange}
             >
-              <option value="">All actions</option>
+              <option value="">{t("auditLogs.allActions")}</option>
               {actionOptions.map((action) => (
                 <option key={action} value={action}>
                   {action}
@@ -254,7 +261,7 @@ function AuditLogsPage() {
               value={filters.module}
               onChange={handleFilterChange}
             >
-              <option value="">All modules</option>
+              <option value="">{t("auditLogs.allModules")}</option>
               {moduleOptions.map((module) => (
                 <option key={module} value={module}>
                   {module}
@@ -276,13 +283,13 @@ function AuditLogsPage() {
             className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
             onClick={handleClearFilters}
           >
-            Clear Filters
+            {t("auditLogs.clearFilters")}
           </button>
         </div>
 
         {loading && (
           <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Loading audit logs...
+            {t("auditLogs.loading")}
           </div>
         )}
 
@@ -296,27 +303,34 @@ function AuditLogsPage() {
           <DataTable
             columns={auditLogTableColumns}
             hasData={auditLogs.length > 0}
-            emptyMessage="No audit logs found."
+            emptyMessage={t("auditLogs.empty")}
             footer={
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-4">
                   <p>
-                    Showing {auditLogs.length} of {totalCount} audit records
+                    {t("auditLogs.showing")} {auditLogs.length}{" "}
+                    {t("auditLogs.of")} {totalCount} {t("auditLogs.records")}
                   </p>
 
-                  <select
-                    value={pageSize}
-                    onChange={(e) => {
-                      const newSize = Number(e.target.value);
-                      setPageSize(newSize);
-                      setSearchParams({ page: "1" });
-                    }}
-                    className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {t("auditLogs.pageSize")}
+                    </span>
+
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        const newSize = Number(e.target.value);
+                        setPageSize(newSize);
+                        setSearchParams({ page: "1" });
+                      }}
+                      className="rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -326,11 +340,12 @@ function AuditLogsPage() {
                     disabled={page === 1}
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
                   >
-                    Prev
+                    {t("auditLogs.prev")}
                   </button>
 
                   <span className="text-sm text-gray-600">
-                    Page {page} of {totalPages || 1}
+                    {t("auditLogs.page")} {page} {t("auditLogs.of")}{" "}
+                    {totalPages || 1}
                   </span>
 
                   <button
@@ -339,7 +354,7 @@ function AuditLogsPage() {
                     disabled={page === totalPages || totalPages === 0}
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
                   >
-                    Next
+                    {t("auditLogs.next")}
                   </button>
                 </div>
               </div>
@@ -351,34 +366,38 @@ function AuditLogsPage() {
                   className="px-6 py-4 text-gray-700"
                   title={log.userId || ""}
                 >
-                  {log.userId ? `${log.userId.slice(0, 8)}...` : "N/A"}
+                  {log.userId
+                    ? `${log.userId.slice(0, 8)}...`
+                    : t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4 text-gray-700">
-                  {log.action || "N/A"}
+                  {log.action || t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4 text-gray-700">
-                  {log.module || "N/A"}
+                  {log.module || t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4 text-gray-700">
-                  {log.entityName || "N/A"}
+                  {log.entityName || t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td
                   className="px-6 py-4 text-gray-700"
                   title={log.entityId || ""}
                 >
-                  {log.entityId ? `${log.entityId.slice(0, 8)}...` : "N/A"}
+                  {log.entityId
+                    ? `${log.entityId.slice(0, 8)}...`
+                    : t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="max-w-[220px] truncate px-6 py-4 text-gray-600">
-                  {log.details || "N/A"}
+                  {log.details || t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4 text-gray-600">
-                  {log.ipAddress || "N/A"}
+                  {log.ipAddress || t("auditLogs.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4 text-gray-600">

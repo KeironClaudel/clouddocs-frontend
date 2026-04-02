@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { getDashboardStats } from "../services/dashboardService";
 import { isAdmin } from "../utils/permissionUtils";
+import { t } from "../i18n";
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -47,9 +48,9 @@ function DashboardPage() {
         setStats(data);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load dashboard.");
+          setError(err.response?.data?.message || t("dashboard.loadError"));
         } else {
-          setError("An unexpected error occurred.");
+          setError(t("dashboard.unexpected"));
         }
       } finally {
         setLoading(false);
@@ -63,15 +64,18 @@ function DashboardPage() {
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("dashboard.title")}
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Welcome back, {user?.fullName || "User"}.
+            {t("dashboard.welcome")},{" "}
+            {user?.fullName || t("dashboard.defaultUser")}.
           </p>
         </div>
 
         {loading && (
           <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Loading dashboard data...
+            {t("dashboard.loading")}
           </div>
         )}
 
@@ -87,7 +91,7 @@ function DashboardPage() {
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Documents
+                    <h2>{t("dashboard.cards.documents")}</h2>
                   </h2>
                   <span className="text-red-500">
                     <FontAwesomeIcon icon={faFilePdf} size="lg" />
@@ -97,7 +101,7 @@ function DashboardPage() {
                   {stats.totalDocuments}
                 </p>
                 <p className="mt-2 text-sm text-gray-500">
-                  Total registered documents
+                  {t("dashboard.cards.totalDocuments")}
                 </p>
               </div>
 
@@ -106,7 +110,7 @@ function DashboardPage() {
                   <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-gray-900">
-                        Users
+                        {t("dashboard.cards.users")}
                       </h2>
                       <span className="text-blue-500">
                         <FontAwesomeIcon icon={faUsers} size="lg" />
@@ -116,14 +120,14 @@ function DashboardPage() {
                       {stats.totalUsers ?? 0}
                     </p>
                     <p className="mt-2 text-sm text-gray-500">
-                      Total registered users
+                      {t("dashboard.cards.totalUsers")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-gray-900">
-                        Active Users
+                        {t("dashboard.cards.activeUsers")}
                       </h2>
                       <span className="text-green-500">
                         <FontAwesomeIcon icon={faUserCheck} size="lg" />
@@ -133,14 +137,14 @@ function DashboardPage() {
                       {stats.activeUsers ?? 0}
                     </p>
                     <p className="mt-2 text-sm text-gray-500">
-                      Accounts currently active
+                      {t("dashboard.cards.activeUsersDesc")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                       <h2 className="text-lg font-semibold text-gray-900">
-                        Inactive Users
+                        {t("dashboard.cards.inactiveUsers")}
                       </h2>
                       <span className="text-amber-500">
                         <FontAwesomeIcon icon={faUserSlash} size="lg" />
@@ -150,7 +154,7 @@ function DashboardPage() {
                       {stats.inactiveUsers ?? 0}
                     </p>
                     <p className="mt-2 text-sm text-gray-500">
-                      Accounts currently inactive
+                      {t("dashboard.cards.inactiveUsersDesc")}
                     </p>
                   </div>
                 </>
@@ -159,7 +163,7 @@ function DashboardPage() {
 
             <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold text-gray-900">
-                Quick Access
+                {t("dashboard.quickAccess.title")}
               </h2>
 
               <div className="mt-5 flex flex-wrap gap-3">
@@ -168,7 +172,7 @@ function DashboardPage() {
                   className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
                 >
                   <FontAwesomeIcon icon={faFolderOpen} />
-                  <span>Documents</span>
+                  <span>{t("dashboard.quickAccess.documents")}</span>
                 </Link>
 
                 <Link
@@ -176,7 +180,7 @@ function DashboardPage() {
                   className="inline-flex items-center gap-2 rounded-lg bg-cyan-50 px-4 py-2.5 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100"
                 >
                   <FontAwesomeIcon icon={faAddressCard} />
-                  <span>Profile</span>
+                  <span>{t("dashboard.quickAccess.profile")}</span>
                 </Link>
 
                 {user?.role === "Admin" && (
@@ -185,7 +189,7 @@ function DashboardPage() {
                     className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"
                   >
                     <FontAwesomeIcon icon={faUsers} />
-                    <span>Users</span>
+                    <span>{t("dashboard.quickAccess.users")}</span>
                   </Link>
                 )}
               </div>

@@ -10,6 +10,7 @@ import {
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
+import { t } from "../i18n";
 
 function CategoriesPage() {
   /**
@@ -88,11 +89,11 @@ function CategoriesPage() {
    * The "actions" column is used to render buttons for editing, deactivating, or reactivating categories.
    */
   const categoryTableColumns = [
-    { key: "name", label: "Name" },
-    { key: "description", label: "Description" },
-    { key: "status", label: "Status" },
-    { key: "createdAt", label: "Created" },
-    { key: "actions", label: "Actions" },
+    { key: "name", label: t("categories.table.name") },
+    { key: "description", label: t("categories.table.description") },
+    { key: "status", label: t("categories.table.status") },
+    { key: "createdAt", label: t("categories.table.created") },
+    { key: "actions", label: t("categories.table.actions") },
   ];
 
   /**
@@ -110,9 +111,13 @@ function CategoriesPage() {
         setCategories(normalizedCategories);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to load categories.");
+          setError(
+            setError(
+              getApiErrorMessage(err, t("categories.messages.loadError")),
+            ),
+          );
         } else {
-          setError("An unexpected error occurred.");
+          setError(t("categories.messages.unexpected"));
         }
       } finally {
         setLoading(false);
@@ -221,13 +226,15 @@ function CategoriesPage() {
         addCategoryToState(createdCategory);
       }
 
-      setActionMessage("Category created successfully.");
+      setActionMessage(t("categories.messages.created"));
       resetCreateForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to create category."));
+        setActionMessage(
+          getApiErrorMessage(err, t("categories.messages.createError")),
+        );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("categories.messages.unexpected"));
       }
     } finally {
       setCreatingCategory(false);
@@ -280,13 +287,15 @@ function CategoriesPage() {
         });
       }
 
-      setActionMessage("Category updated successfully.");
+      setActionMessage(t("categories.messages.updated"));
       resetEditForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to update category."));
+        setActionMessage(
+          getApiErrorMessage(err, t("categories.messages.updateError")),
+        );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("categories.messages.unexpected"));
       }
     } finally {
       setUpdatingCategory(false);
@@ -303,14 +312,14 @@ function CategoriesPage() {
     try {
       await deactivateCategory(categoryId);
       deactivateCategoryInState(categoryId);
-      setActionMessage("Category deactivated successfully.");
+      setActionMessage(t("categories.messages.deactivated"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to deactivate category."),
+          getApiErrorMessage(err, t("categories.messages.deactivateError")),
         );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("categories.messages.unexpected"));
       }
     } finally {
       setDeactivatingCategoryId(null);
@@ -335,14 +344,14 @@ function CategoriesPage() {
         ),
       );
 
-      setActionMessage("Category reactivated successfully.");
+      setActionMessage(t("categories.messages.reactivated"));
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to reactivate category."),
+          getApiErrorMessage(err, t("categories.messages.reactivateError")),
         );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("categories.messages.unexpected"));
       }
     } finally {
       setReactivatingCategoryId(null);
@@ -353,9 +362,12 @@ function CategoriesPage() {
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("categories.title")}
+          </h1>
+
           <p className="mt-2 text-sm text-gray-600">
-            Manage document categories for organization and filtering.
+            {t("categories.subtitle")}
           </p>
 
           <div className="mt-4">
@@ -363,7 +375,9 @@ function CategoriesPage() {
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
               onClick={() => setShowCreateForm((prev) => !prev)}
             >
-              {showCreateForm ? "Cancel" : "Create Category"}
+              {showCreateForm
+                ? t("categories.buttons.cancel")
+                : t("categories.buttons.create")}
             </button>
           </div>
         </div>
@@ -378,14 +392,14 @@ function CategoriesPage() {
         {showCreateForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Create Category
+              {t("categories.form.createTitle")}
             </h2>
 
             <form onSubmit={handleCreateCategory} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Name
+                    {t("categories.form.name")}
                   </label>
                   <input
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -399,7 +413,7 @@ function CategoriesPage() {
 
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Description
+                    {t("categories.form.description")}
                   </label>
                   <input
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -417,7 +431,9 @@ function CategoriesPage() {
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition disabled:opacity-70"
                   disabled={creatingCategory}
                 >
-                  {creatingCategory ? "Creating..." : "Create"}
+                  {creatingCategory
+                    ? t("categories.buttons.creating")
+                    : t("categories.buttons.create")}
                 </button>
 
                 <button
@@ -426,7 +442,7 @@ function CategoriesPage() {
                   onClick={resetCreateForm}
                   disabled={creatingCategory}
                 >
-                  Cancel
+                  {t("categories.buttons.cancel")}
                 </button>
               </div>
             </form>
@@ -437,14 +453,14 @@ function CategoriesPage() {
         {showEditForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Edit Category
+              {t("categories.form.editTitle")}
             </h2>
 
             <form onSubmit={handleUpdateCategory} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Name
+                    {t("categories.form.name")}
                   </label>
                   <input
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -458,7 +474,7 @@ function CategoriesPage() {
 
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Description
+                    {t("categories.form.description")}
                   </label>
                   <input
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -476,7 +492,9 @@ function CategoriesPage() {
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 transition"
                   disabled={updatingCategory}
                 >
-                  {updatingCategory ? "Saving..." : "Save Changes"}
+                  {updatingCategory
+                    ? t("categories.buttons.saving")
+                    : t("categories.buttons.save")}
                 </button>
 
                 <button
@@ -485,7 +503,7 @@ function CategoriesPage() {
                   onClick={resetEditForm}
                   disabled={updatingCategory}
                 >
-                  Cancel
+                  {t("categories.buttons.cancel")}
                 </button>
               </div>
             </form>
@@ -495,7 +513,7 @@ function CategoriesPage() {
         {/* LOADING */}
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Loading categories...
+            {t("categories.messages.loading")}
           </div>
         )}
 
@@ -511,7 +529,7 @@ function CategoriesPage() {
           <DataTable
             columns={categoryTableColumns}
             hasData={categories.length > 0}
-            emptyMessage="No categories found."
+            emptyMessage={t("categories.messages.empty")}
           >
             {categories.map((category) => (
               <tr key={category.id} className="transition hover:bg-gray-50/80">
@@ -520,7 +538,7 @@ function CategoriesPage() {
                 </td>
 
                 <td className="px-6 py-4 text-gray-600">
-                  {category.description || "N/A"}
+                  {category.description || t("categories.table.noDescription")}
                 </td>
 
                 <td className="px-6 py-4">
@@ -531,7 +549,9 @@ function CategoriesPage() {
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {category.isActive ? "Active" : "Inactive"}
+                    {category.isActive
+                      ? t("categories.table.active")
+                      : t("categories.table.inactive")}
                   </span>
                 </td>
 
@@ -546,7 +566,7 @@ function CategoriesPage() {
                       onClick={() => handleOpenEditForm(category)}
                       disabled={!category.isActive}
                     >
-                      Edit
+                      {t("categories.buttons.edit")}
                     </button>
 
                     {category.isActive ? (
@@ -556,8 +576,8 @@ function CategoriesPage() {
                         disabled={deactivatingCategoryId === category.id}
                       >
                         {deactivatingCategoryId === category.id
-                          ? "Processing..."
-                          : "Deactivate"}
+                          ? t("categories.buttons.processing")
+                          : t("categories.buttons.deactivate")}
                       </button>
                     ) : (
                       <button
@@ -566,8 +586,8 @@ function CategoriesPage() {
                         disabled={reactivatingCategoryId === category.id}
                       >
                         {reactivatingCategoryId === category.id
-                          ? "Processing..."
-                          : "Reactivate"}
+                          ? t("categories.buttons.processing")
+                          : t("categories.buttons.reactivate")}
                       </button>
                     )}
                   </div>

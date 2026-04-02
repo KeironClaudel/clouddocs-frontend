@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { changePassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { t } from "../i18n";
 
 function ChangePasswordPage() {
   /**
@@ -44,7 +45,7 @@ function ChangePasswordPage() {
     setSuccessMessage("");
 
     if (newPassword !== confirmPassword) {
-      setError("The new password and confirmation password do not match.");
+      setError(t("changePassword.messages.mismatch"));
       return;
     }
 
@@ -56,15 +57,15 @@ function ChangePasswordPage() {
         newPassword,
       });
 
-      setSuccessMessage("Password changed successfully.");
+      setError(t("changePassword.messages.mismatch"));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, "Failed to change password."));
+        setError(getApiErrorMessage(err, t("changePassword.messages.error")));
       } else {
-        setError("An unexpected error occurred.");
+        setError(t("changePassword.messages.unexpected"));
       }
     } finally {
       setLoading(false);
@@ -75,9 +76,9 @@ function ChangePasswordPage() {
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto flex min-h-[80vh] max-w-3xl items-center justify-center">
         <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900">Change Password</h1>
+          {t("changePassword.title")}
           <p className="mt-2 text-sm text-gray-600">
-            Update your current password securely.
+            {t("changePassword.subtitle")}
           </p>
 
           {successMessage && (
@@ -95,7 +96,7 @@ function ChangePasswordPage() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Current Password
+                {t("changePassword.form.currentPassword")}
               </label>
               <input
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
@@ -109,7 +110,7 @@ function ChangePasswordPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                New Password
+                {t("changePassword.form.newPassword")}
               </label>
               <input
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
@@ -123,7 +124,7 @@ function ChangePasswordPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Confirm New Password
+                {t("changePassword.form.confirmPassword")}
               </label>
               <input
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
@@ -141,7 +142,9 @@ function ChangePasswordPage() {
                 className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
                 disabled={loading}
               >
-                {loading ? "Saving..." : "Save Changes"}
+                {loading
+                  ? t("changePassword.buttons.saving")
+                  : t("changePassword.buttons.save")}
               </button>
             </div>
           </form>

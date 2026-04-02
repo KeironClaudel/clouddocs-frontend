@@ -12,6 +12,7 @@ import { roleOptions } from "../utils/roleOptions";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
+import { t } from "../i18n";
 
 function UsersPage() {
   /**
@@ -96,15 +97,14 @@ function UsersPage() {
    * The "actions" column will be used to render action buttons for each user.
    */
   const userTableColumns = [
-    { key: "fullName", label: "Full Name" },
-    { key: "email", label: "Email" },
-    { key: "department", label: "Department" },
-    { key: "role", label: "Role" },
-    { key: "status", label: "Status" },
-    { key: "createdAt", label: "Created" },
-    { key: "actions", label: "Actions" },
+    { key: "fullName", label: t("users.table.fullName") },
+    { key: "email", label: t("users.table.email") },
+    { key: "department", label: t("users.table.department") },
+    { key: "role", label: t("users.table.role") },
+    { key: "status", label: t("users.table.status") },
+    { key: "createdAt", label: t("users.table.created") },
+    { key: "actions", label: t("users.table.actions") },
   ];
-
   /**
    * Loads the user list when the page is rendered for the first time.
    */
@@ -120,9 +120,9 @@ function UsersPage() {
         setUsers(normalizedUsers);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setActionMessage(getApiErrorMessage(err, "Failed to load user."));
+          getApiErrorMessage(err, t("users.messages.loadError"));
         } else {
-          setActionMessage("An unexpected error occurred.");
+          setActionMessage(t("users.messages.unexpected"));
         }
       } finally {
         setLoading(false);
@@ -167,9 +167,11 @@ function UsersPage() {
       setActionMessage("User deactivated successfully.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to deactivate user."));
+        setActionMessage(
+          getApiErrorMessage(err, t("users.messages.deactivateError")),
+        );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("users.messages.unexpected"));
       }
     } finally {
       setUpdatingUserId(null);
@@ -189,9 +191,11 @@ function UsersPage() {
       setActionMessage("User reactivated successfully.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to reactivate user."));
+        setActionMessage(
+          getApiErrorMessage(err, t("users.messages.reactivateError")),
+        );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("users.messages.unexpected"));
       }
     } finally {
       setUpdatingUserId(null);
@@ -247,14 +251,16 @@ function UsersPage() {
         setUsers((prev) => [createdUser, ...prev]);
       }
 
-      setActionMessage("User created successfully.");
+      setActionMessage(t("users.messages.createSuccess"));
       resetCreateForm();
       setShowCreateForm(false);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setActionMessage(getApiErrorMessage(err, "Failed to create user."));
+        setActionMessage(
+          getApiErrorMessage(err, t("users.messages.createError")),
+        );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("users.messages.unexpected"));
       }
     } finally {
       setCreatingUser(false);
@@ -315,10 +321,10 @@ function UsersPage() {
       setShowEditForm(false);
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          getApiErrorMessage(err, "Failed to load user details."),
+          getApiErrorMessage(err, t("users.messages.loadError")),
         );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("users.messages.unexpected"));
       }
     } finally {
       setLoadingEditUser(false);
@@ -352,15 +358,15 @@ function UsersPage() {
         updateUserInState(updatedUser);
       }
 
-      setActionMessage("User updated successfully.");
+      setActionMessage(t("users.messages.updateSuccess"));
       resetEditForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setActionMessage(
-          err.response?.data?.message || "Failed to update user.",
+          getApiErrorMessage(err, t("users.messages.updateError")),
         );
       } else {
-        setActionMessage("An unexpected error occurred.");
+        setActionMessage(t("users.messages.unexpected"));
       }
     } finally {
       setUpdatingUser(false);
@@ -372,10 +378,10 @@ function UsersPage() {
       <div className="mx-auto max-w-7xl">
         {/* HEADER */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            View registered users and their account information.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("users.title")}
+          </h1>
+          <p className="mt-2 text-sm text-gray-600">{t("users.subtitle")}</p>
 
           {actionMessage && (
             <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
@@ -388,7 +394,9 @@ function UsersPage() {
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
               onClick={() => setShowCreateForm((prev) => !prev)}
             >
-              {showCreateForm ? "Cancel" : "Create User"}
+              {showCreateForm
+                ? t("users.buttons.cancel")
+                : t("users.buttons.create")}
             </button>
           </div>
         </div>
@@ -397,7 +405,7 @@ function UsersPage() {
         {showCreateForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Create New User
+              {t("users.form.createTitle")}
             </h2>
 
             <form onSubmit={handleCreateUser} className="space-y-6">
@@ -408,7 +416,7 @@ function UsersPage() {
                   name="fullName"
                   value={createForm.fullName}
                   onChange={handleCreateFormChange}
-                  placeholder="Full Name"
+                  placeholder={t("users.form.fullName")}
                   required
                 />
 
@@ -418,7 +426,7 @@ function UsersPage() {
                   name="email"
                   value={createForm.email}
                   onChange={handleCreateFormChange}
-                  placeholder="Email"
+                  placeholder={t("users.form.email")}
                   required
                 />
 
@@ -428,7 +436,7 @@ function UsersPage() {
                   name="password"
                   value={createForm.password}
                   onChange={handleCreateFormChange}
-                  placeholder="Password"
+                  placeholder={t("users.form.password")}
                   required
                 />
 
@@ -438,7 +446,7 @@ function UsersPage() {
                   name="department"
                   value={createForm.department}
                   onChange={handleCreateFormChange}
-                  placeholder="Department"
+                  placeholder={t("users.form.department")}
                 />
 
                 <select
@@ -448,7 +456,7 @@ function UsersPage() {
                   onChange={handleCreateFormChange}
                   required
                 >
-                  <option value="">Select a role</option>
+                  <option value="">{t("users.form.selectRole")}</option>
                   {roleOptions.map((role) => (
                     <option key={role.value} value={role.value}>
                       {role.label}
@@ -463,7 +471,9 @@ function UsersPage() {
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                   disabled={creatingUser}
                 >
-                  {creatingUser ? "Creating..." : "Create"}
+                  {creatingUser
+                    ? t("users.buttons.creating")
+                    : t("users.buttons.create")}
                 </button>
 
                 <button
@@ -474,7 +484,7 @@ function UsersPage() {
                     setShowCreateForm(false);
                   }}
                 >
-                  Cancel
+                  {t("users.buttons.cancel")}
                 </button>
               </div>
             </form>
@@ -485,7 +495,7 @@ function UsersPage() {
         {showEditForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Edit User
+              {t("users.form.editTitle")}
             </h2>
 
             {loadingEditUser ? (
@@ -537,7 +547,7 @@ function UsersPage() {
 
                 <div className="flex gap-3">
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
-                    Save Changes
+                    {t("users.buttons.save")}
                   </button>
 
                   <button
@@ -545,7 +555,7 @@ function UsersPage() {
                     className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
                     onClick={resetEditForm}
                   >
-                    Cancel
+                    {t("users.buttons.cancel")}
                   </button>
                 </div>
               </form>
@@ -556,13 +566,13 @@ function UsersPage() {
         {/* STATES */}
         {loading && (
           <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Loading users...
+            {t("users.messages.loading")}
           </div>
         )}
 
         {!loading && error && (
           <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
+            {t("users.messages.loadError")}
           </div>
         )}
 
@@ -571,7 +581,7 @@ function UsersPage() {
           <DataTable
             columns={userTableColumns}
             hasData={users.length > 0}
-            emptyMessage="No users found."
+            emptyMessage={t("users.table.noData")}
           >
             {users.map((userItem) => (
               <tr key={userItem.id} className="transition hover:bg-gray-50/80">
@@ -595,7 +605,9 @@ function UsersPage() {
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {userItem.isActive ? "Active" : "Inactive"}
+                    {userItem.isActive
+                      ? t("users.table.active")
+                      : t("users.table.inactive")}
                   </span>
                 </td>
 
@@ -612,7 +624,7 @@ function UsersPage() {
                         loadingEditUser || updatingUserId === userItem.id
                       }
                     >
-                      Edit
+                      {t("users.buttons.edit")}
                     </button>
 
                     {userItem.isActive ? (
@@ -622,8 +634,8 @@ function UsersPage() {
                         disabled={updatingUserId === userItem.id}
                       >
                         {updatingUserId === userItem.id
-                          ? "Processing..."
-                          : "Deactivate"}
+                          ? t("users.buttons.processing")
+                          : t("users.buttons.deactivate")}
                       </button>
                     ) : (
                       <button
@@ -632,8 +644,8 @@ function UsersPage() {
                         disabled={updatingUserId === userItem.id}
                       >
                         {updatingUserId === userItem.id
-                          ? "Processing..."
-                          : "Reactivate"}
+                          ? t("users.buttons.processing")
+                          : t("users.buttons.reactivate")}
                       </button>
                     )}
                   </div>
