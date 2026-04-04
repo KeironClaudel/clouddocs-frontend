@@ -10,11 +10,12 @@ import {
   searchDocuments,
   uploadDocumentVersion,
 } from "../services/documentService";
+import { getDocumentTypes } from "../services/documentTypeService";
 import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
-import { canManageAdminPanels } from "../utils/permissionUtils";
+import { canManageAdminPanels, isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
@@ -117,6 +118,11 @@ function DocumentsPage() {
   const [categories, setCategories] = useState([]);
 
   /**
+   * Stores the document type list used by dropdown.
+   */
+  const [documentTypes, setDocumentTypes] = useState([]);
+
+  /**
    * Defines the columns to display in the document table, including the key to access the value and the label to show in the header.
    * The "actions" column is a special case that doesn't correspond to a document property but indicates where action buttons will be rendered.
    */
@@ -125,6 +131,7 @@ function DocumentsPage() {
     { key: "category", label: t("documents.table.category") },
     { key: "uploadedBy", label: t("documents.table.uploadedBy") },
     { key: "department", label: t("documents.table.department") },
+    { key: "documentType", label: t("documents.table.type") },
     { key: "created", label: t("documents.table.created") },
     { key: "status", label: t("documents.table.status") },
     { key: "version", label: t("documents.table.version") },
@@ -153,6 +160,31 @@ function DocumentsPage() {
     }
 
     loadCategories();
+  }, []);
+
+  /**
+   * Load document types to DropDownList
+   */
+  useEffect(() => {
+    async function loadDocumentTypes() {
+      try {
+        const data = await getDocumentTypes();
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.documentTypes || data.items || [];
+
+        const activeTypes = normalized.filter(
+          (type) => type.isActive !== false,
+        );
+
+        setDocumentTypes(activeTypes);
+      } catch (err) {
+        console.error("Failed to load document types:", err);
+      }
+    }
+
+    loadDocumentTypes();
   }, []);
 
   /**
@@ -285,7 +317,7 @@ function DocumentsPage() {
         }
 
         if (filters.documentType) {
-          params.documentType = Number(filters.documentType);
+          params.documentTypeId = filters.documentType;
         }
 
         if (filters.expirationPending !== "") {
@@ -296,7 +328,7 @@ function DocumentsPage() {
         /**
          * Admin users can request inactive documents too.
          */
-        if (adminUser) {
+        if (isAdmin(user)) {
           params.includeInactive = true;
         }
 
@@ -637,7 +669,13 @@ function DocumentsPage() {
               value={filters.documentType}
               onChange={handleFilterChange}
             >
-              /* CHANGE TO RECOVER FROM BACKEND *\/
+              <option value="">{t("documents.filters.allTypes")}</option>
+
+              {documentTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
             </select>
 
             <select
@@ -651,7 +689,7 @@ function DocumentsPage() {
               <option value="false">{t("documents.filters.defined")}</option>
             </select>
 
-            {adminUser && (
+            {canManageAdminPanels && (
               <select
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                 name="isActive"
@@ -763,6 +801,10 @@ function DocumentsPage() {
 
                 <td className="px-6 py-4 text-gray-600">
                   {document.department || "N/A"}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {document.documentTypeName}
                 </td>
 
                 <td className="px-6 py-4 text-gray-600">

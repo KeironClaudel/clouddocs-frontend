@@ -46,7 +46,16 @@ function App() {
           }
         />
 
-        <Route path="/document-types" element={<DocumentTypePage />} />
+        <Route
+          path="/document-types"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <DocumentTypePage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/profile"
