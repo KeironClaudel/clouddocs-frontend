@@ -6,30 +6,8 @@ export function isAdmin(user) {
 }
 
 /**
- * Returns true when the user can manage documents.
- * Adjust this rule if more roles gain access in the future.
+ * Returns true when the user can manage admin panels.
  */
-export function canManageDocuments(user) {
-  return isAdmin(user);
-}
-
-/**
- * Returns true when the user can manage users.
- */
-export function canManageUsers(user) {
-  return isAdmin(user);
-}
-
-/**
- * Returns true when the user can manage categories.
- */
-export function canManageCategories(user) {
-  return isAdmin(user);
-}
-
-/**
- * Returns true when the user can view audit logs.
- */
-export function canViewAuditLogs(user) {
+export function canManageAdminPanels(user) {
   return isAdmin(user);
 }

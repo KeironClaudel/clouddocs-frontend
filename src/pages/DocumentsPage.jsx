@@ -14,7 +14,7 @@ import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
-import { canManageDocuments, isAdmin } from "../utils/permissionUtils";
+import { canManageAdminPanels } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
@@ -29,16 +29,6 @@ function DocumentsPage() {
    * Integrates de AuthContext module for use
    */
   const { user } = useAuth();
-
-  /**
-   * Checks if current user can manage documents
-   */
-  const canManageDocumentActions = canManageDocuments(user);
-
-  /**
-   * Checks if the current user is admin
-   */
-  const adminUser = isAdmin(user);
 
   /**
    * Indicates whether the document request is currently in progress.
@@ -819,7 +809,7 @@ function DocumentsPage() {
 
                 <td className="px-6 py-4">
                   <div className="flex flex-wrap gap-2">
-                    {canManageDocumentActions && (
+                    {canManageAdminPanels && (
                       <button
                         className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
                         onClick={() => handleStartRename(document)}
@@ -832,7 +822,7 @@ function DocumentsPage() {
                       </button>
                     )}
 
-                    {canManageDocumentActions && (
+                    {canManageAdminPanels && (
                       <>
                         <input
                           id={`upload-version-${document.id}`}
@@ -881,7 +871,7 @@ function DocumentsPage() {
                       {t("documents.buttons.download")}
                     </button>
 
-                    {canManageDocumentActions &&
+                    {canManageAdminPanels &&
                       (document.isActive ? (
                         <button
                           className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"

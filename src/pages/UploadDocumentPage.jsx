@@ -2,23 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getCategories } from "../services/categoryService";
 import { uploadDocument } from "../services/documentService";
+import { getDocumentTypes } from "../services/documentTypeService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
-
-/**
- * Temporary frontend options for document type.
- * Adjust numeric values if your backend enum uses different values.
- */
-const documentTypeOptions = [
-  { label: "General", value: 0 },
-  { label: "Contract", value: 1 },
-  { label: "Permit", value: 2 },
-  { label: "Policy", value: 3 },
-  { label: "Legal Document", value: 4 },
-  { label: "Other", value: 5 },
-];
 
 /**
  * Temporary frontend options for document access level.
@@ -64,16 +52,43 @@ function UploadDocumentPage() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   /**
+   * Stores the list of document types for selection.
+   */
+
+  const [documentTypes, setDocumentTypes] = useState([]);
+  /**
    * Stores the upload form values.
    */
   const [form, setForm] = useState({
     categoryId: "",
-    documentType: "",
+    documentTypeId: "",
     expirationDate: "",
     expirationDatePendingDefinition: false,
     accessLevel: "",
     department: "",
   });
+
+  /**
+   * Loads active document types for the upload form.
+   */
+
+  useEffect(() => {
+    async function loadDocumentTypes() {
+      try {
+        const data = await getDocumentTypes();
+
+        const activeTypes = Array.isArray(data)
+          ? data.filter((x) => x.isActive)
+          : [];
+
+        setDocumentTypes(activeTypes);
+      } catch (err) {
+        console.error("Failed to load document types:", err);
+      }
+    }
+
+    loadDocumentTypes();
+  }, []);
 
   /**
    * Loads active categories for the upload form.
@@ -158,7 +173,7 @@ function UploadDocumentPage() {
     setSelectedFile(null);
     setForm({
       categoryId: "",
-      documentType: "",
+      documentTypeId: "",
       expirationDate: "",
       expirationDatePendingDefinition: false,
       accessLevel: "",
@@ -185,24 +200,18 @@ function UploadDocumentPage() {
       return;
     }
 
-    if (!form.documentType) {
+    if (!form.documentTypeId) {
       setError(t("uploadDocument.messages.selectType"));
       return;
     }
 
     if (!form.accessLevel) {
-      setError(t("uploadDocument.messages.expirationRequired"));
+      setError(t("uploadDocument.messages.selectAccess"));
       return;
     }
 
-    if (
-      !form.expirationDatePendingDefinition &&
-      !form.expirationDate &&
-      ["1", "2", "3", "4"].includes(String(form.documentType))
-    ) {
-      setError(
-        "Please provide an expiration date or mark it as pending definition.",
-      );
+    if (!form.expirationDatePendingDefinition && !form.expirationDate) {
+      setError(t("uploadDocument.messages.expirationRequired"));
       return;
     }
 
@@ -211,11 +220,8 @@ function UploadDocumentPage() {
     try {
       const payload = {
         file: selectedFile,
-        originalFileName: selectedFile.name,
-        contentType: selectedFile.type,
-        fileSize: selectedFile.size,
         categoryId: form.categoryId,
-        documentType: Number(form.documentType),
+        documentTypeId: form.documentTypeId,
         expirationDate: form.expirationDate || null,
         expirationDatePendingDefinition: form.expirationDatePendingDefinition,
         accessLevel: Number(form.accessLevel),
@@ -228,7 +234,9 @@ function UploadDocumentPage() {
       resetForm();
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        getApiErrorMessage(err, t("uploadDocument.messages.uploadError"));
+        setError(
+          getApiErrorMessage(err, t("uploadDocument.messages.uploadError")),
+        );
       } else {
         setError(t("uploadDocument.messages.unexpected"));
       }
@@ -269,7 +277,7 @@ function UploadDocumentPage() {
             {/* FILE */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("uploadDocument.title")}
+                {t("uploadDocument.form.file")}
               </label>
 
               <input
@@ -309,19 +317,20 @@ function UploadDocumentPage() {
 
               {/* TYPE */}
               <select
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                name="documentType"
-                value={form.documentType}
+                name="documentTypeId"
+                value={form.documentTypeId}
                 onChange={handleInputChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                 disabled={uploading}
                 required
               >
                 <option value="">
                   {t("uploadDocument.form.documentType")}
                 </option>
-                {documentTypeOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>

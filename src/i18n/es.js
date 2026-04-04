@@ -437,6 +437,60 @@ const es = {
       unexpected: "Ocurrió un error inesperado.",
     },
   },
+  documentTypes: {
+    title: "Tipos documentales",
+    subtitle: "Gestiona los tipos documentales disponibles en el sistema.",
+
+    buttons: {
+      create: "Crear tipo documental",
+      cancel: "Cancelar",
+      save: "Guardar cambios",
+      creating: "Creando...",
+      saving: "Guardando...",
+      edit: "Editar",
+      deactivate: "Desactivar",
+      reactivate: "Reactivar",
+      processing: "Procesando...",
+    },
+
+    form: {
+      createTitle: "Crear tipo documental",
+      editTitle: "Editar tipo documental",
+      name: "Nombre",
+      description: "Descripción",
+    },
+
+    table: {
+      name: "Nombre",
+      description: "Descripción",
+      status: "Estado",
+      created: "Creado",
+      actions: "Acciones",
+      active: "Activo",
+      inactive: "Inactivo",
+      noDescription: "N/A",
+      noData: "No se encontraron tipos documentales.",
+    },
+
+    messages: {
+      loading: "Cargando tipos documentales...",
+      created: "Tipo documental creado correctamente.",
+      updated: "Tipo documental actualizado correctamente.",
+      deactivated: "Tipo documental desactivado correctamente.",
+      reactivated: "Tipo documental reactivado correctamente.",
+      loadError: "Error al cargar los tipos documentales.",
+      createError: "Error al crear el tipo documental.",
+      updateError: "Error al actualizar el tipo documental.",
+      deactivateError: "Error al desactivar el tipo documental.",
+      reactivateError: "Error al reactivar el tipo documental.",
+      unexpected: "Ocurrió un error inesperado.",
+    },
+  },
+  notFound: {
+    title: "Página no encontrada",
+    description: "La página que estás buscando no existe o fue movida.",
+    back: "Volver al panel",
+  },
 };
 
 export default es;

@@ -13,6 +13,8 @@ import CategoriesPage from "./pages/CategoriesPage";
 import UploadDocumentPage from "./pages/UploadDocumentPage";
 import AuditLogsPage from "./pages/AuditLogsPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import DocumentTypePage from "./pages/DocumentTypePage";
 
 function App() {
   return (
@@ -43,6 +45,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/document-types" element={<DocumentTypePage />} />
 
         <Route
           path="/profile"
@@ -117,6 +121,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

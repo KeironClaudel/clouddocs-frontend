@@ -4,19 +4,13 @@ import { useAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
-import {
-  canManageCategories,
-  canManageUsers,
-  canViewAuditLogs,
-} from "../utils/permissionUtils";
+import { canManageAdminPanels } from "../utils/permissionUtils";
 import { NavLink } from "react-router-dom";
 
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const showUsersLink = canManageUsers(user);
-  const showCategoriesLink = canManageCategories(user);
-  const showAuditLogsLink = canViewAuditLogs(user);
+  const isAdmin = canManageAdminPanels(user);
 
   // Helper function to determine the class for active/inactive nav links
   const getNavLinkClass = ({ isActive }) =>
@@ -99,7 +93,7 @@ function Navbar() {
             Profile
           </NavLink>
 
-          {showUsersLink && (
+          {isAdmin && (
             <NavLink
               to="/users"
               className={({ isActive }) =>
@@ -114,7 +108,7 @@ function Navbar() {
             </NavLink>
           )}
 
-          {showCategoriesLink && (
+          {isAdmin && (
             <NavLink
               to="/categories"
               className={({ isActive }) =>
@@ -129,7 +123,22 @@ function Navbar() {
             </NavLink>
           )}
 
-          {showAuditLogsLink && (
+          {isAdmin && (
+            <NavLink
+              to="/document-types"
+              className={({ isActive }) =>
+                `${getNavLinkClass({ isActive })} ${
+                  isActive
+                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
+                    : ""
+                }`
+              }
+            >
+              Document Types
+            </NavLink>
+          )}
+
+          {isAdmin && (
             <NavLink
               to="/audit-logs"
               className={({ isActive }) =>
