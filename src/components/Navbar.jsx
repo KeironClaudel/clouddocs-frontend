@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { canManageAdminPanels } from "../utils/permissionUtils";
+import { t } from "../i18n";
 import { NavLink } from "react-router-dom";
 
 function Navbar() {
@@ -51,7 +52,7 @@ function Navbar() {
         {/* RIGHT */}
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-gray-500 md:block">
-            Welcome, {user?.fullName || "User"}
+            {t("navbar.welcome")}, {user?.fullName || t("navbar.defaultUser")}
           </span>
 
           <NavLink
@@ -64,7 +65,7 @@ function Navbar() {
               }`
             }
           >
-            Dashboard
+            {t("navbar.links.dashboard")}
           </NavLink>
 
           <NavLink
@@ -77,7 +78,7 @@ function Navbar() {
               }`
             }
           >
-            Documents
+            {t("navbar.links.documents")}
           </NavLink>
 
           <NavLink
@@ -90,7 +91,7 @@ function Navbar() {
               }`
             }
           >
-            Profile
+            {t("navbar.links.profile")}
           </NavLink>
 
           {isAdmin && (
@@ -104,7 +105,7 @@ function Navbar() {
                 }`
               }
             >
-              Users
+              {t("navbar.links.users")}
             </NavLink>
           )}
 
@@ -119,7 +120,7 @@ function Navbar() {
                 }`
               }
             >
-              Categories
+              {t("navbar.links.categories")}
             </NavLink>
           )}
 
@@ -134,7 +135,7 @@ function Navbar() {
                 }`
               }
             >
-              Document Types
+              {t("navbar.links.documentTypes")}
             </NavLink>
           )}
 
@@ -149,7 +150,7 @@ function Navbar() {
                 }`
               }
             >
-              Audit Logs
+              {t("navbar.links.auditLogs")}
             </NavLink>
           )}
 
@@ -158,7 +159,7 @@ function Navbar() {
             onClick={handleLogout}
           >
             <FontAwesomeIcon icon={faRightFromBracket} />
-            <span>Logout</span>
+            <span>{t("navbar.buttons.logout")}</span>
           </button>
         </div>
       </div>

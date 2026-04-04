@@ -491,6 +491,24 @@ const es = {
     description: "La página que estás buscando no existe o fue movida.",
     back: "Volver al panel",
   },
+  navbar: {
+    welcome: "Bienvenido",
+    defaultUser: "Usuario",
+
+    links: {
+      dashboard: "Panel",
+      documents: "Documentos",
+      profile: "Perfil",
+      users: "Usuarios",
+      categories: "Categorías",
+      documentTypes: "Tipos documentales",
+      auditLogs: "Auditoría",
+    },
+
+    buttons: {
+      logout: "Cerrar sesión",
+    },
+  },
 };
 
 export default es;
