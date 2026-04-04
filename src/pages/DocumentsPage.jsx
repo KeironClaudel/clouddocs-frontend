@@ -622,84 +622,120 @@ function DocumentsPage() {
           </h2>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <input
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              type="text"
-              name="searchTerm"
-              placeholder={t("documents.filters.search")}
-              value={filters.searchTerm}
-              onChange={handleFilterChange}
-            />
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.searchLabel")}
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                type="text"
+                name="searchTerm"
+                placeholder={t("documents.filters.search")}
+                value={filters.searchTerm}
+                onChange={handleFilterChange}
+              />
+            </div>
 
-            <select
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              name="categoryId"
-              value={filters.categoryId}
-              onChange={handleFilterChange}
-            >
-              <option value="">{t("documents.filters.allCategories")}</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-
-            <input
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              type="number"
-              name="month"
-              placeholder={t("documents.filters.month")}
-              value={filters.month}
-              onChange={handleFilterChange}
-            />
-
-            <input
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              type="number"
-              name="year"
-              placeholder={t("documents.filters.year")}
-              value={filters.year}
-              onChange={handleFilterChange}
-            />
-
-            <select
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              name="documentType"
-              value={filters.documentType}
-              onChange={handleFilterChange}
-            >
-              <option value="">{t("documents.filters.allTypes")}</option>
-
-              {documentTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              name="expirationPending"
-              value={filters.expirationPending}
-              onChange={handleFilterChange}
-            >
-              <option value="">{t("documents.filters.all")}</option>
-              <option value="true">{t("documents.filters.pending")}</option>
-              <option value="false">{t("documents.filters.defined")}</option>
-            </select>
-
-            {canManageAdminPanels && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.categoryLabel")}
+              </label>
               <select
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                name="isActive"
-                value={filters.isActive}
+                name="categoryId"
+                value={filters.categoryId}
+                onChange={handleFilterChange}
+              >
+                <option value="">{t("documents.filters.allCategories")}</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.monthLabel")}
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                type="number"
+                name="month"
+                placeholder={t("documents.filters.month")}
+                value={filters.month}
+                onChange={handleFilterChange}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.yearLabel")}
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                type="number"
+                name="year"
+                placeholder={t("documents.filters.year")}
+                value={filters.year}
+                onChange={handleFilterChange}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.typeLabel")}
+              </label>
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                name="documentType"
+                value={filters.documentType}
+                onChange={handleFilterChange}
+              >
+                <option value="">{t("documents.filters.allTypes")}</option>
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.expirationLabel")}
+              </label>
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                name="expirationPending"
+                value={filters.expirationPending}
                 onChange={handleFilterChange}
               >
                 <option value="">{t("documents.filters.all")}</option>
-                <option value="true">{t("documents.filters.active")}</option>
-                <option value="false">{t("documents.filters.inactive")}</option>
+                <option value="true">{t("documents.filters.pending")}</option>
+                <option value="false">{t("documents.filters.defined")}</option>
               </select>
+            </div>
+
+            {canManageAdminPanels && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  {t("documents.filters.statusLabel")}
+                </label>
+                <select
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  name="isActive"
+                  value={filters.isActive}
+                  onChange={handleFilterChange}
+                >
+                  <option value="">{t("documents.filters.all")}</option>
+                  <option value="true">{t("documents.filters.active")}</option>
+                  <option value="false">
+                    {t("documents.filters.inactive")}
+                  </option>
+                </select>
+              </div>
             )}
           </div>
 

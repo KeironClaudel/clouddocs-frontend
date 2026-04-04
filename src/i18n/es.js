@@ -319,6 +319,13 @@ const es = {
       active: "Activo",
       inactive: "Inactivo",
       clear: "Limpiar filtros",
+      searchLabel: "Nombre del documento",
+      categoryLabel: "Categoría",
+      monthLabel: "Mes",
+      yearLabel: "Año",
+      typeLabel: "Tipo documental",
+      expirationLabel: "Expiración",
+      statusLabel: "Estado",
     },
 
     table: {
