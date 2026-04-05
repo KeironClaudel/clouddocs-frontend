@@ -57,7 +57,7 @@ function ChangePasswordPage() {
         newPassword,
       });
 
-      setError(t("changePassword.messages.mismatch"));
+      setSuccessMessage(t("changePassword.messages.success"));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -76,7 +76,9 @@ function ChangePasswordPage() {
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto flex min-h-[80vh] max-w-3xl items-center justify-center">
         <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          {t("changePassword.title")}
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("changePassword.title")}
+          </h1>
           <p className="mt-2 text-sm text-gray-600">
             {t("changePassword.subtitle")}
           </p>

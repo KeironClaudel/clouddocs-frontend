@@ -55,12 +55,12 @@ export async function uploadDocument(documentData) {
   formData.append("contentType", documentData.contentType);
   formData.append("fileSize", String(documentData.fileSize));
   formData.append("categoryId", documentData.categoryId);
-  formData.append("documentType", String(documentData.documentType));
+  formData.append("documentTypeId", String(documentData.documentTypeId));
   formData.append(
     "expirationDatePendingDefinition",
     String(documentData.expirationDatePendingDefinition),
   );
-  formData.append("accessLevel", String(documentData.accessLevel));
+  formData.append("accessLevelId", String(documentData.accessLevelId));
 
   if (documentData.expirationDate) {
     formData.append("expirationDate", documentData.expirationDate);

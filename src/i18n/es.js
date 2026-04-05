@@ -333,6 +333,7 @@ const es = {
       category: "Categoría",
       uploadedBy: "Subido por",
       department: "Departamento",
+      type: "Tipo",
       created: "Creado",
       status: "Estado",
       version: "Versión",
@@ -510,10 +511,60 @@ const es = {
       categories: "Categorías",
       documentTypes: "Tipos documentales",
       auditLogs: "Auditoría",
+      documentAccessLevels: "Niveles de acceso",
     },
 
     buttons: {
       logout: "Cerrar sesión",
+    },
+  },
+  documentAccessLevels: {
+    title: "Niveles de acceso documental",
+    subtitle: "Gestiona los niveles de acceso disponibles para los documentos.",
+
+    buttons: {
+      create: "Crear nivel de acceso",
+      cancel: "Cancelar",
+      save: "Guardar cambios",
+      creating: "Creando...",
+      saving: "Guardando...",
+      edit: "Editar",
+      deactivate: "Desactivar",
+      reactivate: "Reactivar",
+      processing: "Procesando...",
+    },
+
+    form: {
+      createTitle: "Crear nivel de acceso",
+      editTitle: "Editar nivel de acceso",
+      name: "Nombre",
+      description: "Descripción",
+    },
+
+    table: {
+      name: "Nombre",
+      description: "Descripción",
+      status: "Estado",
+      created: "Creado",
+      actions: "Acciones",
+      active: "Activo",
+      inactive: "Inactivo",
+      noDescription: "N/A",
+      noData: "No se encontraron niveles de acceso.",
+    },
+
+    messages: {
+      loading: "Cargando niveles de acceso...",
+      created: "Nivel de acceso creado correctamente.",
+      updated: "Nivel de acceso actualizado correctamente.",
+      deactivated: "Nivel de acceso desactivado correctamente.",
+      reactivated: "Nivel de acceso reactivado correctamente.",
+      loadError: "Error al cargar los niveles de acceso.",
+      createError: "Error al crear el nivel de acceso.",
+      updateError: "Error al actualizar el nivel de acceso.",
+      deactivateError: "Error al desactivar el nivel de acceso.",
+      reactivateError: "Error al reactivar el nivel de acceso.",
+      unexpected: "Ocurrió un error inesperado.",
     },
   },
 };

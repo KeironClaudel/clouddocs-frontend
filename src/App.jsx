@@ -15,6 +15,7 @@ import AuditLogsPage from "./pages/AuditLogsPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DocumentTypePage from "./pages/DocumentTypePage";
+import DocumentAccessLevelsPage from "./pages/DocumentAccessLevelsPage";
 
 function App() {
   return (
@@ -69,14 +70,12 @@ function App() {
         />
 
         <Route
-          path="/users"
+          path="/documents/upload"
           element={
             <ProtectedRoute>
-              <AdminRoute>
-                <AppLayout>
-                  <UsersPage />
-                </AppLayout>
-              </AdminRoute>
+              <AppLayout>
+                <UploadDocumentPage />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
@@ -95,6 +94,19 @@ function App() {
         />
 
         <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <UsersPage />
+                </AppLayout>
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/categories"
           element={
             <ProtectedRoute>
@@ -108,23 +120,25 @@ function App() {
         />
 
         <Route
-          path="/documents/upload"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <UploadDocumentPage />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/audit-logs"
           element={
             <ProtectedRoute>
               <AdminRoute>
                 <AppLayout>
                   <AuditLogsPage />
+                </AppLayout>
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/document-access-levels"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <DocumentAccessLevelsPage />
                 </AppLayout>
               </AdminRoute>
             </ProtectedRoute>

@@ -4,27 +4,21 @@ import { getCategories } from "../services/categoryService";
 import { uploadDocument } from "../services/documentService";
 import { getDocumentTypes } from "../services/documentTypeService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
-
-/**
- * Temporary frontend options for document access level.
- * Adjust numeric values if your backend enum uses different values.
- */
-const accessLevelOptions = [
-  { label: "Public Internal", value: 0 },
-  { label: "Private", value: 1 },
-  { label: "Admins Only", value: 2 },
-  { label: "Owner Only", value: 3 },
-  { label: "Department", value: 4 },
-];
 
 function UploadDocumentPage() {
   /**
    * Stores the category list available for selection.
    */
   const [categories, setCategories] = useState([]);
+
+  /**
+   * Options for document access level.
+   */
+  const [documentAccessLevels, setDocumentAccessLevels] = useState([]);
 
   /**
    * Indicates whether categories are currently loading.
@@ -64,7 +58,7 @@ function UploadDocumentPage() {
     documentTypeId: "",
     expirationDate: "",
     expirationDatePendingDefinition: false,
-    accessLevel: "",
+    accessLevelId: "",
     department: "",
   });
 
@@ -88,6 +82,31 @@ function UploadDocumentPage() {
     }
 
     loadDocumentTypes();
+  }, []);
+
+  /*
+   * Loads active document access levels for the upload form.
+   */
+  useEffect(() => {
+    async function loadDocumentAccessLevels() {
+      try {
+        const data = await getDocumentAccessLevels();
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.documentAccessLevels || data.items || [];
+
+        const activeAccessLevels = normalized.filter(
+          (level) => level.isActive !== false,
+        );
+
+        setDocumentAccessLevels(activeAccessLevels);
+      } catch (err) {
+        console.error("Failed to load document access levels:", err);
+      }
+    }
+
+    loadDocumentAccessLevels();
   }, []);
 
   /**
@@ -176,7 +195,7 @@ function UploadDocumentPage() {
       documentTypeId: "",
       expirationDate: "",
       expirationDatePendingDefinition: false,
-      accessLevel: "",
+      accessLevelId: "",
       department: "",
     });
   }
@@ -205,7 +224,7 @@ function UploadDocumentPage() {
       return;
     }
 
-    if (!form.accessLevel) {
+    if (!form.accessLevelId) {
       setError(t("uploadDocument.messages.selectAccess"));
       return;
     }
@@ -224,7 +243,7 @@ function UploadDocumentPage() {
         documentTypeId: form.documentTypeId,
         expirationDate: form.expirationDate || null,
         expirationDatePendingDefinition: form.expirationDatePendingDefinition,
-        accessLevel: Number(form.accessLevel),
+        accessLevelId: form.accessLevelId,
         department: form.department || null,
       };
 
@@ -338,16 +357,16 @@ function UploadDocumentPage() {
               {/* ACCESS */}
               <select
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                name="accessLevel"
-                value={form.accessLevel}
+                name="accessLevelId"
+                value={form.accessLevelId}
                 onChange={handleInputChange}
                 disabled={uploading}
                 required
               >
                 <option value="">{t("uploadDocument.form.accessLevel")}</option>
-                {accessLevelOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
+                {documentAccessLevels.map((level) => (
+                  <option key={level.id} value={level.id}>
+                    {level.name}
                   </option>
                 ))}
               </select>
