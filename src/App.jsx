@@ -16,6 +16,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import DocumentTypePage from "./pages/DocumentTypePage";
 import DocumentAccessLevelsPage from "./pages/DocumentAccessLevelsPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
 
 function App() {
   return (
@@ -113,6 +114,19 @@ function App() {
               <AdminRoute>
                 <AppLayout>
                   <CategoriesPage />
+                </AppLayout>
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/departments"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AppLayout>
+                  <DepartmentsPage />
                 </AppLayout>
               </AdminRoute>
             </ProtectedRoute>

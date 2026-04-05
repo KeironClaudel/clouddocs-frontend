@@ -382,6 +382,7 @@ const es = {
       department: "Departamento",
       expirationDate: "Fecha de expiración",
       expirationPending: "Fecha de expiración pendiente de definición",
+      visibleDepartments: "Departamentos visibles",
     },
 
     buttons: {
@@ -405,6 +406,9 @@ const es = {
       success: "Documento subido correctamente.",
       uploadError: "Error al subir el documento.",
       unexpected: "Ocurrió un error inesperado.",
+      loadingDepartments: "Cargando departamentos...",
+      noDepartments: "No hay departamentos disponibles.",
+      selectDepartments: "Seleccione al menos un departamento.",
     },
   },
   uploadDocument: {
@@ -512,6 +516,7 @@ const es = {
       documentTypes: "Tipos documentales",
       auditLogs: "Auditoría",
       documentAccessLevels: "Niveles de acceso",
+      departments: "Departamentos",
     },
 
     buttons: {
@@ -564,6 +569,55 @@ const es = {
       updateError: "Error al actualizar el nivel de acceso.",
       deactivateError: "Error al desactivar el nivel de acceso.",
       reactivateError: "Error al reactivar el nivel de acceso.",
+      unexpected: "Ocurrió un error inesperado.",
+    },
+  },
+  departments: {
+    title: "Departamentos",
+    subtitle: "Gestiona los departamentos disponibles en el sistema.",
+
+    buttons: {
+      create: "Crear departamento",
+      cancel: "Cancelar",
+      save: "Guardar cambios",
+      creating: "Creando...",
+      saving: "Guardando...",
+      edit: "Editar",
+      deactivate: "Desactivar",
+      reactivate: "Reactivar",
+      processing: "Procesando...",
+    },
+
+    form: {
+      createTitle: "Crear departamento",
+      editTitle: "Editar departamento",
+      name: "Nombre",
+      description: "Descripción",
+    },
+
+    table: {
+      name: "Nombre",
+      description: "Descripción",
+      status: "Estado",
+      created: "Creado",
+      actions: "Acciones",
+      active: "Activo",
+      inactive: "Inactivo",
+      noDescription: "N/A",
+      noData: "No se encontraron departamentos.",
+    },
+
+    messages: {
+      loading: "Cargando departamentos...",
+      created: "Departamento creado correctamente.",
+      updated: "Departamento actualizado correctamente.",
+      deactivated: "Departamento desactivado correctamente.",
+      reactivated: "Departamento reactivado correctamente.",
+      loadError: "Error al cargar los departamentos.",
+      createError: "Error al crear el departamento.",
+      updateError: "Error al actualizar el departamento.",
+      deactivateError: "Error al desactivar el departamento.",
+      reactivateError: "Error al reactivar el departamento.",
       unexpected: "Ocurrió un error inesperado.",
     },
   },

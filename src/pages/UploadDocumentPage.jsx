@@ -5,6 +5,7 @@ import { uploadDocument } from "../services/documentService";
 import { getDocumentTypes } from "../services/documentTypeService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
+import { getDepartments } from "../services/departmentService";
 import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
@@ -14,6 +15,12 @@ function UploadDocumentPage() {
    * Stores the category list available for selection.
    */
   const [categories, setCategories] = useState([]);
+
+  /*
+   * Stores the department list available for selection.
+   */
+  const [departments, setDepartments] = useState([]);
+  const [loadingDepartments, setLoadingDepartments] = useState(true);
 
   /**
    * Options for document access level.
@@ -59,8 +66,17 @@ function UploadDocumentPage() {
     expirationDate: "",
     expirationDatePendingDefinition: false,
     accessLevelId: "",
-    department: "",
+    departmentIds: [],
   });
+
+  const selectedAccessLevel = documentAccessLevels.find(
+    (level) => String(level.id) === String(form.accessLevelId),
+  );
+
+  const isDepartmentOnly = selectedAccessLevel?.code === "DEPARTMENT_ONLY";
+
+  console.log("isDepartmentOnly:", isDepartmentOnly);
+  console.log("departments:", departments);
 
   /**
    * Loads active document types for the upload form.
@@ -116,7 +132,6 @@ function UploadDocumentPage() {
     async function loadCategories() {
       try {
         const data = await getCategories();
-        console.log(data);
 
         const normalizedCategories = Array.isArray(data)
           ? data
@@ -144,6 +159,46 @@ function UploadDocumentPage() {
     loadCategories();
   }, []);
 
+  /*
+   * Loads active departments for the upload form.
+   */
+  useEffect(() => {
+    async function loadDepartments() {
+      try {
+        const data = await getDepartments();
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.departments || data.items || [];
+
+        const activeDepartments = normalized.filter(
+          (department) => department.isActive !== false,
+        );
+
+        setDepartments(activeDepartments);
+      } catch (err) {
+        console.error("Failed to load departments:", err);
+      } finally {
+        setLoadingDepartments(false);
+      }
+    }
+
+    loadDepartments();
+  }, []);
+
+  /**
+   * Clears selected departments if access level changes from "Department Only" to another type
+   */
+
+  useEffect(() => {
+    if (!isDepartmentOnly && form.departmentIds.length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        departmentIds: [],
+      }));
+    }
+  }, [isDepartmentOnly, form.departmentIds.length]);
+
   /**
    * Updates form state when an input changes.
    */
@@ -154,6 +209,22 @@ function UploadDocumentPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  }
+
+  /*
+   * Toggles a department ID in the form state when a department checkbox is toggled.
+   */
+  function handleDepartmentToggle(departmentId) {
+    setForm((prev) => {
+      const exists = prev.departmentIds.includes(departmentId);
+
+      return {
+        ...prev,
+        departmentIds: exists
+          ? prev.departmentIds.filter((id) => id !== departmentId)
+          : [...prev.departmentIds, departmentId],
+      };
+    });
   }
 
   /**
@@ -196,7 +267,7 @@ function UploadDocumentPage() {
       expirationDate: "",
       expirationDatePendingDefinition: false,
       accessLevelId: "",
-      department: "",
+      departmentIds: [],
     });
   }
 
@@ -234,6 +305,11 @@ function UploadDocumentPage() {
       return;
     }
 
+    if (isDepartmentOnly && form.departmentIds.length === 0) {
+      setError(t("uploadDocument.messages.selectDepartments"));
+      return;
+    }
+
     setUploading(true);
 
     try {
@@ -244,7 +320,7 @@ function UploadDocumentPage() {
         expirationDate: form.expirationDate || null,
         expirationDatePendingDefinition: form.expirationDatePendingDefinition,
         accessLevelId: form.accessLevelId,
-        department: form.department || null,
+        departmentIds: isDepartmentOnly ? form.departmentIds : [],
       };
 
       await uploadDocument(payload);
@@ -372,15 +448,47 @@ function UploadDocumentPage() {
               </select>
 
               {/* DEPARTMENT */}
-              <input
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                type="text"
-                name="department"
-                placeholder={t("uploadDocument.form.department")}
-                value={form.department}
-                onChange={handleInputChange}
-                disabled={uploading}
-              />
+              {isDepartmentOnly && (
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    {t("uploadDocument.form.visibleDepartments")}
+                  </label>
+
+                  <div className="rounded-lg border border-gray-300 p-3">
+                    {loadingDepartments ? (
+                      <p className="text-sm text-gray-500">
+                        {t("uploadDocument.messages.loadingDepartments")}
+                      </p>
+                    ) : departments.length === 0 ? (
+                      <p className="text-sm text-gray-500">
+                        {t("uploadDocument.messages.noDepartments")}
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                        {departments.map((department) => (
+                          <label
+                            key={department.id}
+                            className="flex items-center gap-2 text-sm text-gray-700"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={form.departmentIds.includes(
+                                department.id,
+                              )}
+                              onChange={() =>
+                                handleDepartmentToggle(department.id)
+                              }
+                              disabled={uploading}
+                              className="h-4 w-4"
+                            />
+                            <span>{department.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* EXP DATE */}
               <input

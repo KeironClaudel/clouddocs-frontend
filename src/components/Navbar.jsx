@@ -141,6 +141,21 @@ function Navbar() {
 
           {isAdmin && (
             <NavLink
+              to="/departments"
+              className={({ isActive }) =>
+                `${getNavLinkClass({ isActive })} ${
+                  isActive
+                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
+                    : ""
+                }`
+              }
+            >
+              {t("navbar.links.departments")}
+            </NavLink>
+          )}
+
+          {isAdmin && (
+            <NavLink
               to="/document-types"
               className={({ isActive }) =>
                 `${getNavLinkClass({ isActive })} ${

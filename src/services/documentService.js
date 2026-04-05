@@ -51,9 +51,6 @@ export async function uploadDocument(documentData) {
   const formData = new FormData();
 
   formData.append("file", documentData.file);
-  formData.append("originalFileName", documentData.originalFileName);
-  formData.append("contentType", documentData.contentType);
-  formData.append("fileSize", String(documentData.fileSize));
   formData.append("categoryId", documentData.categoryId);
   formData.append("documentTypeId", String(documentData.documentTypeId));
   formData.append(
@@ -66,8 +63,10 @@ export async function uploadDocument(documentData) {
     formData.append("expirationDate", documentData.expirationDate);
   }
 
-  if (documentData.department) {
-    formData.append("department", documentData.department);
+  if (Array.isArray(documentData.departmentIds)) {
+    documentData.departmentIds.forEach((departmentId) => {
+      formData.append("departmentIds", departmentId);
+    });
   }
 
   const response = await axiosInstance.post("/documents/upload", formData, {
@@ -78,7 +77,6 @@ export async function uploadDocument(documentData) {
 
   return response.data;
 }
-
 /**
  * Sends a request to rename an existing document.
  */
