@@ -132,3 +132,15 @@ export async function uploadDocumentVersion(documentId, file) {
 
   return response.data;
 }
+
+/**
+ * Updates document visibility settings.
+ */
+export async function updateDocumentVisibility(documentId, payload) {
+  const response = await axiosInstance.patch(
+    `/documents/${documentId}/visibility`,
+    payload,
+  );
+
+  return response.data;
+}

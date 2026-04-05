@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import axios from "axios";
 import {
   deactivateDocument,
@@ -9,7 +9,9 @@ import {
   renameDocument,
   searchDocuments,
   uploadDocumentVersion,
+  updateDocumentVisibility,
 } from "../services/documentService";
+import { getDepartments } from "../services/departmentService";
 import { getDocumentTypes } from "../services/documentTypeService";
 import { getCategories } from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
@@ -17,10 +19,27 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import { canManageAdminPanels, isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
 
 function DocumentsPage() {
+  /**
+   * Defines the columns to display in the document table, including the key to access the value and the label to show in the header.
+   * The "actions" column is a special case that doesn't correspond to a document property but indicates where action buttons will be rendered.
+   */
+  const documentTableColumns = [
+    { key: "name", label: t("documents.table.name") },
+    { key: "category", label: t("documents.table.category") },
+    { key: "uploadedBy", label: t("documents.table.uploadedBy") },
+    { key: "department", label: t("documents.table.department") },
+    { key: "documentType", label: t("documents.table.type") },
+    { key: "created", label: t("documents.table.created") },
+    { key: "status", label: t("documents.table.status") },
+    { key: "version", label: t("documents.table.version") },
+    { key: "actions", label: t("documents.table.actions") },
+  ];
+
   /**
    * Stores the document list returned by the API.
    */
@@ -59,6 +78,27 @@ function DocumentsPage() {
   const [versionLoadingByDocumentId, setVersionLoadingByDocumentId] = useState(
     {},
   );
+
+  /*
+   * Tracks which document is currently editing visibility settings.
+   */
+  const [editingVisibilityDocumentId, setEditingVisibilityDocumentId] =
+    useState(null);
+
+  /*
+   * Stores the visibility form state for the document being edited, including access level and department associations.
+   */
+
+  const [visibilityForm, setVisibilityForm] = useState({
+    accessLevelId: "",
+    departmentIds: [],
+  });
+
+  /*
+   * Tracks whether the visibility update request is in progress for a document.
+   */
+
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
 
   /**
    * Stores the current page number shown in the table.
@@ -113,6 +153,27 @@ function DocumentsPage() {
   });
 
   /**
+   * Stores the document access levels used for visibility settings, loaded from the API to populate dropdowns and determine behavior in the visibility form.
+   */
+  const [documentAccessLevels, setDocumentAccessLevels] = useState([]);
+
+  /**
+   * Stores departments for the visibility settings form and other parts of the UI that require department information, loaded from the API to populate dropdowns and determine behavior in the visibility form.
+   */
+
+  const [departments, setDepartments] = useState([]);
+
+  /**
+   * Applies the local status filter to the current page of documents.
+   */
+  const visibleDocuments =
+    filters.isActive === ""
+      ? documents
+      : documents.filter(
+          (document) => String(document.isActive) === filters.isActive,
+        );
+
+  /**
    * Stores the category list used by the filter dropdown.
    */
   const [categories, setCategories] = useState([]);
@@ -123,20 +184,19 @@ function DocumentsPage() {
   const [documentTypes, setDocumentTypes] = useState([]);
 
   /**
-   * Defines the columns to display in the document table, including the key to access the value and the label to show in the header.
-   * The "actions" column is a special case that doesn't correspond to a document property but indicates where action buttons will be rendered.
+   * Stores the document access levels used for visibility settings.
    */
-  const documentTableColumns = [
-    { key: "name", label: t("documents.table.name") },
-    { key: "category", label: t("documents.table.category") },
-    { key: "uploadedBy", label: t("documents.table.uploadedBy") },
-    { key: "department", label: t("documents.table.department") },
-    { key: "documentType", label: t("documents.table.type") },
-    { key: "created", label: t("documents.table.created") },
-    { key: "status", label: t("documents.table.status") },
-    { key: "version", label: t("documents.table.version") },
-    { key: "actions", label: t("documents.table.actions") },
-  ];
+  const selectedVisibilityAccessLevel = documentAccessLevels.find(
+    (level) => String(level.id) === String(visibilityForm.accessLevelId),
+  );
+
+  /**
+   * Stores the document access levels used for visibility settings.
+   */
+
+  const isVisibilityDepartmentOnly =
+    selectedVisibilityAccessLevel?.code === "DEPARTMENT_ONLY";
+
   /*
   Load categories to DropDownList
    */
@@ -195,6 +255,56 @@ function DocumentsPage() {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  /**
+   * Loads document access levels for the visibility settings form.
+   */
+  useEffect(() => {
+    async function loadDocumentAccessLevels() {
+      try {
+        const data = await getDocumentAccessLevels();
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.documentAccessLevels || data.items || [];
+
+        const activeAccessLevels = normalized.filter(
+          (level) => level.isActive !== false,
+        );
+
+        setDocumentAccessLevels(activeAccessLevels);
+      } catch (err) {
+        console.error("Failed to load document access levels:", err);
+      }
+    }
+
+    loadDocumentAccessLevels();
+  }, []);
+
+  /**
+   * Loads departments for the visibility settings form and other parts of the UI that require department information.
+   */
+  useEffect(() => {
+    async function loadDepartments() {
+      try {
+        const data = await getDepartments();
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.departments || data.items || [];
+
+        const activeDepartments = normalized.filter(
+          (department) => department.isActive !== false,
+        );
+
+        setDepartments(activeDepartments);
+      } catch (err) {
+        console.error("Failed to load departments:", err);
+      }
+    }
+
+    loadDepartments();
+  }, []);
 
   /**
    * Loads document versions only once per document when needed.
@@ -584,14 +694,96 @@ function DocumentsPage() {
   }
 
   /**
-   * Applies the local status filter to the current page of documents.
+   * Opens the visibility settings form for a document and loads its current settings into the form state.
    */
-  const visibleDocuments =
-    filters.isActive === ""
-      ? documents
-      : documents.filter(
-          (document) => String(document.isActive) === filters.isActive,
+  function handleStartEditVisibility(document) {
+    setActionMessage("");
+    setEditingVisibilityDocumentId(document.id);
+
+    setVisibilityForm({
+      accessLevelId: document.accessLevelId || "",
+      departmentIds: Array.isArray(document.visibleDepartments)
+        ? document.visibleDepartments.map((d) => d.id)
+        : [],
+    });
+  }
+
+  /**
+   * Toggles the selection of a department for visibility settings.
+   */
+  function handleVisibilityDepartmentToggle(departmentId) {
+    setVisibilityForm((prev) => {
+      const exists = prev.departmentIds.includes(departmentId);
+
+      return {
+        ...prev,
+        departmentIds: exists
+          ? prev.departmentIds.filter((id) => id !== departmentId)
+          : [...prev.departmentIds, departmentId],
+      };
+    });
+  }
+
+  /*
+   * Saves the updated visibility settings for a document and handles API interaction and local state updates.
+   */
+
+  async function handleSaveVisibility(documentId) {
+    if (!visibilityForm.accessLevelId) {
+      setActionMessage("Selecciona un nivel de acceso.");
+      return;
+    }
+
+    if (
+      selectedVisibilityAccessLevel?.code === "DEPARTMENT_ONLY" &&
+      visibilityForm.departmentIds.length === 0
+    ) {
+      setActionMessage("Selecciona al menos un departamento.");
+      return;
+    }
+
+    setUpdatingVisibility(true);
+    setActionMessage("");
+
+    try {
+      await updateDocumentVisibility(documentId, {
+        accessLevelId: visibilityForm.accessLevelId,
+        departmentIds:
+          selectedVisibilityAccessLevel?.code === "DEPARTMENT_ONLY"
+            ? visibilityForm.departmentIds
+            : [],
+      });
+
+      setActionMessage("Visibilidad actualizada correctamente.");
+      setEditingVisibilityDocumentId(null);
+
+      // opcional: recargar lista completa
+      setCurrentPage((prev) => prev);
+
+      // o actualizar local state si el backend devuelve el documento actualizado
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          getApiErrorMessage(err, "Error al actualizar la visibilidad."),
         );
+      } else {
+        setActionMessage("Ocurrió un error inesperado.");
+      }
+    } finally {
+      setUpdatingVisibility(false);
+    }
+  }
+
+  /**
+   * Cancels visibility editing mode and resets the form state.
+   */
+  function handleCancelEditVisibility() {
+    setEditingVisibilityDocumentId(null);
+    setVisibilityForm({
+      accessLevelId: "",
+      departmentIds: [],
+    });
+  }
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -798,182 +990,290 @@ function DocumentsPage() {
             }
           >
             {visibleDocuments.map((document) => (
-              <tr key={document.id} className="transition hover:bg-gray-50/80">
-                <td className="px-6 py-4">
-                  {renamingDocumentId === document.id ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                      />
-                      <button
-                        className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
-                        onClick={() => handleConfirmRename(document.id)}
-                      >
-                        {t("documents.buttons.save")}
-                      </button>
-                      <button
-                        className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
-                        onClick={handleCancelRename}
-                      >
-                        {t("documents.buttons.cancel")}
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="font-medium text-gray-900">
-                      {document.originalFileName}
-                    </p>
-                  )}
-                </td>
-
-                <td className="px-6 py-4 text-gray-700">
-                  {document.categoryName}
-                </td>
-
-                <td className="px-6 py-4 text-gray-700">
-                  {document.uploadedByUserName}
-                </td>
-
-                <td className="px-6 py-4 text-gray-600">
-                  {document.department || "N/A"}
-                </td>
-
-                <td className="px-6 py-4 text-gray-700">
-                  {document.documentTypeName}
-                </td>
-
-                <td className="px-6 py-4 text-gray-600">
-                  {formatLocalDateForDisplay(document.createdAt)}
-                </td>
-
-                <td className="px-6 py-4">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                      document.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {document.isActive
-                      ? t("documents.table.active")
-                      : t("documents.table.inactive")}
-                  </span>
-                </td>
-
-                <td className="px-6 py-4">
-                  <select
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    value={selectedVersionByDocumentId[document.id] || ""}
-                    onMouseDown={() => handleLoadVersions(document.id)}
-                    onChange={(e) =>
-                      handleVersionChange(document.id, e.target.value)
-                    }
-                  >
-                    <option value="">{t("documents.table.current")}</option>
-                    {versionLoadingByDocumentId[document.id] && (
-                      <option value="" disabled>
-                        {t("documents.table.loadingVersions")}
-                      </option>
-                    )}
-
-                    {(versionsByDocumentId[document.id] || []).map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {`v${v.versionNumber} - ${formatLocalDateForDisplay(v.createdAt)}`}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-2">
-                    {canManageAdminPanels && (
-                      <button
-                        className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
-                        onClick={() => handleStartRename(document)}
-                        disabled={
-                          !document.isActive ||
-                          renamingDocumentId === document.id
-                        }
-                      >
-                        {t("documents.buttons.rename")}
-                      </button>
-                    )}
-
-                    {canManageAdminPanels && (
-                      <>
+              <Fragment key={document.id}>
+                <tr className="transition hover:bg-gray-50/80">
+                  <td className="px-6 py-4">
+                    {renamingDocumentId === document.id ? (
+                      <div className="flex items-center gap-2">
                         <input
-                          id={`upload-version-${document.id}`}
-                          type="file"
-                          accept="application/pdf,.pdf"
-                          className="hidden"
-                          onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (file) {
-                              handleUploadVersion(document.id, file);
-                            }
-                            event.target.value = "";
-                          }}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
                         />
-
-                        <label
-                          htmlFor={`upload-version-${document.id}`}
-                          className={`cursor-pointer rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-700 transition hover:bg-sky-100 ${
-                            uploadingVersionDocumentId === document.id
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                          }`}
+                        <button
+                          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
+                          onClick={() => handleConfirmRename(document.id)}
                         >
-                          {uploadingVersionDocumentId === document.id
-                            ? t("documents.buttons.uploading")
-                            : t("documents.buttons.uploadVersion")}
-                        </label>
-                      </>
+                          {t("documents.buttons.save")}
+                        </button>
+                        <button
+                          className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
+                          onClick={handleCancelRename}
+                        >
+                          {t("documents.buttons.cancel")}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="font-medium text-gray-900">
+                        {document.originalFileName}
+                      </p>
                     )}
+                  </td>
 
-                    <button
-                      className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-cyan-100"
-                      onClick={() => handlePreview(document.id)}
-                      disabled={!document.isActive}
+                  <td className="px-6 py-4 text-gray-700">
+                    {document.categoryName}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-700">
+                    {document.uploadedByUserName}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600">
+                    {document.department || "N/A"}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-700">
+                    {document.documentTypeName}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600">
+                    {formatLocalDateForDisplay(document.createdAt)}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                        document.isActive
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
                     >
-                      {t("documents.buttons.preview")}
-                    </button>
+                      {document.isActive
+                        ? t("documents.table.active")
+                        : t("documents.table.inactive")}
+                    </span>
+                  </td>
 
-                    <button
-                      className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
-                      onClick={() =>
-                        handleDownload(document.id, document.originalFileName)
+                  <td className="px-6 py-4">
+                    <select
+                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      value={selectedVersionByDocumentId[document.id] || ""}
+                      onMouseDown={() => handleLoadVersions(document.id)}
+                      onChange={(e) =>
+                        handleVersionChange(document.id, e.target.value)
                       }
-                      disabled={!document.isActive}
                     >
-                      {t("documents.buttons.download")}
-                    </button>
+                      <option value="">{t("documents.table.current")}</option>
+                      {versionLoadingByDocumentId[document.id] && (
+                        <option value="" disabled>
+                          {t("documents.table.loadingVersions")}
+                        </option>
+                      )}
 
-                    {canManageAdminPanels &&
-                      (document.isActive ? (
-                        <button
-                          className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
-                          onClick={() => handleDeactivateDocument(document.id)}
-                          disabled={deactivatingDocumentId === document.id}
-                        >
-                          {deactivatingDocumentId === document.id
-                            ? t("documents.buttons.processing")
-                            : t("documents.buttons.deactivate")}
-                        </button>
-                      ) : (
-                        <button
-                          className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100"
-                          onClick={() => handleReactivateDocument(document.id)}
-                          disabled={reactivatingDocumentId === document.id}
-                        >
-                          {reactivatingDocumentId === document.id
-                            ? t("documents.buttons.processing")
-                            : t("documents.buttons.reactivate")}
-                        </button>
+                      {(versionsByDocumentId[document.id] || []).map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {`v${v.versionNumber} - ${formatLocalDateForDisplay(v.createdAt)}`}
+                        </option>
                       ))}
-                  </div>
-                </td>
-              </tr>
+                    </select>
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-2">
+                      {canManageAdminPanels && (
+                        <button
+                          className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
+                          onClick={() => handleStartRename(document)}
+                          disabled={
+                            !document.isActive ||
+                            renamingDocumentId === document.id
+                          }
+                        >
+                          {t("documents.buttons.rename")}
+                        </button>
+                      )}
+
+                      {canManageAdminPanels && (
+                        <>
+                          <input
+                            id={`upload-version-${document.id}`}
+                            type="file"
+                            accept="application/pdf,.pdf"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              if (file) {
+                                handleUploadVersion(document.id, file);
+                              }
+                              event.target.value = "";
+                            }}
+                          />
+
+                          <label
+                            htmlFor={`upload-version-${document.id}`}
+                            className={`cursor-pointer rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-700 transition hover:bg-sky-100 ${
+                              uploadingVersionDocumentId === document.id
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }`}
+                          >
+                            {uploadingVersionDocumentId === document.id
+                              ? t("documents.buttons.uploading")
+                              : t("documents.buttons.uploadVersion")}
+                          </label>
+                        </>
+                      )}
+
+                      <button
+                        className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-cyan-100"
+                        onClick={() => handlePreview(document.id)}
+                        disabled={!document.isActive}
+                      >
+                        {t("documents.buttons.preview")}
+                      </button>
+
+                      <button
+                        className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
+                        onClick={() =>
+                          handleDownload(document.id, document.originalFileName)
+                        }
+                        disabled={!document.isActive}
+                      >
+                        {t("documents.buttons.download")}
+                      </button>
+
+                      {canManageAdminPanels &&
+                        (document.isActive ? (
+                          <button
+                            className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
+                            onClick={() =>
+                              handleDeactivateDocument(document.id)
+                            }
+                            disabled={deactivatingDocumentId === document.id}
+                          >
+                            {deactivatingDocumentId === document.id
+                              ? t("documents.buttons.processing")
+                              : t("documents.buttons.deactivate")}
+                          </button>
+                        ) : (
+                          <button
+                            className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100"
+                            onClick={() =>
+                              handleReactivateDocument(document.id)
+                            }
+                            disabled={reactivatingDocumentId === document.id}
+                          >
+                            {reactivatingDocumentId === document.id
+                              ? t("documents.buttons.processing")
+                              : t("documents.buttons.reactivate")}
+                          </button>
+                        ))}
+
+                      {canManageAdminPanels && (
+                        <button
+                          className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:bg-purple-100"
+                          onClick={() => handleStartEditVisibility(document)}
+                          disabled={!document.isActive}
+                        >
+                          Editar visibilidad
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+
+                {editingVisibilityDocumentId === document.id && (
+                  <tr>
+                    <td
+                      colSpan={documentTableColumns.length}
+                      className="bg-gray-50 px-6 py-4"
+                    >
+                      <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4">
+                        <div>
+                          <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Nivel de acceso
+                          </label>
+                          <select
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            value={visibilityForm.accessLevelId}
+                            onChange={(e) =>
+                              setVisibilityForm((prev) => ({
+                                ...prev,
+                                accessLevelId: e.target.value,
+                                departmentIds: [],
+                              }))
+                            }
+                            disabled={updatingVisibility}
+                          >
+                            <option value="">
+                              Seleccionar nivel de acceso
+                            </option>
+                            {documentAccessLevels.map((level) => (
+                              <option key={level.id} value={level.id}>
+                                {level.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {isVisibilityDepartmentOnly && (
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                              Departamentos visibles
+                            </label>
+
+                            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {departments.map((department) => (
+                                <label
+                                  key={department.id}
+                                  className="flex items-center gap-2 text-sm text-gray-700"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={visibilityForm.departmentIds.includes(
+                                      department.id,
+                                    )}
+                                    onChange={() =>
+                                      handleVisibilityDepartmentToggle(
+                                        department.id,
+                                      )
+                                    }
+                                    disabled={updatingVisibility}
+                                    className="h-4 w-4"
+                                  />
+                                  <span>{department.name}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
+                            onClick={() => handleSaveVisibility(document.id)}
+                            disabled={updatingVisibility}
+                          >
+                            {updatingVisibility
+                              ? "Guardando..."
+                              : "Guardar visibilidad"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+                            onClick={handleCancelEditVisibility}
+                            disabled={updatingVisibility}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </DataTable>
         )}
