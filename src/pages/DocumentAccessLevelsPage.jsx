@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  createDocumentAccessLevel,
   deactivateDocumentAccessLevel,
   getDocumentAccessLevels,
   reactivateDocumentAccessLevel,
@@ -155,43 +154,6 @@ function DocumentAccessLevelsPage() {
     );
   }
 
-  async function handleCreateDocumentAccessLevel(event) {
-    event.preventDefault();
-
-    setActionMessage("");
-    setCreatingDocumentAccessLevel(true);
-
-    try {
-      const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
-      };
-
-      const createdDocumentAccessLevel =
-        await createDocumentAccessLevel(payload);
-
-      if (createdDocumentAccessLevel?.id) {
-        addDocumentAccessLevelToState(createdDocumentAccessLevel);
-      }
-
-      setActionMessage(t("documentAccessLevels.messages.created"));
-      resetCreateForm();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(
-            err,
-            t("documentAccessLevels.messages.createError"),
-          ),
-        );
-      } else {
-        setActionMessage(t("documentAccessLevels.messages.unexpected"));
-      }
-    } finally {
-      setCreatingDocumentAccessLevel(false);
-    }
-  }
-
   function handleOpenEditForm(documentAccessLevel) {
     setActionMessage("");
     setEditingDocumentAccessLevelId(documentAccessLevel.id);
@@ -304,85 +266,11 @@ function DocumentAccessLevelsPage() {
           <p className="mt-2 text-sm text-gray-600">
             {t("documentAccessLevels.subtitle")}
           </p>
-
-          <div className="mt-4">
-            <button
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-              onClick={() => setShowCreateForm((prev) => !prev)}
-            >
-              {showCreateForm
-                ? t("documentAccessLevels.buttons.cancel")
-                : t("documentAccessLevels.buttons.create")}
-            </button>
-          </div>
         </div>
 
         {actionMessage && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {actionMessage}
-          </div>
-        )}
-
-        {showCreateForm && (
-          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              {t("documentAccessLevels.form.createTitle")}
-            </h2>
-
-            <form
-              onSubmit={handleCreateDocumentAccessLevel}
-              className="space-y-6"
-            >
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    {t("documentAccessLevels.form.name")}
-                  </label>
-                  <input
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    type="text"
-                    name="name"
-                    value={createForm.name}
-                    onChange={handleCreateFormChange}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    {t("documentAccessLevels.form.description")}
-                  </label>
-                  <input
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    type="text"
-                    name="description"
-                    value={createForm.description}
-                    onChange={handleCreateFormChange}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:opacity-70"
-                  disabled={creatingDocumentAccessLevel}
-                >
-                  {creatingDocumentAccessLevel
-                    ? t("documentAccessLevels.buttons.creating")
-                    : t("documentAccessLevels.buttons.create")}
-                </button>
-
-                <button
-                  type="button"
-                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
-                  onClick={resetCreateForm}
-                  disabled={creatingDocumentAccessLevel}
-                >
-                  {t("documentAccessLevels.buttons.cancel")}
-                </button>
-              </div>
-            </form>
           </div>
         )}
 

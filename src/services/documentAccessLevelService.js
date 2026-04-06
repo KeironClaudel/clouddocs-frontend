@@ -17,14 +17,6 @@ export async function getDocumentAccessLevelById(id) {
 }
 
 /**
- * Creates a new document access level.
- */
-export async function createDocumentAccessLevel(payload) {
-  const response = await axiosInstance.post("/access-levels", payload);
-  return response.data;
-}
-
-/**
  * Updates an existing document access level.
  */
 export async function updateDocumentAccessLevel(id, payload) {
