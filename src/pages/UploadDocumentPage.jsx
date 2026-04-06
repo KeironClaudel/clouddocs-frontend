@@ -1,344 +1,26 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { getCategories } from "../services/categoryService";
-import { uploadDocument } from "../services/documentService";
-import { getDocumentTypes } from "../services/documentTypeService";
-import { getApiErrorMessage } from "../utils/errorUtils";
-import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
-import { getDepartments } from "../services/departmentService";
 import { t } from "../i18n";
-
-const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
+import { useUploadDocument } from "../hooks/useUploadDocument";
 
 function UploadDocumentPage() {
-  /**
-   * Stores the category list available for selection.
-   */
-  const [categories, setCategories] = useState([]);
-
-  /*
-   * Stores the department list available for selection.
-   */
-  const [departments, setDepartments] = useState([]);
-  const [loadingDepartments, setLoadingDepartments] = useState(true);
-
-  /**
-   * Options for document access level.
-   */
-  const [documentAccessLevels, setDocumentAccessLevels] = useState([]);
-
-  /**
-   * Indicates whether categories are currently loading.
-   */
-  const [loadingCategories, setLoadingCategories] = useState(true);
-
-  /**
-   * Indicates whether the upload request is currently running.
-   */
-  const [uploading, setUploading] = useState(false);
-
-  /**
-   * Stores a page-level error message.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Stores a success message after a successful upload.
-   */
-  const [successMessage, setSuccessMessage] = useState("");
-
-  /**
-   * Stores the selected file.
-   */
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  /**
-   * Stores the list of document types for selection.
-   */
-
-  const [documentTypes, setDocumentTypes] = useState([]);
-  /**
-   * Stores the upload form values.
-   */
-  const [form, setForm] = useState({
-    categoryId: "",
-    documentTypeId: "",
-    expirationDate: "",
-    expirationDatePendingDefinition: false,
-    accessLevelId: "",
-    departmentIds: [],
-  });
-
-  const selectedAccessLevel = documentAccessLevels.find(
-    (level) => String(level.id) === String(form.accessLevelId),
-  );
-
-  const isDepartmentOnly = selectedAccessLevel?.code === "DEPARTMENT_ONLY";
-
-  console.log("isDepartmentOnly:", isDepartmentOnly);
-  console.log("departments:", departments);
-
-  /**
-   * Loads active document types for the upload form.
-   */
-
-  useEffect(() => {
-    async function loadDocumentTypes() {
-      try {
-        const data = await getDocumentTypes();
-
-        const activeTypes = Array.isArray(data)
-          ? data.filter((x) => x.isActive)
-          : [];
-
-        setDocumentTypes(activeTypes);
-      } catch (err) {
-        console.error("Failed to load document types:", err);
-      }
-    }
-
-    loadDocumentTypes();
-  }, []);
-
-  /*
-   * Loads active document access levels for the upload form.
-   */
-  useEffect(() => {
-    async function loadDocumentAccessLevels() {
-      try {
-        const data = await getDocumentAccessLevels();
-
-        const normalized = Array.isArray(data)
-          ? data
-          : data.documentAccessLevels || data.items || [];
-
-        const activeAccessLevels = normalized.filter(
-          (level) => level.isActive !== false,
-        );
-
-        setDocumentAccessLevels(activeAccessLevels);
-      } catch (err) {
-        console.error("Failed to load document access levels:", err);
-      }
-    }
-
-    loadDocumentAccessLevels();
-  }, []);
-
-  /**
-   * Loads active categories for the upload form.
-   */
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const data = await getCategories();
-
-        const normalizedCategories = Array.isArray(data)
-          ? data
-          : data.categories || data.items || [];
-
-        const activeCategories = normalizedCategories.filter(
-          (category) => category.isActive,
-        );
-
-        setCategories(activeCategories);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            err.response?.data?.message ||
-              t("uploadDocument.messages.loadCategoriesError"),
-          );
-        } else {
-          setError(t("uploadDocument.messages.unexpected"));
-        }
-      } finally {
-        setLoadingCategories(false);
-      }
-    }
-
-    loadCategories();
-  }, []);
-
-  /*
-   * Loads active departments for the upload form.
-   */
-  useEffect(() => {
-    async function loadDepartments() {
-      try {
-        const data = await getDepartments();
-
-        const normalized = Array.isArray(data)
-          ? data
-          : data.departments || data.items || [];
-
-        const activeDepartments = normalized.filter(
-          (department) => department.isActive !== false,
-        );
-
-        setDepartments(activeDepartments);
-      } catch (err) {
-        console.error("Failed to load departments:", err);
-      } finally {
-        setLoadingDepartments(false);
-      }
-    }
-
-    loadDepartments();
-  }, []);
-
-  /**
-   * Clears selected departments if access level changes from "Department Only" to another type
-   */
-
-  useEffect(() => {
-    if (!isDepartmentOnly && form.departmentIds.length > 0) {
-      setForm((prev) => ({
-        ...prev,
-        departmentIds: [],
-      }));
-    }
-  }, [isDepartmentOnly, form.departmentIds.length]);
-
-  /**
-   * Updates form state when an input changes.
-   */
-  function handleInputChange(event) {
-    const { name, value, type, checked } = event.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  }
-
-  /*
-   * Toggles a department ID in the form state when a department checkbox is toggled.
-   */
-  function handleDepartmentToggle(departmentId) {
-    setForm((prev) => {
-      const exists = prev.departmentIds.includes(departmentId);
-
-      return {
-        ...prev,
-        departmentIds: exists
-          ? prev.departmentIds.filter((id) => id !== departmentId)
-          : [...prev.departmentIds, departmentId],
-      };
-    });
-  }
-
-  /**
-   * Validates and stores the selected file.
-   */
-  function handleFileChange(event) {
-    setError("");
-    setSuccessMessage("");
-
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      setSelectedFile(null);
-      return;
-    }
-
-    if (file.type !== "application/pdf") {
-      setError(t("uploadDocument.messages.onlyPdf"));
-      setSelectedFile(null);
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError(t("uploadDocument.messages.fileTooLarge"));
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-  }
-
-  /**
-   * Resets the upload form to its initial state.
-   */
-  function resetForm() {
-    setSelectedFile(null);
-    setForm({
-      categoryId: "",
-      documentTypeId: "",
-      expirationDate: "",
-      expirationDatePendingDefinition: false,
-      accessLevelId: "",
-      departmentIds: [],
-    });
-  }
-
-  /**
-   * Handles document upload form submission.
-   */
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setError("");
-    setSuccessMessage("");
-
-    if (!selectedFile) {
-      setError(t("uploadDocument.messages.selectFile"));
-      return;
-    }
-
-    if (!form.categoryId) {
-      setError(t("uploadDocument.messages.selectCategory"));
-      return;
-    }
-
-    if (!form.documentTypeId) {
-      setError(t("uploadDocument.messages.selectType"));
-      return;
-    }
-
-    if (!form.accessLevelId) {
-      setError(t("uploadDocument.messages.selectAccess"));
-      return;
-    }
-
-    if (!form.expirationDatePendingDefinition && !form.expirationDate) {
-      setError(t("uploadDocument.messages.expirationRequired"));
-      return;
-    }
-
-    if (isDepartmentOnly && form.departmentIds.length === 0) {
-      setError(t("uploadDocument.messages.selectDepartments"));
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      const payload = {
-        file: selectedFile,
-        categoryId: form.categoryId,
-        documentTypeId: form.documentTypeId,
-        expirationDate: form.expirationDate || null,
-        expirationDatePendingDefinition: form.expirationDatePendingDefinition,
-        accessLevelId: form.accessLevelId,
-        departmentIds: isDepartmentOnly ? form.departmentIds : [],
-      };
-
-      await uploadDocument(payload);
-
-      setSuccessMessage(t("uploadDocument.messages.success"));
-      resetForm();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          getApiErrorMessage(err, t("uploadDocument.messages.uploadError")),
-        );
-      } else {
-        setError(t("uploadDocument.messages.unexpected"));
-      }
-    } finally {
-      setUploading(false);
-    }
-  }
+  const {
+    categories,
+    departments,
+    documentAccessLevels,
+    documentTypes,
+    error,
+    form,
+    handleDepartmentToggle,
+    handleFileChange,
+    handleInputChange,
+    handleSubmit,
+    isDepartmentOnly,
+    loadingCategories,
+    loadingDepartments,
+    resetForm,
+    selectedFile,
+    successMessage,
+    uploading,
+  } = useUploadDocument();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -403,9 +85,9 @@ function UploadDocumentPage() {
                 required
               >
                 <option value="">{t("uploadDocument.form.category")}</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -447,49 +129,6 @@ function UploadDocumentPage() {
                 ))}
               </select>
 
-              {/* DEPARTMENT */}
-              {isDepartmentOnly && (
-                <div className="md:col-span-2">
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    {t("uploadDocument.form.visibleDepartments")}
-                  </label>
-
-                  <div className="rounded-lg border border-gray-300 p-3">
-                    {loadingDepartments ? (
-                      <p className="text-sm text-gray-500">
-                        {t("uploadDocument.messages.loadingDepartments")}
-                      </p>
-                    ) : departments.length === 0 ? (
-                      <p className="text-sm text-gray-500">
-                        {t("uploadDocument.messages.noDepartments")}
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                        {departments.map((department) => (
-                          <label
-                            key={department.id}
-                            className="flex items-center gap-2 text-sm text-gray-700"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={form.departmentIds.includes(
-                                department.id,
-                              )}
-                              onChange={() =>
-                                handleDepartmentToggle(department.id)
-                              }
-                              disabled={uploading}
-                              className="h-4 w-4"
-                            />
-                            <span>{department.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* EXP DATE */}
               <input
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -500,6 +139,47 @@ function UploadDocumentPage() {
                 disabled={uploading || form.expirationDatePendingDefinition}
               />
             </div>
+
+            {/* VISIBLE DEPARTMENTS */}
+            {isDepartmentOnly && (
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  {t("uploadDocument.form.visibleDepartments")}
+                </label>
+
+                <div className="rounded-lg border border-gray-300 p-3">
+                  {loadingDepartments ? (
+                    <p className="text-sm text-gray-500">
+                      {t("uploadDocument.messages.loadingDepartments")}
+                    </p>
+                  ) : departments.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      {t("uploadDocument.messages.noDepartments")}
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {departments.map((department) => (
+                        <label
+                          key={department.id}
+                          className="flex items-center gap-2 text-sm text-gray-700"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={form.departmentIds.includes(department.id)}
+                            onChange={() =>
+                              handleDepartmentToggle(department.id)
+                            }
+                            disabled={uploading}
+                            className="h-4 w-4"
+                          />
+                          <span>{department.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* CHECKBOX */}
             <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -518,7 +198,7 @@ function UploadDocumentPage() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition disabled:bg-blue-300"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:bg-blue-300"
                 disabled={uploading || loadingCategories}
               >
                 {uploading
@@ -528,7 +208,7 @@ function UploadDocumentPage() {
 
               <button
                 type="button"
-                className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+                className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
                 onClick={resetForm}
                 disabled={uploading}
               >
