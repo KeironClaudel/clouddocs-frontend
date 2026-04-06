@@ -490,7 +490,7 @@ function DocumentsPage() {
                             disabled={updatingVisibility}
                           >
                             <option value="">
-                              Seleccionar nivel de acceso
+                              {t("documents.visibility.selectAccessLevel")}
                             </option>
                             {documentAccessLevels.map((level) => (
                               <option key={level.id} value={level.id}>
