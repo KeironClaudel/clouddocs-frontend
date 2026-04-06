@@ -2,15 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKey } from "@fortawesome/free-solid-svg-icons";
 import { t } from "../i18n";
+import { useAuth } from "../context/AuthContext";
 
 function ProfilePage() {
   const navigate = useNavigate();
-
-  /**
-   * Retrieves the stored user from localStorage.
-   */
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+  const { user } = useAuth();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">

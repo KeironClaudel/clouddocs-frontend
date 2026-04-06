@@ -21,7 +21,7 @@ function AdminRoute({ children }) {
     );
   }
 
-  if (!user?.accessToken) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

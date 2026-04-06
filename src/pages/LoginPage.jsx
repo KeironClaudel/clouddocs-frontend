@@ -45,9 +45,8 @@ function LoginPage() {
     try {
       const data = await loginUser({ email, password });
 
+      // With httpOnly cookies, we only store user data (not tokens)
       const userData = {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
         fullName: data.fullName,
         email: data.email,
         role: data.role,

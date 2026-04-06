@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axiosInstance from "../api/axiosInstance";
 
 /**
  * Creates a context to store authentication state globally.
@@ -15,34 +16,44 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
   /**
-   * Indicates whether the authentication state has been loaded from localStorage.
+   * Indicates whether the authentication state has been loaded from the server.
    */
   const [isAuthReady, setIsAuthReady] = useState(false);
 
   /**
-   * Loads the user from localStorage when the app starts.
+   * Loads the user from the server when the app starts.
+   * With httpOnly cookies, the server validates the session automatically.
    */
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    async function loadUser() {
+      try {
+        const response = await axiosInstance.get("/auth/me");
+        setUser(response.data);
+      } catch (error) {
+        // User is not authenticated, session expired, or endpoint doesn't exist yet
+        console.log("Auth check failed:", error.message);
+        setUser(null);
+      } finally {
+        setIsAuthReady(true);
+      }
+    }
 
-    setUser(parsedUser);
-    setIsAuthReady(true);
+    loadUser();
   }, []);
 
   /**
-   * Saves user data in both state and localStorage.
+   * Saves user data in state after successful login.
+   * Tokens are managed via httpOnly cookies by the server.
    */
   function login(userData) {
-    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   }
 
   /**
-   * Clears user session from state and localStorage.
+   * Clears user session from state.
+   * Server clears the httpOnly cookie on logout.
    */
   function logout() {
-    localStorage.removeItem("user");
     setUser(null);
   }
 
