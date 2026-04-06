@@ -291,6 +291,7 @@ const es = {
   documents: {
     title: "Documentos",
     subtitle: "Visualiza los documentos disponibles y accede a sus acciones.",
+    accessLevel: "Nivel de acceso",
 
     buttons: {
       upload: "Subir documento",
@@ -304,6 +305,8 @@ const es = {
       processing: "Procesando...",
       uploading: "Subiendo...",
       uploadVersion: "Subir versión",
+      saving: "Guardando...",
+      editVisibility: "Editar visibilidad",
     },
 
     filters: {
@@ -361,7 +364,10 @@ const es = {
       reactivateError: "Error al reactivar el documento.",
       onlyPdf: "Solo se permiten archivos PDF para nuevas versiones.",
     },
-
+    visibility: {
+      departmentsLabel: "Departamentos visibles",
+      selectAccessLevel: "Seleccionar nivel de acceso",
+    },
     pagination: {
       showing: "Mostrando",
       of: "de",
