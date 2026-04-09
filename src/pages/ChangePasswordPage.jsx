@@ -1,76 +1,19 @@
-import { useState } from "react";
-import axios from "axios";
-import { changePassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import { useChangePassword } from "../hooks/useChangePassword";
 
 function ChangePasswordPage() {
-  /**
-   * Stores the current password input value.
-   */
-  const [currentPassword, setCurrentPassword] = useState("");
-
-  /**
-   * Stores the new password input value.
-   */
-  const [newPassword, setNewPassword] = useState("");
-
-  /**
-   * Stores the confirmation password input value.
-   */
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  /**
-   * Indicates whether the change password request is currently running.
-   */
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * Stores a success message after a successful password change.
-   */
-  const [successMessage, setSuccessMessage] = useState("");
-
-  /**
-   * Stores an error message when the request fails.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Handles the change password form submission.
-   */
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setError("");
-    setSuccessMessage("");
-
-    if (newPassword !== confirmPassword) {
-      setError(t("changePassword.messages.mismatch"));
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await changePassword({
-        currentPassword,
-        newPassword,
-      });
-
-      setSuccessMessage(t("changePassword.messages.success"));
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("changePassword.messages.error")));
-      } else {
-        setError(t("changePassword.messages.unexpected"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    confirmPassword,
+    currentPassword,
+    error,
+    handleSubmit,
+    loading,
+    newPassword,
+    setConfirmPassword,
+    setCurrentPassword,
+    setNewPassword,
+    successMessage,
+  } = useChangePassword();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -79,6 +22,7 @@ function ChangePasswordPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             {t("changePassword.title")}
           </h1>
+
           <p className="mt-2 text-sm text-gray-600">
             {t("changePassword.subtitle")}
           </p>
