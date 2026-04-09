@@ -1,95 +1,37 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  createUser,
-  deactivateUser,
-  getUserById,
-  getUsers,
-  reactivateUser,
-  updateUser,
-} from "../services/userService";
-import { roleOptions } from "../utils/roleOptions";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { roleOptions } from "../utils/roleOptions";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
+import { useUsersPage } from "../hooks/useUsersPage";
 
 function UsersPage() {
-  /**
-   * Stores the user list returned by the API.
-   */
-  const [users, setUsers] = useState([]);
+  const {
+    users,
+    loading,
+    error,
+    actionMessage,
 
-  /**
-   * Indicates whether the user request is currently in progress.
-   */
-  const [loading, setLoading] = useState(true);
+    showCreateForm,
+    setShowCreateForm,
+    createForm,
+    creatingUser,
+    handleCreateFormChange,
+    handleCreateUser,
+    resetCreateForm,
 
-  /**
-   * Stores an error message to display when loading fails.
-   */
-  const [error, setError] = useState("");
+    showEditForm,
+    editForm,
+    loadingEditUser,
+    updatingUser,
+    handleEditFormChange,
+    handleOpenEditForm,
+    handleUpdateUser,
+    resetEditForm,
 
-  /**
-   * Stores a global feedback message after admin actions.
-   */
-  const [actionMessage, setActionMessage] = useState("");
-
-  /**
-   * Tracks which user is currently being updated.
-   */
-  const [updatingUserId, setUpdatingUserId] = useState(null);
-
-  /**
-   * Controls whether the create user form is visible.
-   */
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
-  /**
-   * Stores whether the create user request is currently in progress.
-   */
-  const [creatingUser, setCreatingUser] = useState(false);
-
-  /**
-   * Stores the create user form values.
-   */
-  const [createForm, setCreateForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    department: "",
-    roleId: "",
-  });
-
-  /**
-   * Controls whether the edit user form is visible.
-   */
-  const [showEditForm, setShowEditForm] = useState(false);
-
-  /**
-   * Stores whether the selected user is being loaded for editing.
-   */
-  const [loadingEditUser, setLoadingEditUser] = useState(false);
-
-  /**
-   * Stores whether the update request is currently in progress.
-   */
-  const [updatingUser, setUpdatingUser] = useState(false);
-
-  /**
-   * Stores the ID of the user currently being edited.
-   */
-  const [editingUserId, setEditingUserId] = useState(null);
-
-  /**
-   * Stores the edit user form values.
-   */
-  const [editForm, setEditForm] = useState({
-    fullName: "",
-    email: "",
-    department: "",
-    roleId: "",
-  });
+    updatingUserId,
+    handleDeactivate,
+    handleReactivate,
+  } = useUsersPage();
 
   /**
    * Defines the columns to display in the user table, along with their labels.
@@ -105,273 +47,6 @@ function UsersPage() {
     { key: "createdAt", label: t("users.table.created") },
     { key: "actions", label: t("users.table.actions") },
   ];
-  /**
-   * Loads the user list when the page is rendered for the first time.
-   */
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        const data = await getUsers();
-
-        const normalizedUsers = Array.isArray(data)
-          ? data
-          : data.users || data.items || [];
-
-        setUsers(normalizedUsers);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          getApiErrorMessage(err, t("users.messages.loadError"));
-        } else {
-          setActionMessage(t("users.messages.unexpected"));
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadUsers();
-  }, []);
-
-  /**
-   * Updates a user's active status in local state after a successful API request.
-   */
-  function updateUserStatusInState(userId, isActive) {
-    setUsers((prevUsers) =>
-      prevUsers.map((userItem) =>
-        userItem.id === userId ? { ...userItem, isActive } : userItem,
-      ),
-    );
-  }
-
-  /**
-   * Updates the selected user in local state after a successful edit.
-   */
-  function updateUserInState(updatedUser) {
-    setUsers((prevUsers) =>
-      prevUsers.map((userItem) =>
-        userItem.id === updatedUser.id ? updatedUser : userItem,
-      ),
-    );
-  }
-
-  /**
-   * Handles user deactivation.
-   */
-  async function handleDeactivate(userId) {
-    setActionMessage("");
-    setUpdatingUserId(userId);
-
-    try {
-      await deactivateUser(userId);
-      updateUserStatusInState(userId, false);
-      setActionMessage("User deactivated successfully.");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("users.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("users.messages.unexpected"));
-      }
-    } finally {
-      setUpdatingUserId(null);
-    }
-  }
-
-  /**
-   * Handles user reactivation.
-   */
-  async function handleReactivate(userId) {
-    setActionMessage("");
-    setUpdatingUserId(userId);
-
-    try {
-      await reactivateUser(userId);
-      updateUserStatusInState(userId, true);
-      setActionMessage("User reactivated successfully.");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("users.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("users.messages.unexpected"));
-      }
-    } finally {
-      setUpdatingUserId(null);
-    }
-  }
-
-  /**
-   * Updates the create user form state when an input changes.
-   */
-  function handleCreateFormChange(event) {
-    const { name, value } = event.target;
-
-    setCreateForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  /**
-   * Resets the create user form to its initial state.
-   */
-  function resetCreateForm() {
-    setCreateForm({
-      fullName: "",
-      email: "",
-      password: "",
-      department: "",
-      roleId: "",
-    });
-  }
-
-  /**
-   * Handles the create user form submission.
-   */
-  async function handleCreateUser(event) {
-    event.preventDefault();
-
-    setActionMessage("");
-    setCreatingUser(true);
-
-    try {
-      const payload = {
-        fullName: createForm.fullName,
-        email: createForm.email,
-        password: createForm.password,
-        department: createForm.department || null,
-        roleId: createForm.roleId,
-      };
-
-      const createdUser = await createUser(payload);
-
-      if (createdUser && createdUser.id) {
-        setUsers((prev) => [createdUser, ...prev]);
-      }
-
-      setActionMessage(t("users.messages.createSuccess"));
-      resetCreateForm();
-      setShowCreateForm(false);
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("users.messages.createError")),
-        );
-      } else {
-        setActionMessage(t("users.messages.unexpected"));
-      }
-    } finally {
-      setCreatingUser(false);
-    }
-  }
-
-  /**
-   * Updates the edit user form state when an input changes.
-   */
-  function handleEditFormChange(event) {
-    const { name, value } = event.target;
-
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  /**
-   * Resets the edit user form to its initial state.
-   */
-  function resetEditForm() {
-    setEditForm({
-      fullName: "",
-      email: "",
-      department: "",
-      roleId: "",
-    });
-
-    setEditingUserId(null);
-    setShowEditForm(false);
-  }
-
-  /**
-   * Opens the edit form and loads the selected user's details.
-   */
-  async function handleOpenEditForm(userId) {
-    setActionMessage("");
-    setLoadingEditUser(true);
-    setShowEditForm(true);
-
-    try {
-      const userData = await getUserById(userId);
-
-      const matchedRole = roleOptions.find(
-        (role) => role.label === userData.role,
-      );
-
-      setEditForm({
-        fullName: userData.fullName || "",
-        email: userData.email || "",
-        department: userData.department || "",
-        roleId: userData.roleId || matchedRole?.value || "",
-      });
-
-      setEditingUserId(userId);
-    } catch (err) {
-      setShowEditForm(false);
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("users.messages.loadError")),
-        );
-      } else {
-        setActionMessage(t("users.messages.unexpected"));
-      }
-    } finally {
-      setLoadingEditUser(false);
-    }
-  }
-
-  /**
-   * Handles the edit user form submission.
-   */
-  async function handleUpdateUser(event) {
-    event.preventDefault();
-
-    if (!editingUserId) {
-      return;
-    }
-
-    setActionMessage("");
-    setUpdatingUser(true);
-
-    try {
-      const payload = {
-        fullName: editForm.fullName,
-        email: editForm.email,
-        department: editForm.department || null,
-        roleId: editForm.roleId,
-      };
-
-      const updatedUser = await updateUser(editingUserId, payload);
-
-      if (updatedUser && updatedUser.id) {
-        updateUserInState(updatedUser);
-      }
-
-      setActionMessage(t("users.messages.updateSuccess"));
-      resetEditForm();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("users.messages.updateError")),
-        );
-      } else {
-        setActionMessage(t("users.messages.unexpected"));
-      }
-    } finally {
-      setUpdatingUser(false);
-    }
-  }
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -391,7 +66,7 @@ function UsersPage() {
 
           <div className="mt-4">
             <button
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               onClick={() => setShowCreateForm((prev) => !prev)}
             >
               {showCreateForm
@@ -499,7 +174,9 @@ function UsersPage() {
             </h2>
 
             {loadingEditUser ? (
-              <p className="text-sm text-gray-600">Loading user details...</p>
+              <p className="text-sm text-gray-600">
+                {t("users.messages.loadingUserDetails")}
+              </p>
             ) : (
               <form onSubmit={handleUpdateUser} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -536,7 +213,7 @@ function UsersPage() {
                     onChange={handleEditFormChange}
                     required
                   >
-                    <option value="">Select a role</option>
+                    <option value="">{t("users.form.selectRole")}</option>
                     {roleOptions.map((role) => (
                       <option key={role.value} value={role.value}>
                         {role.label}
@@ -546,14 +223,20 @@ function UsersPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
-                    {t("users.buttons.save")}
+                  <button
+                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
+                    disabled={updatingUser}
+                  >
+                    {updatingUser
+                      ? t("users.buttons.processing")
+                      : t("users.buttons.save")}
                   </button>
 
                   <button
                     type="button"
                     className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
                     onClick={resetEditForm}
+                    disabled={updatingUser}
                   >
                     {t("users.buttons.cancel")}
                   </button>
@@ -572,7 +255,7 @@ function UsersPage() {
 
         {!loading && error && (
           <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {t("users.messages.loadError")}
+            {error}
           </div>
         )}
 
