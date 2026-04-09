@@ -1,561 +1,268 @@
-import { Fragment } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { canManageAdminPanels } from "../utils/permissionUtils";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
-import { useDocumentsPage } from "../hooks/useDocumentsPage";
+import { useDepartmentsPage } from "../hooks/useDepartments";
 
-function DocumentsPage() {
-  const { user } = useAuth();
-
+function DepartmentsPage() {
   const {
     actionMessage,
-    categories,
-    currentPage,
-    deactivatingDocumentId,
+    createForm,
+    creatingDepartment,
     departments,
-    documentAccessLevels,
-    documentTypes,
-    editingVisibilityDocumentId,
+    editForm,
     error,
-    filters,
-    handleCancelEditVisibility,
-    handleCancelRename,
-    handleClearFilters,
-    handleConfirmRename,
-    handleDeactivateDocument,
-    handleDownload,
-    handleFilterChange,
-    handleLoadVersions,
-    handleNextPage,
-    handlePreview,
-    handlePreviousPage,
-    handleReactivateDocument,
-    handleSaveVisibility,
-    handleStartEditVisibility,
-    handleStartRename,
-    handleUploadVersion,
-    handleVersionChange,
-    handleVisibilityDepartmentToggle,
-    isVisibilityDepartmentOnly,
+    handleCreateDepartment,
+    handleCreateFormChange,
+    handleDeactivateDepartment,
+    handleEditFormChange,
+    handleOpenEditForm,
+    handleReactivateDepartment,
+    handleUpdateDepartment,
     loading,
-    reactivatingDocumentId,
-    renameValue,
-    renamingDocumentId,
-    selectedVersionByDocumentId,
-    setRenameValue,
-    setVisibilityForm,
-    totalCount,
-    totalPages,
-    updatingVisibility,
-    uploadingVersionDocumentId,
-    versionLoadingByDocumentId,
-    versionsByDocumentId,
-    visibleDocuments,
-    visibilityForm,
-  } = useDocumentsPage(user);
+    resetCreateForm,
+    resetEditForm,
+    setShowCreateForm,
+    showCreateForm,
+    showEditForm,
+    updatingDepartment,
+    updatingDepartmentId,
+  } = useDepartmentsPage();
 
-  const documentTableColumns = [
-    { key: "name", label: t("documents.table.name") },
-    { key: "category", label: t("documents.table.category") },
-    { key: "uploadedBy", label: t("documents.table.uploadedBy") },
-    { key: "department", label: t("documents.table.department") },
-    { key: "documentType", label: t("documents.table.type") },
-    { key: "created", label: t("documents.table.created") },
-    { key: "status", label: t("documents.table.status") },
-    { key: "version", label: t("documents.table.version") },
-    { key: "actions", label: t("documents.table.actions") },
+  const departmentTableColumns = [
+    { key: "name", label: t("departments.table.name") },
+    { key: "description", label: t("departments.table.description") },
+    { key: "status", label: t("departments.table.status") },
+    { key: "createdAt", label: t("departments.table.created") },
+    { key: "actions", label: t("departments.table.actions") },
   ];
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t("documents.title")}
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              {t("documents.subtitle")}
-            </p>
-          </div>
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("departments.title")}
+          </h1>
+          <p className="mt-2 text-sm text-gray-600">
+            {t("departments.subtitle")}
+          </p>
 
-          <Link
-            to="/documents/upload"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-          >
-            {t("documents.buttons.upload")}
-          </Link>
+          {actionMessage && (
+            <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+              {actionMessage}
+            </div>
+          )}
+
+          <div className="mt-4">
+            <button
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+              onClick={() => setShowCreateForm((prev) => !prev)}
+            >
+              {showCreateForm
+                ? t("departments.buttons.cancel")
+                : t("departments.buttons.create")}
+            </button>
+          </div>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
-            {t("documents.filters.title")}
-          </h2>
+        {/* CREATE FORM */}
+        {showCreateForm && (
+          <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              {t("departments.form.createTitle")}
+            </h2>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.searchLabel")}
-              </label>
-              <input
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                type="text"
-                name="searchTerm"
-                placeholder={t("documents.filters.search")}
-                value={filters.searchTerm}
-                onChange={handleFilterChange}
-              />
-            </div>
+            <form onSubmit={handleCreateDepartment} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  type="text"
+                  name="name"
+                  value={createForm.name}
+                  onChange={handleCreateFormChange}
+                  placeholder={t("departments.form.name")}
+                  required
+                />
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.categoryLabel")}
-              </label>
-              <select
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                name="categoryId"
-                value={filters.categoryId}
-                onChange={handleFilterChange}
-              >
-                <option value="">{t("documents.filters.allCategories")}</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.monthLabel")}
-              </label>
-              <input
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                type="number"
-                name="month"
-                placeholder={t("documents.filters.month")}
-                value={filters.month}
-                onChange={handleFilterChange}
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.yearLabel")}
-              </label>
-              <input
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                type="number"
-                name="year"
-                placeholder={t("documents.filters.year")}
-                value={filters.year}
-                onChange={handleFilterChange}
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.typeLabel")}
-              </label>
-              <select
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                name="documentType"
-                value={filters.documentType}
-                onChange={handleFilterChange}
-              >
-                <option value="">{t("documents.filters.allTypes")}</option>
-                {documentTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.expirationLabel")}
-              </label>
-              <select
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                name="expirationPending"
-                value={filters.expirationPending}
-                onChange={handleFilterChange}
-              >
-                <option value="">{t("documents.filters.all")}</option>
-                <option value="true">{t("documents.filters.pending")}</option>
-                <option value="false">{t("documents.filters.defined")}</option>
-              </select>
-            </div>
-
-            {canManageAdminPanels(user) && (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  {t("documents.filters.statusLabel")}
-                </label>
-                <select
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  name="isActive"
-                  value={filters.isActive}
-                  onChange={handleFilterChange}
-                >
-                  <option value="">{t("documents.filters.all")}</option>
-                  <option value="true">{t("documents.filters.active")}</option>
-                  <option value="false">
-                    {t("documents.filters.inactive")}
-                  </option>
-                </select>
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  type="text"
+                  name="description"
+                  value={createForm.description}
+                  onChange={handleCreateFormChange}
+                  placeholder={t("departments.form.description")}
+                />
               </div>
-            )}
-          </div>
 
-          <button
-            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
-            onClick={handleClearFilters}
-          >
-            {t("documents.filters.clear")}
-          </button>
-        </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                  disabled={creatingDepartment}
+                >
+                  {creatingDepartment
+                    ? t("departments.buttons.creating")
+                    : t("departments.buttons.create")}
+                </button>
 
-        {actionMessage && (
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            {actionMessage}
+                <button
+                  type="button"
+                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+                  onClick={() => {
+                    resetCreateForm();
+                    setShowCreateForm(false);
+                  }}
+                >
+                  {t("departments.buttons.cancel")}
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
+        {/* EDIT FORM */}
+        {showEditForm && (
+          <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              {t("departments.form.editTitle")}
+            </h2>
+
+            <form onSubmit={handleUpdateDepartment} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  type="text"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleEditFormChange}
+                  placeholder={t("departments.form.name")}
+                  required
+                />
+
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  type="text"
+                  name="description"
+                  value={editForm.description}
+                  onChange={handleEditFormChange}
+                  placeholder={t("departments.form.description")}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
+                  disabled={updatingDepartment}
+                >
+                  {updatingDepartment
+                    ? t("departments.buttons.saving")
+                    : t("departments.buttons.save")}
+                </button>
+
+                <button
+                  type="button"
+                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+                  onClick={resetEditForm}
+                >
+                  {t("departments.buttons.cancel")}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* STATES */}
         {loading && (
-          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            {t("documents.loading")}
+          <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            {t("departments.messages.loading")}
           </div>
         )}
 
         {!loading && error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
+        {/* TABLE */}
         {!loading && !error && (
           <DataTable
-            columns={documentTableColumns}
-            hasData={visibleDocuments.length > 0}
-            emptyMessage={t("documents.empty")}
-            footer={
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <p>
-                  {t("documents.pagination.showing")} {visibleDocuments.length}{" "}
-                  {t("documents.pagination.of")} {totalCount}
-                </p>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {t("documents.pagination.prev")}
-                  </button>
-
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {t("documents.pagination.next")}
-                  </button>
-                </div>
-              </div>
-            }
+            columns={departmentTableColumns}
+            hasData={departments.length > 0}
+            emptyMessage={t("departments.table.noData")}
           >
-            {visibleDocuments.map((document) => (
-              <Fragment key={document.id}>
-                <tr className="transition hover:bg-gray-50/80">
-                  <td className="px-6 py-4">
-                    {renamingDocumentId === document.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                          value={renameValue}
-                          onChange={(e) => setRenameValue(e.target.value)}
-                        />
-                        <button
-                          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
-                          onClick={() => handleConfirmRename(document.id)}
-                        >
-                          {t("documents.buttons.save")}
-                        </button>
-                        <button
-                          className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
-                          onClick={handleCancelRename}
-                        >
-                          {t("documents.buttons.cancel")}
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="font-medium text-gray-900">
-                        {document.originalFileName}
-                      </p>
-                    )}
-                  </td>
+            {departments.map((departmentItem) => (
+              <tr
+                key={departmentItem.id}
+                className="transition hover:bg-gray-50/80"
+              >
+                <td className="px-6 py-4 font-medium text-gray-900">
+                  {departmentItem.name}
+                </td>
 
-                  <td className="px-6 py-4 text-gray-700">
-                    {document.categoryName}
-                  </td>
+                <td className="px-6 py-4 text-gray-700">
+                  {departmentItem.description ||
+                    t("departments.table.noDescription")}
+                </td>
 
-                  <td className="px-6 py-4 text-gray-700">
-                    {document.uploadedByUserName}
-                  </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                      departmentItem.isActive
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {departmentItem.isActive
+                      ? t("departments.table.active")
+                      : t("departments.table.inactive")}
+                  </span>
+                </td>
 
-                  <td className="px-6 py-4 text-gray-600">
-                    {document.department || "N/A"}
-                  </td>
+                <td className="px-6 py-4 text-gray-600">
+                  {formatLocalDateForDisplay(departmentItem.createdAt)}
+                </td>
 
-                  <td className="px-6 py-4 text-gray-700">
-                    {document.documentTypeName}
-                  </td>
-
-                  <td className="px-6 py-4 text-gray-600">
-                    {formatLocalDateForDisplay(document.createdAt)}
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                        document.isActive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                      onClick={() => handleOpenEditForm(departmentItem)}
+                      disabled={updatingDepartmentId === departmentItem.id}
                     >
-                      {document.isActive
-                        ? t("documents.table.active")
-                        : t("documents.table.inactive")}
-                    </span>
-                  </td>
+                      {t("departments.buttons.edit")}
+                    </button>
 
-                  <td className="px-6 py-4">
-                    <select
-                      className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                      value={selectedVersionByDocumentId[document.id] || ""}
-                      onMouseDown={() => handleLoadVersions(document.id)}
-                      onChange={(e) =>
-                        handleVersionChange(document.id, e.target.value)
-                      }
-                    >
-                      <option value="">{t("documents.table.current")}</option>
-                      {versionLoadingByDocumentId[document.id] && (
-                        <option value="" disabled>
-                          {t("documents.table.loadingVersions")}
-                        </option>
-                      )}
-
-                      {(versionsByDocumentId[document.id] || []).map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {`v${v.versionNumber} - ${formatLocalDateForDisplay(v.createdAt)}`}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      {canManageAdminPanels(user) && (
-                        <button
-                          className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
-                          onClick={() => handleStartRename(document)}
-                          disabled={
-                            !document.isActive ||
-                            renamingDocumentId === document.id
-                          }
-                        >
-                          {t("documents.buttons.rename")}
-                        </button>
-                      )}
-
-                      {canManageAdminPanels(user) && (
-                        <>
-                          <input
-                            id={`upload-version-${document.id}`}
-                            type="file"
-                            accept="application/pdf,.pdf"
-                            className="hidden"
-                            onChange={(event) => {
-                              const file = event.target.files?.[0];
-                              if (file) {
-                                handleUploadVersion(document.id, file);
-                              }
-                              event.target.value = "";
-                            }}
-                          />
-
-                          <label
-                            htmlFor={`upload-version-${document.id}`}
-                            className={`cursor-pointer rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-700 transition hover:bg-sky-100 ${
-                              uploadingVersionDocumentId === document.id
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }`}
-                          >
-                            {uploadingVersionDocumentId === document.id
-                              ? t("documents.buttons.uploading")
-                              : t("documents.buttons.uploadVersion")}
-                          </label>
-                        </>
-                      )}
-
+                    {departmentItem.isActive ? (
                       <button
-                        className="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-medium text-cyan-700 transition hover:bg-cyan-100"
-                        onClick={() => handlePreview(document.id)}
-                        disabled={!document.isActive}
-                      >
-                        {t("documents.buttons.preview")}
-                      </button>
-
-                      <button
-                        className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
+                        className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 hover:bg-yellow-100"
                         onClick={() =>
-                          handleDownload(document.id, document.originalFileName)
+                          handleDeactivateDepartment(departmentItem.id)
                         }
-                        disabled={!document.isActive}
+                        disabled={updatingDepartmentId === departmentItem.id}
                       >
-                        {t("documents.buttons.download")}
+                        {updatingDepartmentId === departmentItem.id
+                          ? t("departments.buttons.processing")
+                          : t("departments.buttons.deactivate")}
                       </button>
-
-                      {canManageAdminPanels(user) &&
-                        (document.isActive ? (
-                          <button
-                            className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
-                            onClick={() =>
-                              handleDeactivateDocument(document.id)
-                            }
-                            disabled={deactivatingDocumentId === document.id}
-                          >
-                            {deactivatingDocumentId === document.id
-                              ? t("documents.buttons.processing")
-                              : t("documents.buttons.deactivate")}
-                          </button>
-                        ) : (
-                          <button
-                            className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100"
-                            onClick={() =>
-                              handleReactivateDocument(document.id)
-                            }
-                            disabled={reactivatingDocumentId === document.id}
-                          >
-                            {reactivatingDocumentId === document.id
-                              ? t("documents.buttons.processing")
-                              : t("documents.buttons.reactivate")}
-                          </button>
-                        ))}
-
-                      {canManageAdminPanels(user) && (
-                        <button
-                          className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:bg-purple-100"
-                          onClick={() => handleStartEditVisibility(document)}
-                          disabled={!document.isActive}
-                        >
-                          {t("documents.buttons.editVisibility")}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-
-                {editingVisibilityDocumentId === document.id && (
-                  <tr>
-                    <td
-                      colSpan={documentTableColumns.length}
-                      className="bg-gray-50 px-6 py-4"
-                    >
-                      <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4">
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
-                            {t.documents.accessLevel}
-                          </label>
-                          <select
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            value={visibilityForm.accessLevelId}
-                            onChange={(e) =>
-                              setVisibilityForm((prev) => ({
-                                ...prev,
-                                accessLevelId: e.target.value,
-                                departmentIds: [],
-                              }))
-                            }
-                            disabled={updatingVisibility}
-                          >
-                            <option value="">
-                              {t("documents.visibility.selectAccessLevel")}
-                            </option>
-                            {documentAccessLevels.map((level) => (
-                              <option key={level.id} value={level.id}>
-                                {level.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {isVisibilityDepartmentOnly && (
-                          <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700">
-                              {t.documents.visibility.departmentsLabel}
-                            </label>
-
-                            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {departments.map((department) => (
-                                <label
-                                  key={department.id}
-                                  className="flex items-center gap-2 text-sm text-gray-700"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={visibilityForm.departmentIds.includes(
-                                      department.id,
-                                    )}
-                                    onChange={() =>
-                                      handleVisibilityDepartmentToggle(
-                                        department.id,
-                                      )
-                                    }
-                                    disabled={updatingVisibility}
-                                    className="h-4 w-4"
-                                  />
-                                  <span>{department.name}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-60"
-                            onClick={() => handleSaveVisibility(document.id)}
-                            disabled={updatingVisibility}
-                          >
-                            {updatingVisibility
-                              ? t.buttons.saving
-                              : t.buttons.save}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
-                            onClick={handleCancelEditVisibility}
-                            disabled={updatingVisibility}
-                          >
-                            {t.buttons.cancel}
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </Fragment>
+                    ) : (
+                      <button
+                        className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100"
+                        onClick={() =>
+                          handleReactivateDepartment(departmentItem.id)
+                        }
+                        disabled={updatingDepartmentId === departmentItem.id}
+                      >
+                        {updatingDepartmentId === departmentItem.id
+                          ? t("departments.buttons.processing")
+                          : t("departments.buttons.reactivate")}
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
             ))}
           </DataTable>
         )}
@@ -564,4 +271,4 @@ function DocumentsPage() {
   );
 }
 
-export default DocumentsPage;
+export default DepartmentsPage;
