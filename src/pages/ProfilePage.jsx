@@ -1,12 +1,10 @@
-import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKey } from "@fortawesome/free-solid-svg-icons";
 import { t } from "../i18n";
-import { useAuth } from "../context/AuthContext";
+import { useProfile } from "../hooks/useProfile";
 
 function ProfilePage() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const { handleGoToChangePassword, user } = useProfile();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -47,7 +45,7 @@ function ProfilePage() {
             <div className="mt-6">
               <button
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-                onClick={() => navigate("/change-password")}
+                onClick={handleGoToChangePassword}
               >
                 <FontAwesomeIcon icon={faKey} />
                 <span>{t("profile.buttons.changePassword")}</span>
