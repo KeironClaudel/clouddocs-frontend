@@ -37,7 +37,7 @@ A modern, secure, and scalable document management system built with React and V
 
 ### Frontend Framework
 
-- **React 18** - Modern React with hooks and concurrent features
+- **React 19** - Modern React with hooks and concurrent features
 - **Vite** - Fast build tool and development server
 - **React Router** - Client-side routing and navigation
 
