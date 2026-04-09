@@ -1,64 +1,13 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faAddressCard,
-  faFilePdf,
-  faFolderOpen,
-  faUsers,
-  faUserCheck,
-  faUserSlash,
-} from "@fortawesome/free-solid-svg-icons";
-import { useAuth } from "../context/AuthContext";
-import { getDashboardStats } from "../services/dashboardService";
-import { isAdmin } from "../utils/permissionUtils";
 import { t } from "../i18n";
+import { useAuth } from "../context/AuthContext";
+import { useDashboard } from "../hooks/useDashboard";
+import { canManageAdminPanels } from "../utils/permissionUtils";
 
 function DashboardPage() {
   const { user } = useAuth();
+  const { error, loading, summary } = useDashboard();
 
-  /**
-   * Stores the dashboard statistics displayed in the cards.
-   */
-  const [stats, setStats] = useState({
-    totalDocuments: 0,
-    totalUsers: null,
-    activeUsers: null,
-    inactiveUsers: null,
-  });
-
-  /**
-   * Indicates whether dashboard data is currently loading.
-   */
-  const [loading, setLoading] = useState(true);
-
-  /**
-   * Stores a dashboard error message when loading fails.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Loads dashboard metrics when the page is rendered.
-   */
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        const data = await getDashboardStats(isAdmin(user));
-        setStats(data);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || t("dashboard.loadError"));
-        } else {
-          setError(t("dashboard.unexpected"));
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadDashboard();
-  }, [user?.role]);
+  const canManage = canManageAdminPanels(user);
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -68,133 +17,74 @@ function DashboardPage() {
             {t("dashboard.title")}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            {t("dashboard.welcome")},{" "}
-            {user?.fullName || t("dashboard.defaultUser")}.
+            {t("dashboard.welcome")}{" "}
+            {user?.fullName || t("dashboard.defaultUser")}
           </p>
         </div>
 
         {loading && (
-          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            {t("dashboard.loading")}
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+            {t("dashboard.messages.loading")}
           </div>
         )}
 
         {!loading && error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {!loading && !error && (
-          <>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {!loading && !error && summary && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    <h2>{t("dashboard.cards.documents")}</h2>
-                  </h2>
-                  <span className="text-red-500">
-                    <FontAwesomeIcon icon={faFilePdf} size="lg" />
-                  </span>
-                </div>
-                <p className="text-3xl font-bold text-gray-900">
-                  {stats.totalDocuments}
+                <p className="text-sm font-medium text-gray-500">
+                  {t("dashboard.cards.documents")}
                 </p>
-                <p className="mt-2 text-sm text-gray-500">
-                  {t("dashboard.cards.totalDocuments")}
+                <p className="mt-3 text-3xl font-bold text-gray-900">
+                  {summary.totalDocuments ?? 0}
                 </p>
               </div>
 
-              {user?.role === "Admin" && (
-                <>
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-gray-900">
-                        {t("dashboard.cards.users")}
-                      </h2>
-                      <span className="text-blue-500">
-                        <FontAwesomeIcon icon={faUsers} size="lg" />
-                      </span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {stats.totalUsers ?? 0}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {t("dashboard.cards.totalUsers")}
-                    </p>
-                  </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("dashboard.cards.users")}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-gray-900">
+                  {summary.totalUsers ?? 0}
+                </p>
+              </div>
 
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-gray-900">
-                        {t("dashboard.cards.activeUsers")}
-                      </h2>
-                      <span className="text-green-500">
-                        <FontAwesomeIcon icon={faUserCheck} size="lg" />
-                      </span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {stats.activeUsers ?? 0}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {t("dashboard.cards.activeUsersDesc")}
-                    </p>
-                  </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("dashboard.cards.categories")}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-gray-900">
+                  {summary.totalCategories ?? 0}
+                </p>
+              </div>
 
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-gray-900">
-                        {t("dashboard.cards.inactiveUsers")}
-                      </h2>
-                      <span className="text-amber-500">
-                        <FontAwesomeIcon icon={faUserSlash} size="lg" />
-                      </span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900">
-                      {stats.inactiveUsers ?? 0}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {t("dashboard.cards.inactiveUsersDesc")}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                {t("dashboard.quickAccess.title")}
-              </h2>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link
-                  to="/documents"
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-                >
-                  <FontAwesomeIcon icon={faFolderOpen} />
-                  <span>{t("dashboard.quickAccess.documents")}</span>
-                </Link>
-
-                <Link
-                  to="/profile"
-                  className="inline-flex items-center gap-2 rounded-lg bg-cyan-50 px-4 py-2.5 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100"
-                >
-                  <FontAwesomeIcon icon={faAddressCard} />
-                  <span>{t("dashboard.quickAccess.profile")}</span>
-                </Link>
-
-                {user?.role === "Admin" && (
-                  <Link
-                    to="/users"
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"
-                  >
-                    <FontAwesomeIcon icon={faUsers} />
-                    <span>{t("dashboard.quickAccess.users")}</span>
-                  </Link>
-                )}
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <p className="text-sm font-medium text-gray-500">
+                  {t("dashboard.cards.documentTypes")}
+                </p>
+                <p className="mt-3 text-3xl font-bold text-gray-900">
+                  {summary.totalDocumentTypes ?? 0}
+                </p>
               </div>
             </div>
-          </>
+
+            {canManage && (
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {t("dashboard.sections.adminOverview")}
+                </h2>
+                <p className="mt-2 text-sm text-gray-600">
+                  {t("dashboard.sections.adminOverviewDescription")}
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </section>
