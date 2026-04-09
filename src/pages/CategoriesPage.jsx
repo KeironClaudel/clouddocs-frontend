@@ -1,92 +1,36 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import {
-  createCategory,
-  deactivateCategory,
-  getCategories,
-  updateCategory,
-  reactivateCategory,
-} from "../services/categoryService";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
+import { useCategoriesPage } from "../hooks/useCategories";
 
 function CategoriesPage() {
-  /**
-   * Stores the category list returned by the API.
-   */
-  const [categories, setCategories] = useState([]);
+  const {
+    actionMessage,
+    categories,
+    createForm,
+    creatingCategory,
+    deactivatingCategoryId,
+    editForm,
+    error,
+    handleCreateCategory,
+    handleCreateFormChange,
+    handleDeactivateCategory,
+    handleEditFormChange,
+    handleOpenEditForm,
+    handleReactivateCategory,
+    handleUpdateCategory,
+    loading,
+    reactivatingCategoryId,
+    resetCreateForm,
+    resetEditForm,
+    setShowCreateForm,
+    showCreateForm,
+    showEditForm,
+    updatingCategory,
+  } = useCategoriesPage();
 
   /**
-   * Indicates whether the category request is currently running.
-   */
-  const [loading, setLoading] = useState(true);
-
-  /**
-   * Stores a page-level error message.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Stores a success/info message after category actions.
-   */
-  const [actionMessage, setActionMessage] = useState("");
-
-  /**
-   * Controls whether the create category form is visible.
-   */
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
-  /**
-   * Controls whether the edit category form is visible.
-   */
-  const [showEditForm, setShowEditForm] = useState(false);
-
-  /**
-   * Tracks whether the create request is currently in progress.
-   */
-  const [creatingCategory, setCreatingCategory] = useState(false);
-
-  /**
-   * Tracks whether the update request is currently in progress.
-   */
-  const [updatingCategory, setUpdatingCategory] = useState(false);
-
-  /**
-   * Tracks which category is currently being deactivated.
-   */
-  const [deactivatingCategoryId, setDeactivatingCategoryId] = useState(null);
-
-  /**
-   * Tracks which category is currently being activated.
-   */
-  const [reactivatingCategoryId, setReactivatingCategoryId] = useState(null);
-
-  /**
-   * Stores the ID of the category currently being edited.
-   */
-  const [editingCategoryId, setEditingCategoryId] = useState(null);
-
-  /**
-   * Stores the create form values.
-   */
-  const [createForm, setCreateForm] = useState({
-    name: "",
-    description: "",
-  });
-
-  /**
-   * Stores the edit form values.
-   */
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
-
-  /**
-   * Defines the columns to display in the category table, along with their labels.
-   * The "actions" column is used to render buttons for editing, deactivating, or reactivating categories.
+   * Defines the columns to display in the category table.
    */
   const categoryTableColumns = [
     { key: "name", label: t("categories.table.name") },
@@ -95,268 +39,6 @@ function CategoriesPage() {
     { key: "createdAt", label: t("categories.table.created") },
     { key: "actions", label: t("categories.table.actions") },
   ];
-
-  /**
-   * Loads the category list when the page is rendered for the first time.
-   */
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const data = await getCategories();
-
-        const normalizedCategories = Array.isArray(data)
-          ? data
-          : data.categories || data.items || [];
-
-        setCategories(normalizedCategories);
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            setError(
-              getApiErrorMessage(err, t("categories.messages.loadError")),
-            ),
-          );
-        } else {
-          setError(t("categories.messages.unexpected"));
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadCategories();
-  }, []);
-
-  /**
-   * Updates the create form state when an input changes.
-   */
-  function handleCreateFormChange(event) {
-    const { name, value } = event.target;
-
-    setCreateForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  /**
-   * Updates the edit form state when an input changes.
-   */
-  function handleEditFormChange(event) {
-    const { name, value } = event.target;
-
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-
-  /**
-   * Resets the create form to its initial state.
-   */
-  function resetCreateForm() {
-    setCreateForm({
-      name: "",
-      description: "",
-    });
-    setShowCreateForm(false);
-  }
-
-  /**
-   * Resets the edit form to its initial state.
-   */
-  function resetEditForm() {
-    setEditForm({
-      name: "",
-      description: "",
-    });
-    setEditingCategoryId(null);
-    setShowEditForm(false);
-  }
-
-  /**
-   * Adds a newly created category to local state.
-   */
-  function addCategoryToState(category) {
-    setCategories((prev) => [category, ...prev]);
-  }
-
-  /**
-   * Updates an existing category in local state.
-   */
-  function updateCategoryInState(updatedCategory) {
-    setCategories((prev) =>
-      prev.map((category) =>
-        category.id === updatedCategory.id ? updatedCategory : category,
-      ),
-    );
-  }
-
-  /**
-   * Marks a category as inactive in local state.
-   */
-  function deactivateCategoryInState(categoryId) {
-    setCategories((prev) =>
-      prev.map((category) =>
-        category.id === categoryId
-          ? { ...category, isActive: false }
-          : category,
-      ),
-    );
-  }
-
-  /**
-   * Handles the create category form submission.
-   */
-  async function handleCreateCategory(event) {
-    event.preventDefault();
-
-    setActionMessage("");
-    setCreatingCategory(true);
-
-    try {
-      const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
-      };
-
-      const createdCategory = await createCategory(payload);
-
-      if (createdCategory?.id) {
-        addCategoryToState(createdCategory);
-      }
-
-      setActionMessage(t("categories.messages.created"));
-      resetCreateForm();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("categories.messages.createError")),
-        );
-      } else {
-        setActionMessage(t("categories.messages.unexpected"));
-      }
-    } finally {
-      setCreatingCategory(false);
-    }
-  }
-
-  /**
-   * Opens the edit form with the selected category values.
-   */
-  function handleOpenEditForm(category) {
-    setActionMessage("");
-    setEditingCategoryId(category.id);
-    setEditForm({
-      name: category.name || "",
-      description: category.description || "",
-    });
-    setShowEditForm(true);
-  }
-
-  /**
-   * Handles the update category form submission.
-   */
-  async function handleUpdateCategory(event) {
-    event.preventDefault();
-
-    if (!editingCategoryId) {
-      return;
-    }
-
-    setActionMessage("");
-    setUpdatingCategory(true);
-
-    try {
-      const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
-      };
-
-      const updatedCategory = await updateCategory(editingCategoryId, payload);
-
-      if (updatedCategory?.id) {
-        updateCategoryInState(updatedCategory);
-      } else {
-        updateCategoryInState({
-          id: editingCategoryId,
-          name: editForm.name,
-          description: editForm.description || null,
-          isActive: true,
-          createdAt: formatLocalDateForDisplay(category.createdAt),
-        });
-      }
-
-      setActionMessage(t("categories.messages.updated"));
-      resetEditForm();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("categories.messages.updateError")),
-        );
-      } else {
-        setActionMessage(t("categories.messages.unexpected"));
-      }
-    } finally {
-      setUpdatingCategory(false);
-    }
-  }
-
-  /**
-   * Handles category deactivation.
-   */
-  async function handleDeactivateCategory(categoryId) {
-    setActionMessage("");
-    setDeactivatingCategoryId(categoryId);
-
-    try {
-      await deactivateCategory(categoryId);
-      deactivateCategoryInState(categoryId);
-      setActionMessage(t("categories.messages.deactivated"));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("categories.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("categories.messages.unexpected"));
-      }
-    } finally {
-      setDeactivatingCategoryId(null);
-    }
-  }
-
-  /**
-   * Handles category reactivation.
-   */
-  async function handleReactivateCategory(categoryId) {
-    setActionMessage("");
-    setReactivatingCategoryId(categoryId);
-
-    try {
-      await reactivateCategory(categoryId);
-
-      setCategories((prev) =>
-        prev.map((category) =>
-          category.id === categoryId
-            ? { ...category, isActive: true }
-            : category,
-        ),
-      );
-
-      setActionMessage(t("categories.messages.reactivated"));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("categories.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("categories.messages.unexpected"));
-      }
-    } finally {
-      setReactivatingCategoryId(null);
-    }
-  }
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -600,4 +282,5 @@ function CategoriesPage() {
     </section>
   );
 }
+
 export default CategoriesPage;
