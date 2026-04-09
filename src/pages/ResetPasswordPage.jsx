@@ -1,86 +1,19 @@
-import { useMemo, useState } from "react";
-import axios from "axios";
-import { Link, useSearchParams } from "react-router-dom";
-import { resetPassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { Link } from "react-router-dom";
 import { t } from "../i18n";
+import { useResetPassword } from "../hooks/useResetPassword";
 
 function ResetPasswordPage() {
-  const [searchParams] = useSearchParams();
-
-  /**
-   * Extracts the reset token from the URL query string.
-   */
-  const token = useMemo(() => searchParams.get("token") || "", [searchParams]);
-
-  /**
-   * Stores the new password input value.
-   */
-  const [newPassword, setNewPassword] = useState("");
-
-  /**
-   * Stores the confirmation password input value.
-   */
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  /**
-   * Indicates whether the reset password request is currently running.
-   */
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * Stores a success message after a successful password reset.
-   */
-  const [successMessage, setSuccessMessage] = useState("");
-
-  /**
-   * Stores an error message when the request fails.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Handles the reset password form submission.
-   */
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setError("");
-    setSuccessMessage("");
-
-    if (!token) {
-      setError(t("resetPassword.messages.invalidToken"));
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError(t("resetPassword.messages.mismatch"));
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      /**
-       * Adjust the payload keys if your backend uses different property names.
-       */
-      await resetPassword({
-        token,
-        newPassword,
-      });
-
-      setSuccessMessage(t("resetPassword.messages.success"));
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("resetPassword.messages.error")));
-      } else {
-        setError(t("resetPassword.messages.unexpected"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    confirmPassword,
+    error,
+    handleSubmit,
+    loading,
+    newPassword,
+    setConfirmPassword,
+    setNewPassword,
+    successMessage,
+    token,
+  } = useResetPassword();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8 flex items-center justify-center">
