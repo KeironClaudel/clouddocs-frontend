@@ -1,44 +1,49 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { getDashboardSummary } from "../services/dashboardService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { getDashboardStats } from "../services/dashboardService";
+import { isAdmin } from "../utils/permissionUtils";
 import { t } from "../i18n";
 
 /**
  * Encapsulates all DashboardPage state and handlers.
  */
-export function useDashboard() {
+export function useDashboard(user) {
   /**
-   * Stores the dashboard summary returned by the backend.
+   * Stores the dashboard statistics displayed in the cards.
    */
-  const [summary, setSummary] = useState(null);
+  const [stats, setStats] = useState({
+    totalDocuments: 0,
+    totalUsers: null,
+    activeUsers: null,
+    inactiveUsers: null,
+  });
 
   /**
-   * Indicates whether the dashboard request is currently running.
+   * Indicates whether dashboard data is currently loading.
    */
   const [loading, setLoading] = useState(true);
 
   /**
-   * Stores an error message when dashboard loading fails.
+   * Stores a dashboard error message when loading fails.
    */
   const [error, setError] = useState("");
 
   /**
-   * Loads dashboard summary data.
+   * Loads dashboard metrics when the page is rendered.
    */
   useEffect(() => {
     async function loadDashboard() {
-      setLoading(true);
-      setError("");
-
       try {
-        const data = await getDashboardSummary();
-        setSummary(data);
+        setLoading(true);
+        setError("");
+
+        const data = await getDashboardStats(isAdmin(user));
+        setStats(data);
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          setError(getApiErrorMessage(err, t("dashboard.messages.loadError")));
+          setError(err.response?.data?.message || t("dashboard.loadError"));
         } else {
-          setError(t("dashboard.messages.unexpected"));
+          setError(t("dashboard.unexpected"));
         }
       } finally {
         setLoading(false);
@@ -46,11 +51,11 @@ export function useDashboard() {
     }
 
     loadDashboard();
-  }, []);
+  }, [user?.role]);
 
   return {
     error,
     loading,
-    summary,
+    stats,
   };
 }
