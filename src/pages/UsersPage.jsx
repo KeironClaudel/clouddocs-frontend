@@ -2,7 +2,7 @@ import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import { roleOptions } from "../utils/roleOptions";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
-import { useUsersPage } from "../hooks/useUsersPage";
+import { useUsersPage } from "../hooks/useUsers";
 
 function UsersPage() {
   const {

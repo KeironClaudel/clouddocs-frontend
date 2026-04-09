@@ -5,7 +5,7 @@ import { canManageAdminPanels } from "../utils/permissionUtils";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
-import { useDocumentsPage } from "../hooks/useDocumentsPage";
+import { useDocumentsPage } from "../hooks/useDocuments";
 import DocumentVisibilityEditorRow from "../components/DocumentVisibilityEditorRow";
 
 function DocumentsPage() {
