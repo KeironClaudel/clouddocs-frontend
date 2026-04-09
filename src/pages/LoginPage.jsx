@@ -1,75 +1,29 @@
-import { useState } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/authService";
-import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { faLock } from "@fortawesome/free-solid-svg-icons";
-import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faLock,
+  faRightToBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import { t } from "../i18n";
+import { useLogin } from "../hooks/useLogin";
 
 function LoginPage() {
-  /**
-   * Stores the current email input value.
-   */
-  const [email, setEmail] = useState("");
-
-  /**
-   * Stores the current password input value.
-   */
-  const [password, setPassword] = useState("");
-
-  /**
-   * Indicates whether the login request is currently in progress.
-   */
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * Stores an error message to display when login fails.
-   */
-  const [error, setError] = useState("");
-
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
-  /**
-   * Handles the form submission and signs in the user.
-   */
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setError("");
-    setLoading(true);
-
-    try {
-      const data = await loginUser({ email, password });
-
-      // With httpOnly cookies, we only store user data (not tokens)
-      const userData = {
-        fullName: data.fullName,
-        email: data.email,
-        role: data.role,
-      };
-
-      login(userData);
-      navigate("/dashboard");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || t("login.messages.error"));
-      } else {
-        setError(t("login.messages.unexpected"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    email,
+    error,
+    handleSubmit,
+    loading,
+    password,
+    setEmail,
+    setPassword,
+  } = useLogin();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8 flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
-          <div className="text-center mb-8">
+          <div className="mb-6 text-center">
             <h1 className="text-3xl font-bold text-gray-900">
               {t("login.title")}
             </h1>
@@ -92,7 +46,7 @@ function LoginPage() {
                   <FontAwesomeIcon icon={faEnvelope} />
                 </span>
                 <input
-                  className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+                  className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                   type="email"
                   placeholder={t("login.form.emailPlaceholder")}
                   value={email}
@@ -112,7 +66,7 @@ function LoginPage() {
                   <FontAwesomeIcon icon={faLock} />
                 </span>
                 <input
-                  className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
+                  className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                   type="password"
                   placeholder={t("login.form.passwordPlaceholder")}
                   value={password}
@@ -123,7 +77,7 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="text-right">
               <Link
                 to="/forgot-password"
                 className="text-sm text-blue-600 transition hover:text-blue-700 hover:underline"
@@ -134,12 +88,10 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
               disabled={loading}
             >
-              <span className={loading ? "hidden" : "inline-flex items-center"}>
-                <FontAwesomeIcon icon={faRightToBracket} />
-              </span>
+              <FontAwesomeIcon icon={faRightToBracket} />
               <span>
                 {loading
                   ? t("login.buttons.loading")
