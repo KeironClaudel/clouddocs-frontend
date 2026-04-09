@@ -1,57 +1,12 @@
-import { useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { forgotPassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import { useForgotPassword } from "../hooks/useForgotPassword";
 
 function ForgotPasswordPage() {
-  /**
-   * Stores the current email input value.
-   */
-  const [email, setEmail] = useState("");
-
-  /**
-   * Indicates whether the forgot password request is currently running.
-   */
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * Stores a success message returned by the backend.
-   */
-  const [successMessage, setSuccessMessage] = useState("");
-
-  /**
-   * Stores an error message when the request fails.
-   */
-  const [error, setError] = useState("");
-
-  /**
-   * Handles the forgot password form submission.
-   */
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setError("");
-    setSuccessMessage("");
-    setLoading(true);
-
-    try {
-      const data = await forgotPassword(email);
-
-      setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
-      } else {
-        setError(t("forgotPassword.messages.unexpected"));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { email, error, handleSubmit, loading, setEmail, successMessage } =
+    useForgotPassword();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8 flex items-center justify-center">
@@ -90,7 +45,7 @@ function ForgotPasswordPage() {
                 <input
                   className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder={t("forgotPassword.form.emailPlaceholder")}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   disabled={loading}
