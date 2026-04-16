@@ -1,29 +1,26 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { logoutUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolderOpen } from "@fortawesome/free-solid-svg-icons";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFolderOpen,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import { canManageAdminPanels } from "../utils/permissionUtils";
 import { t } from "../i18n";
-import { NavLink } from "react-router-dom";
 
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const isAdmin = canManageAdminPanels(user);
 
-  // Helper function to determine the class for active/inactive nav links
   const getNavLinkClass = ({ isActive }) =>
-    `text-sm transition relative ${
+    `relative text-sm transition ${
       isActive
         ? "text-blue-600 font-semibold"
         : "text-gray-700 hover:text-blue-600"
     }`;
 
-  /**
-   * Invalidates the current session in the backend and clears local storage.
-   */
   async function handleLogout() {
     try {
       if (user?.refreshToken) {
@@ -37,162 +34,119 @@ function Navbar() {
     }
   }
 
+  const renderNavLink = (to, label) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `${getNavLinkClass({ isActive })} ${
+          isActive
+            ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
+            : ""
+        }`
+      }
+    >
+      {label}
+    </NavLink>
+  );
+
   return (
     <nav className="w-full border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
-      <div className="mx-auto grid max-w-9xl grid-cols-[auto_260px_1fr] items-center gap-6">
-        {/* LEFT */}
-        <NavLink
-          to="/dashboard"
-          className="flex items-center gap-2 text-lg font-semibold text-gray-900"
-        >
-          <FontAwesomeIcon icon={faFolderOpen} className="text-blue-600" />
-          <span>CloudDocs</span>
-        </NavLink>
+      <div className="mx-auto max-w-9xl">
+        {/* MOBILE */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between gap-3">
+            <NavLink
+              to="/dashboard"
+              className="flex min-w-0 items-center gap-2 text-lg font-semibold text-gray-900"
+            >
+              <FontAwesomeIcon
+                icon={faFolderOpen}
+                className="shrink-0 text-blue-600"
+              />
+              <span className="truncate">CloudDocs</span>
+            </NavLink>
 
-        <div className="hidden md:flex justify-center">
-          <span className="truncate text-sm text-gray-500 whitespace-nowrap">
-            {t("navbar.welcome")}, {user?.fullName || t("navbar.defaultUser")}
-          </span>
+            <button
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-200"
+              onClick={handleLogout}
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} />
+              <span>{t("navbar.buttons.logout")}</span>
+            </button>
+          </div>
+
+          <div className="mt-3">
+            <p className="truncate text-sm text-gray-500">
+              {t("navbar.welcome")}, {user?.fullName || t("navbar.defaultUser")}
+            </p>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            {renderNavLink("/dashboard", t("navbar.links.dashboard"))}
+            {renderNavLink("/documents", t("navbar.links.documents"))}
+            {renderNavLink("/profile", t("navbar.links.profile"))}
+
+            {isAdmin && renderNavLink("/users", t("navbar.links.users"))}
+            {isAdmin &&
+              renderNavLink(
+                "/document-access-levels",
+                t("navbar.links.documentAccessLevels"),
+              )}
+            {isAdmin &&
+              renderNavLink("/categories", t("navbar.links.categories"))}
+            {isAdmin &&
+              renderNavLink("/departments", t("navbar.links.departments"))}
+            {isAdmin &&
+              renderNavLink("/document-types", t("navbar.links.documentTypes"))}
+            {isAdmin &&
+              renderNavLink("/audit-logs", t("navbar.links.auditLogs"))}
+          </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="flex items-center justify-end gap-4">
+        {/* DESKTOP */}
+        <div className="hidden md:grid md:grid-cols-[auto_260px_1fr] md:items-center md:gap-6">
           <NavLink
             to="/dashboard"
-            className={({ isActive }) =>
-              `${getNavLinkClass({ isActive })} ${
-                isActive
-                  ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                  : ""
-              }`
-            }
+            className="flex items-center gap-2 text-lg font-semibold text-gray-900"
           >
-            {t("navbar.links.dashboard")}
+            <FontAwesomeIcon icon={faFolderOpen} className="text-blue-600" />
+            <span>CloudDocs</span>
           </NavLink>
 
-          <NavLink
-            to="/documents"
-            className={({ isActive }) =>
-              `${getNavLinkClass({ isActive })} ${
-                isActive
-                  ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                  : ""
-              }`
-            }
-          >
-            {t("navbar.links.documents")}
-          </NavLink>
+          <div className="flex justify-center">
+            <span className="truncate whitespace-nowrap text-sm text-gray-500">
+              {t("navbar.welcome")}, {user?.fullName || t("navbar.defaultUser")}
+            </span>
+          </div>
 
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `${getNavLinkClass({ isActive })} ${
-                isActive
-                  ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                  : ""
-              }`
-            }
-          >
-            {t("navbar.links.profile")}
-          </NavLink>
+          <div className="flex items-center justify-end gap-4">
+            {renderNavLink("/dashboard", t("navbar.links.dashboard"))}
+            {renderNavLink("/documents", t("navbar.links.documents"))}
+            {renderNavLink("/profile", t("navbar.links.profile"))}
 
-          {isAdmin && (
-            <NavLink
-              to="/users"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
+            {isAdmin && renderNavLink("/users", t("navbar.links.users"))}
+            {isAdmin &&
+              renderNavLink(
+                "/document-access-levels",
+                t("navbar.links.documentAccessLevels"),
+              )}
+            {isAdmin &&
+              renderNavLink("/categories", t("navbar.links.categories"))}
+            {isAdmin &&
+              renderNavLink("/departments", t("navbar.links.departments"))}
+            {isAdmin &&
+              renderNavLink("/document-types", t("navbar.links.documentTypes"))}
+            {isAdmin &&
+              renderNavLink("/audit-logs", t("navbar.links.auditLogs"))}
+
+            <button
+              className="ml-2 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-200"
+              onClick={handleLogout}
             >
-              {t("navbar.links.users")}
-            </NavLink>
-          )}
-
-          {isAdmin && (
-            <NavLink
-              to="/document-access-levels"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
-            >
-              {t("navbar.links.documentAccessLevels")}
-            </NavLink>
-          )}
-
-          {isAdmin && (
-            <NavLink
-              to="/categories"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
-            >
-              {t("navbar.links.categories")}
-            </NavLink>
-          )}
-
-          {isAdmin && (
-            <NavLink
-              to="/departments"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
-            >
-              {t("navbar.links.departments")}
-            </NavLink>
-          )}
-
-          {isAdmin && (
-            <NavLink
-              to="/document-types"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
-            >
-              {t("navbar.links.documentTypes")}
-            </NavLink>
-          )}
-
-          {isAdmin && (
-            <NavLink
-              to="/audit-logs"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} ${
-                  isActive
-                    ? "after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:bg-blue-600"
-                    : ""
-                }`
-              }
-            >
-              {t("navbar.links.auditLogs")}
-            </NavLink>
-          )}
-
-          <button
-            className="ml-2 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 transition"
-            onClick={handleLogout}
-          >
-            <FontAwesomeIcon icon={faRightFromBracket} />
-            <span>{t("navbar.buttons.logout")}</span>
-          </button>
+              <FontAwesomeIcon icon={faRightFromBracket} />
+              <span>{t("navbar.buttons.logout")}</span>
+            </button>
+          </div>
         </div>
       </div>
     </nav>
