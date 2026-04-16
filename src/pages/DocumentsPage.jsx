@@ -15,6 +15,7 @@ function DocumentsPage() {
   const {
     actionMessage,
     categories,
+    clientOptions,
     currentPage,
     deactivatingDocumentId,
     departments,
@@ -46,6 +47,7 @@ function DocumentsPage() {
     reactivatingDocumentId,
     renameValue,
     renamingDocumentId,
+    searchingClients,
     selectedVersionByDocumentId,
     setRenameValue,
     setVisibilityForm,
@@ -57,10 +59,6 @@ function DocumentsPage() {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
-    clientOptions,
-    clientSearchTerm,
-    searchingClients,
-    setClientSearchTerm,
   } = useDocumentsPage(user);
 
   const documentTableColumns = [
@@ -126,8 +124,12 @@ function DocumentsPage() {
               <input
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                 type="text"
-                value={clientSearchTerm}
-                onChange={(e) => setClientSearchTerm(e.target.value)}
+                value={filters.clientSearchTerm}
+                onChange={(e) =>
+                  handleFilterChange({
+                    target: { name: "clientSearchTerm", value: e.target.value },
+                  })
+                }
                 placeholder={t("documents.filters.searchClient")}
               />
             </div>

@@ -804,6 +804,7 @@ export function useDocumentsPage(user) {
   return {
     actionMessage,
     categories,
+    clientOptions,
     currentPage,
     deactivatingDocumentId,
     departments,
@@ -838,6 +839,7 @@ export function useDocumentsPage(user) {
     reactivatingDocumentId,
     renameValue,
     renamingDocumentId,
+    searchingClients,
     selectedVersionByDocumentId,
     selectedVisibilityAccessLevel,
     setRenameValue,
@@ -850,9 +852,5 @@ export function useDocumentsPage(user) {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
-    clientOptions,
-    clientSearchTerm,
-    searchingClients,
-    setClientSearchTerm,
   };
 }

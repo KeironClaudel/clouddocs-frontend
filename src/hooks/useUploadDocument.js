@@ -73,6 +73,11 @@ export function useUploadDocument() {
   const [clientOptions, setClientOptions] = useState([]);
   const [searchingClients, setSearchingClients] = useState(false);
 
+  /*
+   * Tracks whether the user has performed a client search to conditionally
+   */
+  const [hasSearchedClients, setHasSearchedClients] = useState(false);
+
   /**
    * Stores the upload form values.
    */
@@ -228,6 +233,7 @@ export function useUploadDocument() {
   useEffect(() => {
     if (!clientSearchTerm.trim()) {
       setClientOptions([]);
+      setHasSearchedClients(false);
       return;
     }
 
@@ -242,8 +248,11 @@ export function useUploadDocument() {
           : data.clients || data.items || [];
 
         setClientOptions(normalized);
+        setHasSearchedClients(true);
       } catch (error) {
         console.error("Failed to search clients:", error);
+        setClientOptions([]);
+        setHasSearchedClients(true);
       } finally {
         setSearchingClients(false);
       }
@@ -314,6 +323,7 @@ export function useUploadDocument() {
    */
   function resetForm() {
     setSelectedFile(null);
+    setClientSearchTerm("");
     setForm({
       categoryId: "",
       documentTypeId: "",
@@ -422,5 +432,6 @@ export function useUploadDocument() {
     clientSearchTerm,
     searchingClients,
     setClientSearchTerm,
+    hasSearchedClients,
   };
 }
