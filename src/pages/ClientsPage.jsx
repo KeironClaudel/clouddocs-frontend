@@ -1,7 +1,7 @@
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
-import { useClientsPage } from "../hooks/useClientsPage";
+import { useClientsPage } from "../hooks/useClient";
 
 function ClientsPage() {
   const {

@@ -7,6 +7,7 @@ import DataTable from "../components/DataTable";
 import { t } from "../i18n";
 import { useDocumentsPage } from "../hooks/useDocuments";
 import DocumentVisibilityEditorRow from "../components/DocumentVisibilityEditorRow";
+import ClientAutocomplete from "../components/ClientAutocomplete";
 
 function DocumentsPage() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ function DocumentsPage() {
     actionMessage,
     categories,
     clientOptions,
+    clientSearchTerm,
     currentPage,
     deactivatingDocumentId,
     departments,
@@ -27,6 +29,7 @@ function DocumentsPage() {
     handleCancelEditVisibility,
     handleCancelRename,
     handleClearFilters,
+    handleClientSearchChange,
     handleConfirmRename,
     handleDeactivateDocument,
     handleDownload,
@@ -77,7 +80,6 @@ function DocumentsPage() {
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
-        {/* HEADER */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -96,7 +98,6 @@ function DocumentsPage() {
           </Link>
         </div>
 
-        {/* FILTERS */}
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             {t("documents.filters.title")}
@@ -119,45 +120,27 @@ function DocumentsPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.clientSearchLabel")}
+                {t("documents.filters.clientLabel")}
               </label>
-              <input
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                type="text"
-                value={filters.clientSearchTerm}
-                onChange={(e) =>
+
+              <ClientAutocomplete
+                searchTerm={clientSearchTerm}
+                setSearchTerm={handleClientSearchChange}
+                options={clientOptions}
+                loading={searchingClients}
+                selectedClientId={filters.clientId || ""}
+                onSelectClient={(client) =>
                   handleFilterChange({
-                    target: { name: "clientSearchTerm", value: e.target.value },
+                    target: {
+                      name: "clientId",
+                      value: client.id,
+                    },
                   })
                 }
                 placeholder={t("documents.filters.searchClient")}
+                emptyText={t("documents.filters.noClientsFound")}
+                loadingText={t("documents.filters.searchingClients")}
               />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t("documents.filters.clientLabel")}
-              </label>
-              <select
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                name="clientId"
-                value={filters.clientId || ""}
-                onChange={handleFilterChange}
-                disabled={searchingClients}
-              >
-                <option value="">{t("documents.filters.allClients")}</option>
-                {clientOptions.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
-
-              {searchingClients && (
-                <p className="mt-2 text-xs text-gray-500">
-                  {t("documents.filters.searchingClients")}
-                </p>
-              )}
             </div>
 
             <div>
@@ -279,7 +262,7 @@ function DocumentsPage() {
 
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            {t("documents.loading")}
+            {t("documents.messages.loading")}
           </div>
         )}
 
@@ -293,7 +276,7 @@ function DocumentsPage() {
           <DataTable
             columns={documentTableColumns}
             hasData={visibleDocuments.length > 0}
-            emptyMessage={t("documents.empty")}
+            emptyMessage={t("documents.table.noData")}
             footer={
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p>
@@ -353,7 +336,7 @@ function DocumentsPage() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-700">
-                    {document.clientName || "N/A"}
+                    {document.clientName || t("documents.table.notAvailable")}
                   </td>
 
                   <td className="px-6 py-4 text-gray-700">
@@ -365,7 +348,7 @@ function DocumentsPage() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-600">
-                    {document.department || "N/A"}
+                    {document.department || t("documents.table.notAvailable")}
                   </td>
 
                   <td className="px-6 py-4 text-gray-700">

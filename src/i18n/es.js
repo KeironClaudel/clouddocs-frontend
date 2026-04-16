@@ -293,10 +293,6 @@ const es = {
     subtitle: "Visualiza los documentos disponibles y accede a sus acciones.",
     accessLevel: "Nivel de acceso",
 
-    table: {
-      client: "Cliente",
-    },
-
     buttons: {
       upload: "Subir documento",
       rename: "Renombrar",
@@ -338,10 +334,12 @@ const es = {
       clientLabel: "Cliente",
       allClients: "Todos los clientes",
       searchingClients: "Buscando clientes...",
+      noClientsFound: "No se encontraron clientes.",
     },
 
     table: {
       name: "Nombre",
+      client: "Cliente",
       category: "Categoría",
       uploadedBy: "Subido por",
       department: "Departamento",
@@ -373,60 +371,17 @@ const es = {
       reactivateError: "Error al reactivar el documento.",
       onlyPdf: "Solo se permiten archivos PDF para nuevas versiones.",
     },
+
     visibility: {
       departmentsLabel: "Departamentos visibles",
       selectAccessLevel: "Seleccionar nivel de acceso",
     },
+
     pagination: {
       showing: "Mostrando",
       of: "de",
       prev: "Anterior",
       next: "Siguiente",
-    },
-  },
-  uploadDocument: {
-    form: {
-      file: "Archivo PDF",
-      selectedFile: "Archivo seleccionado",
-      client: "Cliente",
-      searchClient: "Buscar cliente...",
-      selectClient: "Seleccionar cliente",
-      category: "Seleccionar categoría",
-      documentType: "Seleccionar tipo de documento",
-      accessLevel: "Seleccionar nivel de acceso",
-      visibleDepartments: "Departamentos visibles",
-      expirationPending: "Fecha de expiración pendiente de definición",
-    },
-    messages: {
-      loadingDepartments: "Cargando departamentos...",
-      noDepartments: "No hay departamentos disponibles.",
-      searchingClients: "Buscando clientes...",
-      noClientsFound: "No se encontraron clientes.",
-    },
-    buttons: {
-      uploading: "Subiendo...",
-      submit: "Subir documento",
-      reset: "Restablecer",
-    },
-
-    messages: {
-      loadingCategories: "Cargando categorías...",
-      loadCategoriesError: "Error al cargar las categorías.",
-      onlyPdf: "Solo se permiten archivos PDF.",
-      fileTooLarge:
-        "El archivo seleccionado excede el tamaño máximo permitido.",
-      selectFile: "Seleccione un archivo PDF.",
-      selectCategory: "Seleccione una categoría.",
-      selectType: "Seleccione un tipo de documento.",
-      selectAccess: "Seleccione un nivel de acceso.",
-      expirationRequired:
-        "Proporcione una fecha de expiración o márquela como pendiente.",
-      success: "Documento subido correctamente.",
-      uploadError: "Error al subir el documento.",
-      unexpected: "Ocurrió un error inesperado.",
-      loadingDepartments: "Cargando departamentos...",
-      noDepartments: "No hay departamentos disponibles.",
-      selectDepartments: "Seleccione al menos un departamento.",
     },
   },
   uploadDocument: {
@@ -436,10 +391,14 @@ const es = {
     form: {
       file: "Archivo PDF",
       selectedFile: "Archivo seleccionado",
+      client: "Cliente",
+      searchClient: "Buscar cliente...",
+      selectClient: "Seleccionar cliente",
       category: "Seleccionar categoría",
       documentType: "Seleccionar tipo de documento",
       accessLevel: "Seleccionar nivel de acceso",
       department: "Departamento",
+      visibleDepartments: "Departamentos visibles",
       expirationDate: "Fecha de expiración",
       expirationPending: "Fecha de expiración pendiente de definición",
     },
@@ -453,13 +412,19 @@ const es = {
     messages: {
       loadingCategories: "Cargando categorías...",
       loadCategoriesError: "Error al cargar las categorías.",
+      loadingDepartments: "Cargando departamentos...",
+      noDepartments: "No hay departamentos disponibles.",
+      searchingClients: "Buscando clientes...",
+      noClientsFound: "No se encontraron clientes.",
       onlyPdf: "Solo se permiten archivos PDF.",
       fileTooLarge:
         "El archivo seleccionado excede el tamaño máximo permitido.",
       selectFile: "Seleccione un archivo PDF.",
+      selectClient: "Seleccione un cliente.",
       selectCategory: "Seleccione una categoría.",
       selectType: "Seleccione un tipo de documento.",
       selectAccess: "Seleccione un nivel de acceso.",
+      selectDepartments: "Seleccione al menos un departamento.",
       expirationRequired:
         "Proporcione una fecha de expiración o márquela como pendiente.",
       success: "Documento subido correctamente.",

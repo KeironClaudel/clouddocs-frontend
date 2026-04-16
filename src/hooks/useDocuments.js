@@ -20,119 +20,45 @@ import { isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 
-/**
- * Encapsulates all DocumentsPage state, data loading,
- * actions, filters, pagination, versions, and visibility editing.
- */
 export function useDocumentsPage(user) {
-  /**
-   * Stores the document list returned by the API.
-   */
   const [documents, setDocuments] = useState([]);
-
-  /**
-   * Indicates whether the document request is currently in progress.
-   */
   const [loading, setLoading] = useState(true);
-
-  /**
-   * Stores an error message to display when document loading fails.
-   */
   const [error, setError] = useState("");
 
-  /**
-   * Stores the available versions for each document.
-   * The key is the document ID and the value is an array of versions.
-   */
   const [versionsByDocumentId, setVersionsByDocumentId] = useState({});
-
-  /**
-   * Stores the currently selected version ID for each document.
-   */
   const [selectedVersionByDocumentId, setSelectedVersionByDocumentId] =
     useState({});
-
-  /**
-   * Tracks whether the version list for a document is being loaded.
-   */
   const [versionLoadingByDocumentId, setVersionLoadingByDocumentId] = useState(
     {},
   );
 
-  /**
-   * Tracks which document is currently editing visibility settings.
-   */
   const [editingVisibilityDocumentId, setEditingVisibilityDocumentId] =
     useState(null);
 
-  /**
-   * Stores the visibility form state for the document being edited.
-   */
   const [visibilityForm, setVisibilityForm] = useState({
     accessLevelId: "",
     departmentIds: [],
   });
 
-  /**
-   * Tracks whether the visibility update request is in progress.
-   */
   const [updatingVisibility, setUpdatingVisibility] = useState(false);
 
-  /**
-   * Stores the current page number shown in the table.
-   */
   const [currentPage, setCurrentPage] = useState(1);
-
-  /**
-   * Defines how many documents are shown per page.
-   */
   const [pageSize] = useState(10);
-
-  /**
-   * Stores the total result count.
-   */
   const [totalCount, setTotalCount] = useState(0);
 
-  /**
-   * Stores a feedback message after document actions.
-   */
   const [actionMessage, setActionMessage] = useState("");
-
-  /**
-   * Tracks which document is currently being renamed.
-   */
   const [renamingDocumentId, setRenamingDocumentId] = useState(null);
-
-  /**
-   * Stores the new name value while editing a document.
-   */
   const [renameValue, setRenameValue] = useState("");
 
-  /**
-   * Tracks which document is currently being deactivated.
-   */
   const [deactivatingDocumentId, setDeactivatingDocumentId] = useState(null);
-
-  /**
-   * Tracks which document is currently being reactivated.
-   */
   const [reactivatingDocumentId, setReactivatingDocumentId] = useState(null);
-
-  /**
-   * Tracks which document is currently uploading a new version.
-   */
   const [uploadingVersionDocumentId, setUploadingVersionDocumentId] =
     useState(null);
 
-  /**
-   * Stores the current search term for client filtering in the visibility form.
-   */
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [clientOptions, setClientOptions] = useState([]);
   const [searchingClients, setSearchingClients] = useState(false);
-  /**
-   * Stores filter values used by the document search.
-   */
+
   const [filters, setFilters] = useState({
     searchTerm: "",
     categoryId: "",
@@ -144,22 +70,13 @@ export function useDocumentsPage(user) {
     clientId: "",
   });
 
-  /**
-   * Stores catalog data used by filters and visibility editing.
-   */
   const [categories, setCategories] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [documentAccessLevels, setDocumentAccessLevels] = useState([]);
   const [departments, setDepartments] = useState([]);
 
-  /**
-   * Calculates the total number of pages based on the document count.
-   */
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  /**
-   * Applies the local status filter to the current page of documents.
-   */
   const visibleDocuments = useMemo(() => {
     return filters.isActive === ""
       ? documents
@@ -168,39 +85,27 @@ export function useDocumentsPage(user) {
         );
   }, [documents, filters.isActive]);
 
-  /**
-   * Retrieves the selected access level for visibility editing.
-   */
   const selectedVisibilityAccessLevel = useMemo(() => {
     return documentAccessLevels.find(
       (level) => String(level.id) === String(visibilityForm.accessLevelId),
     );
   }, [documentAccessLevels, visibilityForm.accessLevelId]);
 
-  /**
-   * Returns true when the selected visibility access level
-   * requires department selection.
-   */
   const isVisibilityDepartmentOnly =
     selectedVisibilityAccessLevel?.code === "DEPARTMENT_ONLY";
 
-  /**
-   * Loads active categories for the filter dropdown.
-   */
   useEffect(() => {
     async function loadCategories() {
       try {
         const data = await getCategories();
-
         const normalizedCategories = Array.isArray(data)
           ? data
           : data.categories || data.items || [];
-
-        const activeCategories = normalizedCategories.filter(
-          (category) => category.isActive !== false,
+        setCategories(
+          normalizedCategories.filter(
+            (category) => category.isActive !== false,
+          ),
         );
-
-        setCategories(activeCategories);
       } catch (err) {
         console.error("Failed to load categories:", err);
       }
@@ -209,23 +114,16 @@ export function useDocumentsPage(user) {
     loadCategories();
   }, []);
 
-  /**
-   * Loads active document types for the filter dropdown.
-   */
   useEffect(() => {
     async function loadDocumentTypes() {
       try {
         const data = await getDocumentTypes();
-
         const normalizedTypes = Array.isArray(data)
           ? data
           : data.documentTypes || data.items || [];
-
-        const activeTypes = normalizedTypes.filter(
-          (type) => type.isActive !== false,
+        setDocumentTypes(
+          normalizedTypes.filter((type) => type.isActive !== false),
         );
-
-        setDocumentTypes(activeTypes);
       } catch (err) {
         console.error("Failed to load document types:", err);
       }
@@ -234,23 +132,16 @@ export function useDocumentsPage(user) {
     loadDocumentTypes();
   }, []);
 
-  /**
-   * Loads active document access levels for visibility editing.
-   */
   useEffect(() => {
     async function loadDocumentAccessLevels() {
       try {
         const data = await getDocumentAccessLevels();
-
         const normalizedAccessLevels = Array.isArray(data)
           ? data
           : data.documentAccessLevels || data.items || [];
-
-        const activeAccessLevels = normalizedAccessLevels.filter(
-          (level) => level.isActive !== false,
+        setDocumentAccessLevels(
+          normalizedAccessLevels.filter((level) => level.isActive !== false),
         );
-
-        setDocumentAccessLevels(activeAccessLevels);
       } catch (err) {
         console.error("Failed to load document access levels:", err);
       }
@@ -259,23 +150,18 @@ export function useDocumentsPage(user) {
     loadDocumentAccessLevels();
   }, []);
 
-  /**
-   * Loads active departments for visibility editing.
-   */
   useEffect(() => {
     async function loadDepartments() {
       try {
         const data = await getDepartments();
-
         const normalizedDepartments = Array.isArray(data)
           ? data
           : data.departments || data.items || [];
-
-        const activeDepartments = normalizedDepartments.filter(
-          (department) => department.isActive !== false,
+        setDepartments(
+          normalizedDepartments.filter(
+            (department) => department.isActive !== false,
+          ),
         );
-
-        setDepartments(activeDepartments);
       } catch (err) {
         console.error("Failed to load departments:", err);
       }
@@ -284,18 +170,12 @@ export function useDocumentsPage(user) {
     loadDepartments();
   }, []);
 
-  /**
-   * Ensures the current page stays valid when the document list changes.
-   */
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
 
-  /**
-   * Loads the document list when filters or pagination change.
-   */
   useEffect(() => {
     async function loadDocuments() {
       setLoading(true);
@@ -341,7 +221,6 @@ export function useDocumentsPage(user) {
         }
 
         const data = await searchDocuments(params);
-
         const items = Array.isArray(data?.items) ? data.items : [];
 
         setDocuments(items);
@@ -360,9 +239,6 @@ export function useDocumentsPage(user) {
     loadDocuments();
   }, [currentPage, pageSize, filters, user]);
 
-  /**
-   * Searches clients based on the current search term in the visibility form.
-   */
   useEffect(() => {
     if (!clientSearchTerm.trim()) {
       setClientOptions([]);
@@ -374,7 +250,6 @@ export function useDocumentsPage(user) {
         setSearchingClients(true);
 
         const data = await searchClients(clientSearchTerm.trim());
-
         const normalized = Array.isArray(data)
           ? data
           : data.clients || data.items || [];
@@ -390,9 +265,6 @@ export function useDocumentsPage(user) {
     return () => clearTimeout(timeout);
   }, [clientSearchTerm]);
 
-  /**
-   * Loads document versions only once per document when needed.
-   */
   async function handleLoadVersions(documentId) {
     if (versionsByDocumentId[documentId]) {
       return;
@@ -405,7 +277,6 @@ export function useDocumentsPage(user) {
 
     try {
       const data = await getDocumentVersions(documentId);
-
       const normalizedVersions = Array.isArray(data)
         ? data
         : data.versions || data.items || [];
@@ -429,9 +300,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Stores the selected version ID for a document.
-   */
   function handleVersionChange(documentId, versionId) {
     setSelectedVersionByDocumentId((prev) => ({
       ...prev,
@@ -439,14 +307,10 @@ export function useDocumentsPage(user) {
     }));
   }
 
-  /**
-   * Opens a PDF preview in a new browser tab.
-   */
   async function handlePreview(documentId) {
     try {
       const selectedVersionId = selectedVersionByDocumentId[documentId] || null;
       const blob = await previewDocument(documentId, selectedVersionId);
-
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (err) {
@@ -454,23 +318,18 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Forces the browser to download the file.
-   */
   async function handleDownload(documentId, fileName) {
     try {
       const selectedVersionId = selectedVersionByDocumentId[documentId] || null;
       const blob = await downloadDocument(documentId, selectedVersionId);
 
       const url = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.download = fileName;
 
       document.body.appendChild(link);
       link.click();
-
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
@@ -478,9 +337,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Uploads a new version for an existing document.
-   */
   async function handleUploadVersion(documentId, file) {
     if (!file) {
       return;
@@ -522,23 +378,14 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Moves to the previous page if possible.
-   */
   function handlePreviousPage() {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   }
 
-  /**
-   * Moves to the next page if possible.
-   */
   function handleNextPage() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   }
 
-  /**
-   * Updates a document name in local state after a successful rename.
-   */
   function updateDocumentNameInState(documentId, newName) {
     setDocuments((prevDocuments) =>
       prevDocuments.map((document) =>
@@ -549,9 +396,6 @@ export function useDocumentsPage(user) {
     );
   }
 
-  /**
-   * Marks a document as inactive in local state after a successful deactivation.
-   */
   function deactivateDocumentInState(documentId) {
     setDocuments((prevDocuments) =>
       prevDocuments.map((document) =>
@@ -562,9 +406,6 @@ export function useDocumentsPage(user) {
     );
   }
 
-  /**
-   * Marks a document as active in local state after reactivation.
-   */
   function reactivateDocumentInState(documentId) {
     setDocuments((prevDocuments) =>
       prevDocuments.map((document) =>
@@ -573,26 +414,17 @@ export function useDocumentsPage(user) {
     );
   }
 
-  /**
-   * Opens inline rename mode for a document.
-   */
   function handleStartRename(document) {
     setActionMessage("");
     setRenamingDocumentId(document.id);
     setRenameValue(document.originalFileName);
   }
 
-  /**
-   * Cancels inline rename mode.
-   */
   function handleCancelRename() {
     setRenamingDocumentId(null);
     setRenameValue("");
   }
 
-  /**
-   * Handles the rename request for a document.
-   */
   async function handleConfirmRename(documentId) {
     if (!renameValue.trim()) {
       setActionMessage(t("documents.messages.emptyName"));
@@ -617,9 +449,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Handles document deactivation.
-   */
   async function handleDeactivateDocument(documentId) {
     setActionMessage("");
     setDeactivatingDocumentId(documentId);
@@ -641,9 +470,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Handles document reactivation.
-   */
   async function handleReactivateDocument(documentId) {
     setActionMessage("");
     setReactivatingDocumentId(documentId);
@@ -665,9 +491,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Handles filter state and resets pagination.
-   */
   function handleFilterChange(event) {
     const { name, value } = event.target;
 
@@ -679,9 +502,19 @@ export function useDocumentsPage(user) {
     setCurrentPage(1);
   }
 
-  /**
-   * Clears filter options and resets pagination.
-   */
+  function handleClientSearchChange(value) {
+    setClientSearchTerm(value);
+
+    if (!value.trim()) {
+      setFilters((prev) => ({
+        ...prev,
+        clientId: "",
+      }));
+    }
+
+    setCurrentPage(1);
+  }
+
   function handleClearFilters() {
     setFilters({
       searchTerm: "",
@@ -691,15 +524,14 @@ export function useDocumentsPage(user) {
       documentType: "",
       expirationPending: "",
       isActive: "",
+      clientId: "",
     });
 
+    setClientSearchTerm("");
+    setClientOptions([]);
     setCurrentPage(1);
   }
 
-  /**
-   * Opens the visibility settings form for a document
-   * and loads its current settings into the form state.
-   */
   function handleStartEditVisibility(document) {
     setActionMessage("");
     setEditingVisibilityDocumentId(document.id);
@@ -712,9 +544,6 @@ export function useDocumentsPage(user) {
     });
   }
 
-  /**
-   * Toggles the selection of a department for visibility settings.
-   */
   function handleVisibilityDepartmentToggle(departmentId) {
     setVisibilityForm((prev) => {
       const exists = prev.departmentIds.includes(departmentId);
@@ -728,9 +557,6 @@ export function useDocumentsPage(user) {
     });
   }
 
-  /**
-   * Saves the updated visibility settings for a document.
-   */
   async function handleSaveVisibility(documentId) {
     if (!visibilityForm.accessLevelId) {
       setActionMessage(t("documents.messages.selectAccessLevel"));
@@ -790,9 +616,6 @@ export function useDocumentsPage(user) {
     }
   }
 
-  /**
-   * Cancels visibility editing mode and resets the form state.
-   */
   function handleCancelEditVisibility() {
     setEditingVisibilityDocumentId(null);
     setVisibilityForm({
@@ -805,6 +628,7 @@ export function useDocumentsPage(user) {
     actionMessage,
     categories,
     clientOptions,
+    clientSearchTerm,
     currentPage,
     deactivatingDocumentId,
     departments,
@@ -817,6 +641,7 @@ export function useDocumentsPage(user) {
     handleCancelEditVisibility,
     handleCancelRename,
     handleClearFilters,
+    handleClientSearchChange,
     handleConfirmRename,
     handleDeactivateDocument,
     handleDownload,

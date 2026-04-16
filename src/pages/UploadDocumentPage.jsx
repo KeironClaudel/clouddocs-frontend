@@ -1,6 +1,6 @@
 import { t } from "../i18n";
 import { useUploadDocument } from "../hooks/useUploadDocument";
-
+import ClientAutocomplete from "../components/ClientAutocomplete";
 function UploadDocumentPage() {
   const {
     categories,
@@ -84,33 +84,21 @@ function UploadDocumentPage() {
               </label>
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  type="text"
-                  value={clientSearchTerm}
-                  onChange={(e) => setClientSearchTerm(e.target.value)}
-                  placeholder={t("uploadDocument.form.searchClient")}
-                  disabled={uploading}
+                <ClientAutocomplete
+                  searchTerm={clientSearchTerm}
+                  setSearchTerm={setClientSearchTerm}
+                  options={clientOptions}
+                  loading={searchingClients}
+                  selectedClientId={form.clientId}
+                  onSelectClient={(client) =>
+                    handleInputChange({
+                      target: {
+                        name: "clientId",
+                        value: client.id,
+                      },
+                    })
+                  }
                 />
-
-                <select
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  name="clientId"
-                  value={form.clientId}
-                  onChange={handleInputChange}
-                  disabled={uploading || searchingClients}
-                  required
-                >
-                  <option value="">
-                    {t("uploadDocument.form.selectClient")}
-                  </option>
-
-                  {clientOptions.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {searchingClients && (

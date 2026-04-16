@@ -18,6 +18,7 @@ import DocumentTypePage from "./pages/DocumentTypePage";
 import DocumentAccessLevelsPage from "./pages/DocumentAccessLevelsPage";
 import DepartmentsPage from "./pages/DepartmentsPage";
 import UnderConstructionPage from "./pages/UnderConstructionPage";
+import ClientsPage from "./pages/ClientsPage";
 
 function App() {
   return (
