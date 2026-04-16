@@ -646,7 +646,7 @@ const es = {
       createTitle: "Crear cliente",
       editTitle: "Editar cliente",
       name: "Nombre comercial",
-      legalName: "Razón social",
+      legalName: "Nombre legal oficial",
       identification: "Identificación",
       email: "Correo electrónico",
       phone: "Teléfono",

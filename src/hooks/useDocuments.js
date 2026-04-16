@@ -11,7 +11,6 @@ import {
   updateDocumentVisibility,
   sendDocumentToClient,
   uploadDocumentVersion,
-  sendDocumentToClient,
 } from "../services/documentService";
 import { searchClients } from "../services/clientService";
 import { getDepartments } from "../services/departmentService";
@@ -26,9 +25,6 @@ export function useDocumentsPage(user) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [sendingToClientDocumentId, setSendingToClientDocumentId] =
-    useState(null);
 
   const [sendingToClientDocumentId, setSendingToClientDocumentId] =
     useState(null);

@@ -540,7 +540,7 @@ function DocumentsPage() {
             ))}
           </DataTable>
         )}
-        /* MODAL */
+        {/* MODAL */}
         {sendToClientModalDocument && (
           <SendToClientModal
             documentName={sendToClientModalDocument.originalFileName}
