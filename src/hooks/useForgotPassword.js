@@ -3,6 +3,7 @@ import axios from "axios";
 import { forgotPassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Encapsulates all ForgotPasswordPage state and handlers.
