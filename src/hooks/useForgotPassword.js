@@ -61,6 +61,8 @@ export function useForgotPassword() {
   //   }
   // }
 
+  const navigate = useNavigate();
+
   async function handleSubmit(event) {
     event.preventDefault();
 
