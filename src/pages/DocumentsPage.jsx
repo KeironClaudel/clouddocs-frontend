@@ -10,6 +10,7 @@ import DocumentVisibilityEditorRow from "../components/DocumentVisibilityEditorR
 
 function DocumentsPage() {
   const { user } = useAuth();
+  const canManage = canManageAdminPanels(user);
 
   const {
     actionMessage,
@@ -56,10 +57,15 @@ function DocumentsPage() {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
+    clientOptions,
+    clientSearchTerm,
+    searchingClients,
+    setClientSearchTerm,
   } = useDocumentsPage(user);
 
   const documentTableColumns = [
     { key: "name", label: t("documents.table.name") },
+    { key: "client", label: t("documents.table.client") },
     { key: "category", label: t("documents.table.category") },
     { key: "uploadedBy", label: t("documents.table.uploadedBy") },
     { key: "department", label: t("documents.table.department") },
@@ -111,6 +117,45 @@ function DocumentsPage() {
                 value={filters.searchTerm}
                 onChange={handleFilterChange}
               />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.clientSearchLabel")}
+              </label>
+              <input
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                type="text"
+                value={clientSearchTerm}
+                onChange={(e) => setClientSearchTerm(e.target.value)}
+                placeholder={t("documents.filters.searchClient")}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documents.filters.clientLabel")}
+              </label>
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                name="clientId"
+                value={filters.clientId || ""}
+                onChange={handleFilterChange}
+                disabled={searchingClients}
+              >
+                <option value="">{t("documents.filters.allClients")}</option>
+                {clientOptions.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.name}
+                  </option>
+                ))}
+              </select>
+
+              {searchingClients && (
+                <p className="mt-2 text-xs text-gray-500">
+                  {t("documents.filters.searchingClients")}
+                </p>
+              )}
             </div>
 
             <div>
@@ -195,7 +240,7 @@ function DocumentsPage() {
               </select>
             </div>
 
-            {canManageAdminPanels && (
+            {canManage && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   {t("documents.filters.statusLabel")}
@@ -238,7 +283,7 @@ function DocumentsPage() {
 
         {!loading && error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {t("documents.error")}
+            {error}
           </div>
         )}
 
@@ -306,6 +351,10 @@ function DocumentsPage() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-700">
+                    {document.clientName || "N/A"}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-700">
                     {document.categoryName}
                   </td>
 
@@ -365,7 +414,7 @@ function DocumentsPage() {
 
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
-                      {canManageAdminPanels && (
+                      {canManage && (
                         <button
                           className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
                           onClick={() => handleStartRename(document)}
@@ -378,7 +427,7 @@ function DocumentsPage() {
                         </button>
                       )}
 
-                      {canManageAdminPanels && (
+                      {canManage && (
                         <>
                           <input
                             id={`upload-version-${document.id}`}
@@ -427,7 +476,7 @@ function DocumentsPage() {
                         {t("documents.buttons.download")}
                       </button>
 
-                      {canManageAdminPanels &&
+                      {canManage &&
                         (document.isActive ? (
                           <button
                             className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
@@ -454,13 +503,13 @@ function DocumentsPage() {
                           </button>
                         ))}
 
-                      {canManageAdminPanels && (
+                      {canManage && (
                         <button
                           className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:bg-purple-100"
                           onClick={() => handleStartEditVisibility(document)}
                           disabled={!document.isActive}
                         >
-                          Editar visibilidad
+                          {t("documents.buttons.editVisibility")}
                         </button>
                       )}
                     </div>

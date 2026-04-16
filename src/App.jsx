@@ -29,6 +29,17 @@ function App() {
         <Route path="/under-construction" element={<UnderConstructionPage />} />
 
         <Route
+          path="/clients"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ClientsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/dashboard"
           element={
             <ProtectedRoute>

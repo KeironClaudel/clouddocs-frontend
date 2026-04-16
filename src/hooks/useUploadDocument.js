@@ -6,6 +6,7 @@ import { getDocumentTypes } from "../services/documentTypeService";
 import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import { getDepartments } from "../services/departmentService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { searchClients } from "../services/clientService";
 import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
@@ -66,6 +67,13 @@ export function useUploadDocument() {
   const [documentTypes, setDocumentTypes] = useState([]);
 
   /**
+   * Stores the current search term for client lookup and the resulting options.
+   */
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [clientOptions, setClientOptions] = useState([]);
+  const [searchingClients, setSearchingClients] = useState(false);
+
+  /**
    * Stores the upload form values.
    */
   const [form, setForm] = useState({
@@ -75,6 +83,7 @@ export function useUploadDocument() {
     expirationDatePendingDefinition: false,
     accessLevelId: "",
     departmentIds: [],
+    clientId: "",
   });
 
   /**
@@ -213,6 +222,36 @@ export function useUploadDocument() {
     }
   }, [isDepartmentOnly, form.departmentIds.length]);
 
+  /*
+   * Performs a debounced search for clients when the search term changes.
+   */
+  useEffect(() => {
+    if (!clientSearchTerm.trim()) {
+      setClientOptions([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        setSearchingClients(true);
+
+        const data = await searchClients(clientSearchTerm.trim());
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.clients || data.items || [];
+
+        setClientOptions(normalized);
+      } catch (error) {
+        console.error("Failed to search clients:", error);
+      } finally {
+        setSearchingClients(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [clientSearchTerm]);
+
   /**
    * Updates form state when a standard input changes.
    */
@@ -282,6 +321,7 @@ export function useUploadDocument() {
       expirationDatePendingDefinition: false,
       accessLevelId: "",
       departmentIds: [],
+      clientId: "",
     });
   }
 
@@ -301,6 +341,11 @@ export function useUploadDocument() {
 
     if (!form.categoryId) {
       setError(t("uploadDocument.messages.selectCategory"));
+      return;
+    }
+
+    if (!form.clientId) {
+      setError(t("uploadDocument.messages.selectClient"));
       return;
     }
 
@@ -335,6 +380,7 @@ export function useUploadDocument() {
         expirationDatePendingDefinition: form.expirationDatePendingDefinition,
         accessLevelId: form.accessLevelId,
         departmentIds: isDepartmentOnly ? form.departmentIds : [],
+        clientId: form.clientId,
       };
 
       await uploadDocument(payload);
@@ -372,5 +418,9 @@ export function useUploadDocument() {
     selectedFile,
     successMessage,
     uploading,
+    clientOptions,
+    clientSearchTerm,
+    searchingClients,
+    setClientSearchTerm,
   };
 }

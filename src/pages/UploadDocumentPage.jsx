@@ -20,6 +20,10 @@ function UploadDocumentPage() {
     selectedFile,
     successMessage,
     uploading,
+    clientOptions,
+    clientSearchTerm,
+    searchingClients,
+    setClientSearchTerm,
   } = useUploadDocument();
 
   return (
@@ -71,6 +75,57 @@ function UploadDocumentPage() {
                   {t("uploadDocument.form.selectedFile")}: {selectedFile.name}
                 </p>
               )}
+            </div>
+
+            {/* CLIENT */}
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("uploadDocument.form.client")}
+              </label>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  type="text"
+                  value={clientSearchTerm}
+                  onChange={(e) => setClientSearchTerm(e.target.value)}
+                  placeholder={t("uploadDocument.form.searchClient")}
+                  disabled={uploading}
+                />
+
+                <select
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  name="clientId"
+                  value={form.clientId}
+                  onChange={handleInputChange}
+                  disabled={uploading || searchingClients}
+                  required
+                >
+                  <option value="">
+                    {t("uploadDocument.form.selectClient")}
+                  </option>
+
+                  {clientOptions.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {searchingClients && (
+                <p className="mt-2 text-sm text-gray-500">
+                  {t("uploadDocument.messages.searchingClients")}
+                </p>
+              )}
+
+              {!searchingClients &&
+                clientSearchTerm.trim() &&
+                clientOptions.length === 0 && (
+                  <p className="mt-2 text-sm text-gray-500">
+                    {t("uploadDocument.messages.noClientsFound")}
+                  </p>
+                )}
             </div>
 
             {/* GRID */}

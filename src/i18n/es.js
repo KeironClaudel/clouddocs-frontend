@@ -293,6 +293,10 @@ const es = {
     subtitle: "Visualiza los documentos disponibles y accede a sus acciones.",
     accessLevel: "Nivel de acceso",
 
+    table: {
+      client: "Cliente",
+    },
+
     buttons: {
       upload: "Subir documento",
       rename: "Renombrar",
@@ -329,6 +333,11 @@ const es = {
       typeLabel: "Tipo documental",
       expirationLabel: "Expiración",
       statusLabel: "Estado",
+      clientSearchLabel: "Búsqueda de cliente",
+      searchClient: "Buscar cliente...",
+      clientLabel: "Cliente",
+      allClients: "Todos los clientes",
+      searchingClients: "Buscando clientes...",
     },
 
     table: {
@@ -376,24 +385,27 @@ const es = {
     },
   },
   uploadDocument: {
-    title: "Subir documento",
-    subtitle: "Sube archivos PDF y registra sus metadatos de forma segura.",
-
     form: {
       file: "Archivo PDF",
       selectedFile: "Archivo seleccionado",
+      client: "Cliente",
+      searchClient: "Buscar cliente...",
+      selectClient: "Seleccionar cliente",
       category: "Seleccionar categoría",
       documentType: "Seleccionar tipo de documento",
       accessLevel: "Seleccionar nivel de acceso",
-      department: "Departamento",
-      expirationDate: "Fecha de expiración",
-      expirationPending: "Fecha de expiración pendiente de definición",
       visibleDepartments: "Departamentos visibles",
+      expirationPending: "Fecha de expiración pendiente de definición",
     },
-
+    messages: {
+      loadingDepartments: "Cargando departamentos...",
+      noDepartments: "No hay departamentos disponibles.",
+      searchingClients: "Buscando clientes...",
+      noClientsFound: "No se encontraron clientes.",
+    },
     buttons: {
-      submit: "Subir documento",
       uploading: "Subiendo...",
+      submit: "Subir documento",
       reset: "Restablecer",
     },
 
@@ -518,6 +530,7 @@ const es = {
       documents: "Documentos",
       profile: "Perfil",
       users: "Usuarios",
+      clients: "Clientes",
       categories: "Categorías",
       documentTypes: "Tipos documentales",
       auditLogs: "Auditoría",

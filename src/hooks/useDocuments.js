@@ -11,6 +11,7 @@ import {
   updateDocumentVisibility,
   uploadDocumentVersion,
 } from "../services/documentService";
+import { searchClients } from "../services/clientService";
 import { getDepartments } from "../services/departmentService";
 import { getDocumentTypes } from "../services/documentTypeService";
 import { getCategories } from "../services/categoryService";
@@ -124,6 +125,12 @@ export function useDocumentsPage(user) {
     useState(null);
 
   /**
+   * Stores the current search term for client filtering in the visibility form.
+   */
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [clientOptions, setClientOptions] = useState([]);
+  const [searchingClients, setSearchingClients] = useState(false);
+  /**
    * Stores filter values used by the document search.
    */
   const [filters, setFilters] = useState({
@@ -134,6 +141,7 @@ export function useDocumentsPage(user) {
     documentType: "",
     expirationPending: "",
     isActive: "",
+    clientId: "",
   });
 
   /**
@@ -307,6 +315,10 @@ export function useDocumentsPage(user) {
           params.categoryId = filters.categoryId;
         }
 
+        if (filters.clientId) {
+          params.clientId = filters.clientId;
+        }
+
         if (filters.month) {
           params.month = Number(filters.month);
         }
@@ -347,6 +359,36 @@ export function useDocumentsPage(user) {
 
     loadDocuments();
   }, [currentPage, pageSize, filters, user]);
+
+  /**
+   * Searches clients based on the current search term in the visibility form.
+   */
+  useEffect(() => {
+    if (!clientSearchTerm.trim()) {
+      setClientOptions([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        setSearchingClients(true);
+
+        const data = await searchClients(clientSearchTerm.trim());
+
+        const normalized = Array.isArray(data)
+          ? data
+          : data.clients || data.items || [];
+
+        setClientOptions(normalized);
+      } catch (error) {
+        console.error("Failed to search clients:", error);
+      } finally {
+        setSearchingClients(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [clientSearchTerm]);
 
   /**
    * Loads document versions only once per document when needed.
@@ -808,5 +850,9 @@ export function useDocumentsPage(user) {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
+    clientOptions,
+    clientSearchTerm,
+    searchingClients,
+    setClientSearchTerm,
   };
 }

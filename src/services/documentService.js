@@ -51,6 +51,9 @@ export async function uploadDocument(documentData) {
   const formData = new FormData();
 
   formData.append("file", documentData.file);
+  formData.append("originalFileName", documentData.originalFileName);
+  formData.append("contentType", documentData.contentType);
+  formData.append("fileSize", String(documentData.fileSize));
   formData.append("categoryId", documentData.categoryId);
   formData.append("documentTypeId", String(documentData.documentTypeId));
   formData.append(
@@ -59,8 +62,16 @@ export async function uploadDocument(documentData) {
   );
   formData.append("accessLevelId", String(documentData.accessLevelId));
 
+  if (documentData.clientId) {
+    formData.append("clientId", documentData.clientId);
+  }
+
   if (documentData.expirationDate) {
     formData.append("expirationDate", documentData.expirationDate);
+  }
+
+  if (documentData.department) {
+    formData.append("department", documentData.department);
   }
 
   if (Array.isArray(documentData.departmentIds)) {

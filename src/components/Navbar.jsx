@@ -87,6 +87,7 @@ function Navbar() {
             {renderNavLink("/profile", t("navbar.links.profile"))}
 
             {isAdmin && renderNavLink("/users", t("navbar.links.users"))}
+            {isAdmin && renderNavLink("/clients", t("navbar.links.clients"))}
             {isAdmin &&
               renderNavLink(
                 "/document-access-levels",
@@ -125,6 +126,7 @@ function Navbar() {
             {renderNavLink("/profile", t("navbar.links.profile"))}
 
             {isAdmin && renderNavLink("/users", t("navbar.links.users"))}
+            {isAdmin && renderNavLink("/clients", t("navbar.links.clients"))}
             {isAdmin &&
               renderNavLink(
                 "/document-access-levels",
