@@ -39,7 +39,7 @@ function Navbar() {
 
   return (
     <nav className="w-full border-b border-gray-200 bg-white px-4 py-3 shadow-sm">
-      <div className="relative mx-auto flex max-w-9xl items-center justify-between">
+      <div className="mx-auto grid max-w-9xl grid-cols-[auto_260px_1fr] items-center gap-6">
         {/* LEFT */}
         <NavLink
           to="/dashboard"
@@ -49,15 +49,14 @@ function Navbar() {
           <span>CloudDocs</span>
         </NavLink>
 
-        {/* CENTER (FIXED) */}
-        <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 transform">
-          <span className="hidden text-sm text-gray-500 md:block whitespace-nowrap">
+        <div className="hidden md:flex justify-center">
+          <span className="truncate text-sm text-gray-500 whitespace-nowrap">
             {t("navbar.welcome")}, {user?.fullName || t("navbar.defaultUser")}
           </span>
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end gap-4">
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
