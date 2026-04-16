@@ -29,6 +29,8 @@ export function useForgotPassword() {
    */
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+
   /**
    * Resets transient feedback messages.
    */
@@ -60,8 +62,6 @@ export function useForgotPassword() {
   //     setLoading(false);
   //   }
   // }
-
-  const navigate = useNavigate();
 
   async function handleSubmit(event) {
     event.preventDefault();
