@@ -17,6 +17,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DocumentTypePage from "./pages/DocumentTypePage";
 import DocumentAccessLevelsPage from "./pages/DocumentAccessLevelsPage";
 import DepartmentsPage from "./pages/DepartmentsPage";
+import UnderConstructionPage from "./pages/UnderConstructionPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/under-construction" element={<UnderConstructionPage />} />
 
         <Route
           path="/dashboard"

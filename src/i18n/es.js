@@ -627,6 +627,12 @@ const es = {
       unexpected: "Ocurrió un error inesperado.",
     },
   },
+  underConstruction: {
+    title: "En construcción",
+    description:
+      "Esta funcionalidad aún no está disponible en esta versión demo.",
+    back: "Volver al login",
+  },
 };
 
 export default es;

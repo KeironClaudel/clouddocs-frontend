@@ -39,25 +39,38 @@ export function useForgotPassword() {
   /**
    * Handles the forgot password form submission.
    */
+  // async function handleSubmit(event) {
+  //   event.preventDefault();
+
+  //   resetMessages();
+  //   setLoading(true);
+
+  //   try {
+  //     const data = await forgotPassword(email);
+
+  //     setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
+  //   } catch (err) {
+  //     if (axios.isAxiosError(err)) {
+  //       setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
+  //     } else {
+  //       setError(t("forgotPassword.messages.unexpected"));
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
   async function handleSubmit(event) {
     event.preventDefault();
 
-    resetMessages();
     setLoading(true);
+    setSuccessMessage(
+      "Demo: El flujo del cambio de contraseña está en desarrollo. Redirigiendo...",
+    );
 
-    try {
-      const data = await forgotPassword(email);
-
-      setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
-      } else {
-        setError(t("forgotPassword.messages.unexpected"));
-      }
-    } finally {
-      setLoading(false);
-    }
+    setTimeout(() => {
+      navigate("/under-construction");
+    }, 1200);
   }
 
   return {
