@@ -626,6 +626,63 @@ const es = {
       "Esta funcionalidad aún no está disponible en esta versión demo.",
     back: "Volver al login",
   },
+  clients: {
+    title: "Clientes",
+    subtitle: "Gestiona los clientes disponibles en el sistema.",
+
+    buttons: {
+      create: "Crear cliente",
+      cancel: "Cancelar",
+      save: "Guardar cambios",
+      creating: "Creando...",
+      saving: "Guardando...",
+      edit: "Editar",
+      deactivate: "Desactivar",
+      reactivate: "Reactivar",
+      processing: "Procesando...",
+    },
+
+    form: {
+      createTitle: "Crear cliente",
+      editTitle: "Editar cliente",
+      name: "Nombre comercial",
+      legalName: "Razón social",
+      identification: "Identificación",
+      email: "Correo electrónico",
+      phone: "Teléfono",
+      notes: "Notas",
+    },
+
+    table: {
+      name: "Nombre",
+      identification: "Identificación",
+      email: "Correo",
+      phone: "Teléfono",
+      status: "Estado",
+      created: "Creado",
+      updated: "Actualizado",
+      actions: "Acciones",
+      active: "Activo",
+      inactive: "Inactivo",
+      noData: "No se encontraron clientes.",
+      notAvailable: "N/A",
+    },
+
+    messages: {
+      loading: "Cargando clientes...",
+      created: "Cliente creado correctamente.",
+      updated: "Cliente actualizado correctamente.",
+      deactivated: "Cliente desactivado correctamente.",
+      reactivated: "Cliente reactivado correctamente.",
+      loadError: "Error al cargar los clientes.",
+      createError: "Error al crear el cliente.",
+      updateError: "Error al actualizar el cliente.",
+      deactivateError: "Error al desactivar el cliente.",
+      reactivateError: "Error al reactivar el cliente.",
+      unexpected: "Ocurrió un error inesperado.",
+      nameRequired: "El nombre del cliente es obligatorio.",
+    },
+  },
 };
 
 export default es;

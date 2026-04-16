@@ -30,28 +30,34 @@ function ClientsPage() {
   } = useClientsPage();
 
   const clientTableColumns = [
-    { key: "name", label: "Nombre" },
-    { key: "description", label: "Descripción" },
-    { key: "status", label: "Estado" },
-    { key: "createdAt", label: "Creado" },
-    { key: "actions", label: "Acciones" },
+    { key: "name", label: t("clients.table.name") },
+    { key: "identification", label: t("clients.table.identification") },
+    { key: "email", label: t("clients.table.email") },
+    { key: "phone", label: t("clients.table.phone") },
+    { key: "status", label: t("clients.table.status") },
+    { key: "createdAt", label: t("clients.table.created") },
+    { key: "updatedAt", label: t("clients.table.updated") },
+    { key: "actions", label: t("clients.table.actions") },
   ];
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Gestiona los clientes disponibles en el sistema.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("clients.title")}
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-600">{t("clients.subtitle")}</p>
 
           <div className="mt-4">
             <button
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               onClick={() => setShowCreateForm((prev) => !prev)}
             >
-              {showCreateForm ? "Cancelar" : "Crear cliente"}
+              {showCreateForm
+                ? t("clients.buttons.cancel")
+                : t("clients.buttons.create")}
             </button>
           </div>
         </div>
@@ -65,29 +71,88 @@ function ClientsPage() {
         {showCreateForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Crear cliente
+              {t("clients.form.createTitle")}
             </h2>
 
             <form onSubmit={handleCreateClient} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  type="text"
-                  name="name"
-                  value={createForm.name}
-                  onChange={handleCreateFormChange}
-                  placeholder="Nombre"
-                  required
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.name")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="name"
+                    value={createForm.name}
+                    onChange={handleCreateFormChange}
+                    required
+                  />
+                </div>
 
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  type="text"
-                  name="description"
-                  value={createForm.description}
-                  onChange={handleCreateFormChange}
-                  placeholder="Descripción"
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.legalName")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="legalName"
+                    value={createForm.legalName}
+                    onChange={handleCreateFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.identification")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="identification"
+                    value={createForm.identification}
+                    onChange={handleCreateFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.email")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="email"
+                    name="email"
+                    value={createForm.email}
+                    onChange={handleCreateFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.phone")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="phone"
+                    value={createForm.phone}
+                    onChange={handleCreateFormChange}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.notes")}
+                  </label>
+                  <textarea
+                    className="min-h-[110px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    name="notes"
+                    value={createForm.notes}
+                    onChange={handleCreateFormChange}
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3">
@@ -96,7 +161,9 @@ function ClientsPage() {
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:opacity-70"
                   disabled={creatingClient}
                 >
-                  {creatingClient ? "Creando..." : "Crear cliente"}
+                  {creatingClient
+                    ? t("clients.buttons.creating")
+                    : t("clients.buttons.create")}
                 </button>
 
                 <button
@@ -105,7 +172,7 @@ function ClientsPage() {
                   onClick={resetCreateForm}
                   disabled={creatingClient}
                 >
-                  Cancelar
+                  {t("clients.buttons.cancel")}
                 </button>
               </div>
             </form>
@@ -115,27 +182,88 @@ function ClientsPage() {
         {showEditForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Editar cliente
+              {t("clients.form.editTitle")}
             </h2>
 
             <form onSubmit={handleUpdateClient} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  type="text"
-                  name="name"
-                  value={editForm.name}
-                  onChange={handleEditFormChange}
-                  required
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.name")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="name"
+                    value={editForm.name}
+                    onChange={handleEditFormChange}
+                    required
+                  />
+                </div>
 
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  type="text"
-                  name="description"
-                  value={editForm.description}
-                  onChange={handleEditFormChange}
-                />
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.legalName")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="legalName"
+                    value={editForm.legalName}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.identification")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="identification"
+                    value={editForm.identification}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.email")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="email"
+                    name="email"
+                    value={editForm.email}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.phone")}
+                  </label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="text"
+                    name="phone"
+                    value={editForm.phone}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    {t("clients.form.notes")}
+                  </label>
+                  <textarea
+                    className="min-h-[110px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    name="notes"
+                    value={editForm.notes}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3">
@@ -144,7 +272,9 @@ function ClientsPage() {
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white transition hover:bg-indigo-700"
                   disabled={updatingClient}
                 >
-                  {updatingClient ? "Guardando..." : "Guardar"}
+                  {updatingClient
+                    ? t("clients.buttons.saving")
+                    : t("clients.buttons.save")}
                 </button>
 
                 <button
@@ -153,7 +283,7 @@ function ClientsPage() {
                   onClick={resetEditForm}
                   disabled={updatingClient}
                 >
-                  Cancelar
+                  {t("clients.buttons.cancel")}
                 </button>
               </div>
             </form>
@@ -162,7 +292,7 @@ function ClientsPage() {
 
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-            Cargando clientes...
+            {t("clients.messages.loading")}
           </div>
         )}
 
@@ -176,7 +306,7 @@ function ClientsPage() {
           <DataTable
             columns={clientTableColumns}
             hasData={clients.length > 0}
-            emptyMessage="No se encontraron clientes."
+            emptyMessage={t("clients.table.noData")}
           >
             {clients.map((client) => (
               <tr key={client.id} className="transition hover:bg-gray-50/80">
@@ -184,8 +314,16 @@ function ClientsPage() {
                   {client.name}
                 </td>
 
-                <td className="px-6 py-4 text-gray-600">
-                  {client.description || "N/A"}
+                <td className="px-6 py-4 text-gray-700">
+                  {client.identification || t("clients.table.notAvailable")}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {client.email || t("clients.table.notAvailable")}
+                </td>
+
+                <td className="px-6 py-4 text-gray-700">
+                  {client.phone || t("clients.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4">
@@ -196,12 +334,20 @@ function ClientsPage() {
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {client.isActive ? "Activo" : "Inactivo"}
+                    {client.isActive
+                      ? t("clients.table.active")
+                      : t("clients.table.inactive")}
                   </span>
                 </td>
 
                 <td className="px-6 py-4 text-gray-600">
                   {formatLocalDateForDisplay(client.createdAt)}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {client.updatedAt
+                    ? formatLocalDateForDisplay(client.updatedAt)
+                    : t("clients.table.notAvailable")}
                 </td>
 
                 <td className="px-6 py-4">
@@ -211,7 +357,7 @@ function ClientsPage() {
                       onClick={() => handleOpenEditForm(client)}
                       disabled={!client.isActive}
                     >
-                      Editar
+                      {t("clients.buttons.edit")}
                     </button>
 
                     {client.isActive ? (
@@ -221,8 +367,8 @@ function ClientsPage() {
                         disabled={deactivatingClientId === client.id}
                       >
                         {deactivatingClientId === client.id
-                          ? "Procesando..."
-                          : "Desactivar"}
+                          ? t("clients.buttons.processing")
+                          : t("clients.buttons.deactivate")}
                       </button>
                     ) : (
                       <button
@@ -231,8 +377,8 @@ function ClientsPage() {
                         disabled={reactivatingClientId === client.id}
                       >
                         {reactivatingClientId === client.id
-                          ? "Procesando..."
-                          : "Reactivar"}
+                          ? t("clients.buttons.processing")
+                          : t("clients.buttons.reactivate")}
                       </button>
                     )}
                   </div>

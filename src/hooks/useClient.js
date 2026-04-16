@@ -10,6 +10,9 @@ import {
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 
+/**
+ * Encapsulates all ClientsPage state and handlers.
+ */
 export function useClientsPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,15 +30,17 @@ export function useClientsPage() {
 
   const [editingClientId, setEditingClientId] = useState(null);
 
-  const [createForm, setCreateForm] = useState({
+  const initialForm = {
     name: "",
-    description: "",
-  });
+    legalName: "",
+    identification: "",
+    email: "",
+    phone: "",
+    notes: "",
+  };
 
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
+  const [createForm, setCreateForm] = useState(initialForm);
+  const [editForm, setEditForm] = useState(initialForm);
 
   useEffect(() => {
     async function loadClients() {
@@ -63,21 +68,29 @@ export function useClientsPage() {
 
   function handleCreateFormChange(event) {
     const { name, value } = event.target;
-    setCreateForm((prev) => ({ ...prev, [name]: value }));
+
+    setCreateForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   function handleEditFormChange(event) {
     const { name, value } = event.target;
-    setEditForm((prev) => ({ ...prev, [name]: value }));
+
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   }
 
   function resetCreateForm() {
-    setCreateForm({ name: "", description: "" });
+    setCreateForm(initialForm);
     setShowCreateForm(false);
   }
 
   function resetEditForm() {
-    setEditForm({ name: "", description: "" });
+    setEditForm(initialForm);
     setEditingClientId(null);
     setShowEditForm(false);
   }
@@ -118,14 +131,23 @@ export function useClientsPage() {
 
     try {
       const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
+        name: createForm.name.trim(),
+        legalName: createForm.legalName.trim() || null,
+        identification: createForm.identification.trim() || null,
+        email: createForm.email.trim() || null,
+        phone: createForm.phone.trim() || null,
+        notes: createForm.notes.trim() || null,
       };
 
       const createdClient = await createClient(payload);
 
       if (createdClient?.id) {
         addClientToState(createdClient);
+      }
+
+      if (!createForm.name.trim()) {
+        setActionMessage(t("clients.messages.nameRequired"));
+        return;
       }
 
       setActionMessage(t("clients.messages.created"));
@@ -146,10 +168,16 @@ export function useClientsPage() {
   function handleOpenEditForm(client) {
     setActionMessage("");
     setEditingClientId(client.id);
+
     setEditForm({
       name: client.name || "",
-      description: client.description || "",
+      legalName: client.legalName || "",
+      identification: client.identification || "",
+      email: client.email || "",
+      phone: client.phone || "",
+      notes: client.notes || "",
     });
+
     setShowEditForm(true);
   }
 
@@ -165,14 +193,23 @@ export function useClientsPage() {
 
     try {
       const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
+        name: editForm.name.trim(),
+        legalName: editForm.legalName.trim() || null,
+        identification: editForm.identification.trim() || null,
+        email: editForm.email.trim() || null,
+        phone: editForm.phone.trim() || null,
+        notes: editForm.notes.trim() || null,
       };
 
       const updatedClient = await updateClient(editingClientId, payload);
 
       if (updatedClient?.id) {
         updateClientInState(updatedClient);
+      }
+
+      if (!editForm.name.trim()) {
+        setActionMessage(t("clients.messages.nameRequired"));
+        return;
       }
 
       setActionMessage(t("clients.messages.updated"));
