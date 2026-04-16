@@ -8,6 +8,7 @@ import { t } from "../i18n";
 import { useDocumentsPage } from "../hooks/useDocuments";
 import DocumentVisibilityEditorRow from "../components/DocumentVisibilityEditorRow";
 import ClientAutocomplete from "../components/ClientAutocomplete";
+import SendToClientModal from "../components/SendToClientModal";
 
 function DocumentsPage() {
   const { user } = useAuth();
@@ -61,7 +62,15 @@ function DocumentsPage() {
     versionLoadingByDocumentId,
     versionsByDocumentId,
     visibleDocuments,
+    handleSendToClient,
     visibilityForm,
+    handleCloseSendToClientModal,
+    handleConfirmSendToClient,
+    handleOpenSendToClientModal,
+    handleSendToClientFormChange,
+    sendToClientForm,
+    sendToClientModalDocument,
+    sendingToClientDocumentId,
   } = useDocumentsPage(user);
 
   const documentTableColumns = [
@@ -97,7 +106,6 @@ function DocumentsPage() {
             {t("documents.buttons.upload")}
           </Link>
         </div>
-
         <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             {t("documents.filters.title")}
@@ -253,25 +261,21 @@ function DocumentsPage() {
             {t("documents.filters.clear")}
           </button>
         </div>
-
         {actionMessage && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {actionMessage}
           </div>
         )}
-
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {t("documents.messages.loading")}
           </div>
         )}
-
         {!loading && error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
-
         {!loading && !error && (
           <DataTable
             columns={documentTableColumns}
@@ -461,6 +465,20 @@ function DocumentsPage() {
                         {t("documents.buttons.download")}
                       </button>
 
+                      <button
+                        className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
+                        onClick={() => handleOpenSendToClientModal(document)}
+                        disabled={
+                          !document.isActive ||
+                          !document.clientName ||
+                          sendingToClientDocumentId === document.id
+                        }
+                      >
+                        {sendingToClientDocumentId === document.id
+                          ? t("documents.buttons.sendingToClient")
+                          : t("documents.buttons.sendToClient")}
+                      </button>
+
                       {canManage &&
                         (document.isActive ? (
                           <button
@@ -521,6 +539,24 @@ function DocumentsPage() {
               </Fragment>
             ))}
           </DataTable>
+        )}
+        /* MODAL */
+        {sendToClientModalDocument && (
+          <SendToClientModal
+            documentName={sendToClientModalDocument.originalFileName}
+            clientName={sendToClientModalDocument.clientName}
+            subject={sendToClientForm.subject}
+            message={sendToClientForm.message}
+            onSubjectChange={(value) =>
+              handleSendToClientFormChange("subject", value)
+            }
+            onMessageChange={(value) =>
+              handleSendToClientFormChange("message", value)
+            }
+            onCancel={handleCloseSendToClientModal}
+            onConfirm={handleConfirmSendToClient}
+            sending={sendingToClientDocumentId === sendToClientModalDocument.id}
+          />
         )}
       </div>
     </section>

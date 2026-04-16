@@ -9,7 +9,9 @@ import {
   renameDocument,
   searchDocuments,
   updateDocumentVisibility,
+  sendDocumentToClient,
   uploadDocumentVersion,
+  sendDocumentToClient,
 } from "../services/documentService";
 import { searchClients } from "../services/clientService";
 import { getDepartments } from "../services/departmentService";
@@ -24,6 +26,20 @@ export function useDocumentsPage(user) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [sendingToClientDocumentId, setSendingToClientDocumentId] =
+    useState(null);
+
+  const [sendingToClientDocumentId, setSendingToClientDocumentId] =
+    useState(null);
+
+  const [sendToClientModalDocument, setSendToClientModalDocument] =
+    useState(null);
+
+  const [sendToClientForm, setSendToClientForm] = useState({
+    subject: "",
+    message: "",
+  });
 
   const [versionsByDocumentId, setVersionsByDocumentId] = useState({});
   const [selectedVersionByDocumentId, setSelectedVersionByDocumentId] =
@@ -334,6 +350,126 @@ export function useDocumentsPage(user) {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Download failed:", err);
+    }
+  }
+
+  /**
+   * Sends the selected document to its assigned client.
+   */
+  async function handleSendToClient(document) {
+    if (!document?.clientName) {
+      setActionMessage("El documento no tiene un cliente asociado.");
+      return;
+    }
+
+    const subjectInput = window.prompt(
+      "Asunto del correo:",
+      `Documento: ${document.originalFileName}`,
+    );
+
+    if (subjectInput === null) {
+      return;
+    }
+
+    const messageInput = window.prompt(
+      "Mensaje del correo:",
+      "Adjuntamos el documento solicitado.",
+    );
+
+    if (messageInput === null) {
+      return;
+    }
+
+    setActionMessage("");
+    setSendingToClientDocumentId(document.id);
+
+    try {
+      await sendDocumentToClient(document.id, {
+        subject: subjectInput.trim() || null,
+        message: messageInput.trim() || null,
+      });
+
+      setActionMessage("Documento enviado al cliente correctamente.");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          getApiErrorMessage(err, "Error al enviar el documento al cliente."),
+        );
+      } else {
+        setActionMessage("Ocurrió un error inesperado.");
+      }
+    } finally {
+      setSendingToClientDocumentId(null);
+    }
+  }
+
+  /**
+   * Opens the send-to-client modal for the selected document.
+   */
+  function handleOpenSendToClientModal(document) {
+    if (!document?.clientName) {
+      setActionMessage(t("documents.sendToClient.noClientAssigned"));
+      return;
+    }
+
+    setActionMessage("");
+    setSendToClientModalDocument(document);
+    setSendToClientForm({
+      subject: `${t("documents.sendToClient.defaultSubjectPrefix")}: ${document.originalFileName}`,
+      message: t("documents.sendToClient.defaultMessage"),
+    });
+  }
+
+  /**
+   * Closes the send-to-client modal and resets form state.
+   */
+  function handleCloseSendToClientModal() {
+    setSendToClientModalDocument(null);
+    setSendToClientForm({
+      subject: "",
+      message: "",
+    });
+  }
+
+  /**
+   * Updates the send-to-client form state.
+   */
+  function handleSendToClientFormChange(field, value) {
+    setSendToClientForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  /**
+   * Sends the selected document to its assigned client.
+   */
+  async function handleConfirmSendToClient() {
+    if (!sendToClientModalDocument) {
+      return;
+    }
+
+    setActionMessage("");
+    setSendingToClientDocumentId(sendToClientModalDocument.id);
+
+    try {
+      await sendDocumentToClient(sendToClientModalDocument.id, {
+        subject: sendToClientForm.subject.trim() || null,
+        message: sendToClientForm.message.trim() || null,
+      });
+
+      setActionMessage(t("documents.sendToClient.success"));
+      handleCloseSendToClientModal();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setActionMessage(
+          getApiErrorMessage(err, t("documents.sendToClient.error")),
+        );
+      } else {
+        setActionMessage(t("documents.messages.unexpected"));
+      }
+    } finally {
+      setSendingToClientDocumentId(null);
     }
   }
 
@@ -677,5 +813,14 @@ export function useDocumentsPage(user) {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
+    handleSendToClient,
+    handleCloseSendToClientModal,
+    handleConfirmSendToClient,
+    handleOpenSendToClientModal,
+    handleSendToClientFormChange,
+    handleSendToClient,
+    sendToClientForm,
+    sendToClientModalDocument,
+    sendingToClientDocumentId,
   };
 }

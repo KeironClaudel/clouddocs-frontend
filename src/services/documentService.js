@@ -155,3 +155,15 @@ export async function updateDocumentVisibility(documentId, payload) {
 
   return response.data;
 }
+
+/**
+ * Sends a document to its assigned client by email.
+ */
+export async function sendDocumentToClient(documentId, payload) {
+  const response = await axiosInstance.post(
+    `/documents/${documentId}/send-to-client`,
+    payload,
+  );
+
+  return response.data;
+}

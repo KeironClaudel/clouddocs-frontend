@@ -307,6 +307,8 @@ const es = {
       uploadVersion: "Subir versión",
       saving: "Guardando...",
       editVisibility: "Editar visibilidad",
+      sendToClient: "Enviar al cliente",
+      sendingToClient: "Enviando...",
     },
 
     filters: {
@@ -382,6 +384,19 @@ const es = {
       of: "de",
       prev: "Anterior",
       next: "Siguiente",
+    },
+    sendToClient: {
+      title: "Enviar documento al cliente",
+      subtitle: "Confirma el envío del documento al cliente asociado.",
+      document: "Documento",
+      client: "Cliente",
+      subject: "Asunto",
+      message: "Mensaje",
+      defaultSubjectPrefix: "Documento",
+      defaultMessage: "Adjuntamos el documento solicitado.",
+      noClientAssigned: "El documento no tiene un cliente asociado.",
+      success: "Documento enviado al cliente correctamente.",
+      error: "Error al enviar el documento al cliente.",
     },
   },
   uploadDocument: {
