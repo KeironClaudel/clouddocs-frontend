@@ -1,5 +1,5 @@
 import React from "react";
-import SendToClientModal from "../src/components/SendToClientModal";
+import SendToClientModal from "./SendToClientModal";
 
 export default {
   title: "Components/SendToClientModal",

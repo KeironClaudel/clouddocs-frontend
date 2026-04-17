@@ -1,5 +1,5 @@
 import React from "react";
-import ClientAutocomplete from "../src/components/ClientAutocomplete";
+import ClientAutocomplete from "./ClientAutocomplete";
 
 export default {
   title: "Components/ClientAutocomplete",

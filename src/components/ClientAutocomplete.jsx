@@ -4,15 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * Renders an autocomplete input for selecting a client.
  */
 function ClientAutocomplete({
-  searchTerm,
-  setSearchTerm,
-  options,
-  loading,
-  selectedClientId,
-  onSelectClient,
-  placeholder,
-  emptyText,
-  loadingText,
+  searchTerm = "",
+  setSearchTerm = () => {},
+  options = [],
+  loading = false,
+  selectedClientId = null,
+  onSelectClient = () => {},
+  placeholder = "",
+  emptyText = "No results",
+  loadingText = "Loading...",
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);

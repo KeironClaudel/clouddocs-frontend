@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../src/components/Navbar";
+import Navbar from "./Navbar";
 
 export default {
   title: "Components/Navbar",

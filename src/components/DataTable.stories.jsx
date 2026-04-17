@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import DataTable from "../src/components/DataTable";
+import DataTable from "./DataTable";
 
 export default {
   title: "Components/DataTable",
