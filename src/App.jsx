@@ -95,8 +95,6 @@ function App() {
           }
         />
 
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
         <Route
           path="/change-password"
           element={
