@@ -19,7 +19,6 @@ function UsersPage() {
     handleCreateFormChange,
     handleCreateUser,
     resetCreateForm,
-
     showEditForm,
     editForm,
     loadingEditUser,
@@ -28,7 +27,6 @@ function UsersPage() {
     handleOpenEditForm,
     handleUpdateUser,
     resetEditForm,
-
     updatingUserId,
     handleDeactivate,
     handleReactivate,
@@ -121,8 +119,12 @@ function UsersPage() {
                   name="departmentId"
                   value={createForm.departmentId}
                   onChange={handleCreateFormChange}
+                  required
                 >
-                  <option value="">{t("users.form.selectDepartment") || "Seleccionar departamento"}</option>
+                  <option value="">
+                    {t("users.form.selectDepartment") ||
+                      "Seleccionar departamento"}
+                  </option>
                   {departments.map((dept) => (
                     <option key={dept.id} value={dept.id}>
                       {dept.name}
@@ -209,8 +211,12 @@ function UsersPage() {
                     name="departmentId"
                     value={editForm.departmentId}
                     onChange={handleEditFormChange}
+                    required
                   >
-                    <option value="">{t("users.form.selectDepartment") || "Seleccionar departamento"}</option>
+                    <option value="">
+                      {t("users.form.selectDepartment") ||
+                        "Seleccionar departamento"}
+                    </option>
                     {departments.map((dept) => (
                       <option key={dept.id} value={dept.id}>
                         {dept.name}
@@ -288,7 +294,8 @@ function UsersPage() {
 
                 <td className="px-6 py-4 text-gray-600">
                   {userItem.departmentId
-                    ? departments.find((d) => d.id === userItem.departmentId)?.name || "N/A"
+                    ? departments.find((d) => d.id === userItem.departmentId)
+                        ?.name || "N/A"
                     : "N/A"}
                 </td>
 

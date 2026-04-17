@@ -156,7 +156,10 @@ export function useUsersPage() {
         fullName: createForm.fullName,
         email: createForm.email,
         password: createForm.password,
-        departmentId: createForm.departmentId ? parseInt(createForm.departmentId) : null,
+        departmentId:
+          createForm.departmentId && createForm.departmentId !== ""
+            ? createForm.departmentId
+            : null,
         roleId: createForm.roleId,
       };
 
@@ -209,7 +212,9 @@ export function useUsersPage() {
       setEditForm({
         fullName: userData.fullName || "",
         email: userData.email || "",
-        departmentId: userData.departmentId ? String(userData.departmentId) : "",
+        departmentId: userData.departmentId
+          ? String(userData.departmentId)
+          : "",
         roleId: userData.roleId || matchedRole?.value || "",
       });
 
@@ -238,7 +243,7 @@ export function useUsersPage() {
       const payload = {
         fullName: editForm.fullName,
         email: editForm.email,
-        departmentId: editForm.departmentId ? parseInt(editForm.departmentId) : null,
+        departmentId: editForm.departmentId || null,
         roleId: editForm.roleId,
       };
 
