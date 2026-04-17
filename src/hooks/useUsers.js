@@ -8,6 +8,7 @@ import {
   reactivateUser,
   updateUser,
 } from "../services/userService";
+import { getDepartments } from "../services/departmentService";
 import { roleOptions } from "../utils/roleOptions";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
@@ -17,6 +18,7 @@ import { t } from "../i18n";
  */
 export function useUsersPage() {
   const [users, setUsers] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -30,7 +32,7 @@ export function useUsersPage() {
     fullName: "",
     email: "",
     password: "",
-    department: "",
+    departmentId: "",
     roleId: "",
   });
 
@@ -42,20 +44,28 @@ export function useUsersPage() {
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
-    department: "",
+    departmentId: "",
     roleId: "",
   });
 
   useEffect(() => {
-    async function loadUsers() {
+    async function loadData() {
       try {
-        const data = await getUsers();
+        const [usersData, departmentsData] = await Promise.all([
+          getUsers(),
+          getDepartments(),
+        ]);
 
-        const normalizedUsers = Array.isArray(data)
-          ? data
-          : data.users || data.items || [];
+        const normalizedUsers = Array.isArray(usersData)
+          ? usersData
+          : usersData.users || usersData.items || [];
+
+        const normalizedDepts = Array.isArray(departmentsData)
+          ? departmentsData
+          : departmentsData.departments || departmentsData.items || [];
 
         setUsers(normalizedUsers);
+        setDepartments(normalizedDepts);
       } catch (err) {
         if (axios.isAxiosError(err)) {
           setError(getApiErrorMessage(err, t("users.messages.loadError")));
@@ -67,7 +77,7 @@ export function useUsersPage() {
       }
     }
 
-    loadUsers();
+    loadData();
   }, []);
 
   function updateUserStatusInState(userId, isActive) {
@@ -130,7 +140,7 @@ export function useUsersPage() {
       fullName: "",
       email: "",
       password: "",
-      department: "",
+      departmentId: "",
       roleId: "",
     });
   }
@@ -143,8 +153,11 @@ export function useUsersPage() {
 
     try {
       const payload = {
-        ...createForm,
-        department: createForm.department || null,
+        fullName: createForm.fullName,
+        email: createForm.email,
+        password: createForm.password,
+        departmentId: createForm.departmentId ? parseInt(createForm.departmentId) : null,
+        roleId: createForm.roleId,
       };
 
       const createdUser = await createUser(payload);
@@ -176,7 +189,7 @@ export function useUsersPage() {
     setEditForm({
       fullName: "",
       email: "",
-      department: "",
+      departmentId: "",
       roleId: "",
     });
 
@@ -196,7 +209,7 @@ export function useUsersPage() {
       setEditForm({
         fullName: userData.fullName || "",
         email: userData.email || "",
-        department: userData.department || "",
+        departmentId: userData.departmentId ? String(userData.departmentId) : "",
         roleId: userData.roleId || matchedRole?.value || "",
       });
 
@@ -223,8 +236,10 @@ export function useUsersPage() {
 
     try {
       const payload = {
-        ...editForm,
-        department: editForm.department || null,
+        fullName: editForm.fullName,
+        email: editForm.email,
+        departmentId: editForm.departmentId ? parseInt(editForm.departmentId) : null,
+        roleId: editForm.roleId,
       };
 
       const updatedUser = await updateUser(editingUserId, payload);
@@ -248,6 +263,7 @@ export function useUsersPage() {
 
   return {
     users,
+    departments,
     loading,
     error,
     actionMessage,

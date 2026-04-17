@@ -7,6 +7,7 @@ import { useUsersPage } from "../hooks/useUsers";
 function UsersPage() {
   const {
     users,
+    departments,
     loading,
     error,
     actionMessage,
@@ -115,14 +116,19 @@ function UsersPage() {
                   required
                 />
 
-                <input
+                <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  type="text"
-                  name="department"
-                  value={createForm.department}
+                  name="departmentId"
+                  value={createForm.departmentId}
                   onChange={handleCreateFormChange}
-                  placeholder={t("users.form.department")}
-                />
+                >
+                  <option value="">{t("users.form.selectDepartment") || "Seleccionar departamento"}</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
 
                 <select
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -198,13 +204,19 @@ function UsersPage() {
                     required
                   />
 
-                  <input
+                  <select
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    type="text"
-                    name="department"
-                    value={editForm.department}
+                    name="departmentId"
+                    value={editForm.departmentId}
                     onChange={handleEditFormChange}
-                  />
+                  >
+                    <option value="">{t("users.form.selectDepartment") || "Seleccionar departamento"}</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
 
                   <select
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
@@ -275,7 +287,9 @@ function UsersPage() {
                 <td className="px-6 py-4 text-gray-700">{userItem.email}</td>
 
                 <td className="px-6 py-4 text-gray-600">
-                  {userItem.department || "N/A"}
+                  {userItem.departmentId
+                    ? departments.find((d) => d.id === userItem.departmentId)?.name || "N/A"
+                    : "N/A"}
                 </td>
 
                 <td className="px-6 py-4 text-gray-700">{userItem.role}</td>
