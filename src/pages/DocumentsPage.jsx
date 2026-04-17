@@ -311,26 +311,32 @@ function DocumentsPage() {
             {visibleDocuments.map((document) => (
               <Fragment key={document.id}>
                 <tr className="transition hover:bg-gray-50/80">
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 align-middle">
                     {renamingDocumentId === document.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex min-w-[220px] flex-col gap-2">
                         <input
                           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                           value={renameValue}
                           onChange={(e) => setRenameValue(e.target.value)}
                         />
-                        <button
-                          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
-                          onClick={() => handleConfirmRename(document.id)}
-                        >
-                          {t("documents.buttons.save")}
-                        </button>
-                        <button
-                          className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
-                          onClick={handleCancelRename}
-                        >
-                          {t("documents.buttons.cancel")}
-                        </button>
+
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
+                            onClick={() => handleConfirmRename(document.id)}
+                          >
+                            {t("documents.buttons.save")}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-200"
+                            onClick={handleCancelRename}
+                          >
+                            {t("documents.buttons.cancel")}
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <p className="font-medium text-gray-900">

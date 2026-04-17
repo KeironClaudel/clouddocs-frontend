@@ -1,7 +1,7 @@
 import { t } from "../i18n";
 
 /**
- * Renders an inline editor row for document visibility settings.
+ * Renders inline editor for document visibility.
  */
 function DocumentVisibilityEditorRow({
   colSpan,
@@ -20,6 +20,7 @@ function DocumentVisibilityEditorRow({
     <tr>
       <td colSpan={colSpan} className="bg-gray-50 px-6 py-4">
         <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-4">
+          {/* ACCESS LEVEL */}
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
               {t("documents.visibility.accessLevel")}
@@ -49,6 +50,7 @@ function DocumentVisibilityEditorRow({
             </select>
           </div>
 
+          {/* DEPARTMENTS */}
           {isVisibilityDepartmentOnly && (
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -79,6 +81,7 @@ function DocumentVisibilityEditorRow({
             </div>
           )}
 
+          {/* ACTIONS */}
           <div className="flex gap-3">
             <button
               type="button"

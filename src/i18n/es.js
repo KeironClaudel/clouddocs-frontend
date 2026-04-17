@@ -309,6 +309,8 @@ const es = {
       editVisibility: "Editar visibilidad",
       sendToClient: "Enviar al cliente",
       sendingToClient: "Enviando...",
+      saveVisibility: "Guardar visibilidad",
+      savingVisibility: "Guardando...",
     },
 
     filters: {
