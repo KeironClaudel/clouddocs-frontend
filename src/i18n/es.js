@@ -158,6 +158,8 @@ const es = {
       department: "Departamento",
       role: "Rol",
       selectRole: "Seleccionar un rol",
+      newPassword: "Nueva contraseña (opcional)",
+      passwordHelp: "Déjalo vacío si no deseas cambiarla.",
     },
 
     table: {

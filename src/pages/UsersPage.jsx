@@ -27,16 +27,12 @@ function UsersPage() {
     handleOpenEditForm,
     handleUpdateUser,
     resetEditForm,
+
     updatingUserId,
     handleDeactivate,
     handleReactivate,
   } = useUsersPage();
 
-  /**
-   * Defines the columns to display in the user table, along with their labels.
-   * The "key" corresponds to the property in the user object, and "label" is the column header.
-   * The "actions" column will be used to render action buttons for each user.
-   */
   const userTableColumns = [
     { key: "fullName", label: t("users.table.fullName") },
     { key: "email", label: t("users.table.email") },
@@ -50,7 +46,6 @@ function UsersPage() {
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
-        {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             {t("users.title")}
@@ -75,7 +70,6 @@ function UsersPage() {
           </div>
         </div>
 
-        {/* CREATE FORM */}
         {showCreateForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -174,7 +168,6 @@ function UsersPage() {
           </div>
         )}
 
-        {/* EDIT FORM */}
         {showEditForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -204,6 +197,15 @@ function UsersPage() {
                     value={editForm.email}
                     onChange={handleEditFormChange}
                     required
+                  />
+
+                  <input
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    type="password"
+                    name="password"
+                    value={editForm.password}
+                    onChange={handleEditFormChange}
+                    placeholder={t("users.form.newPassword")}
                   />
 
                   <select
@@ -264,7 +266,6 @@ function UsersPage() {
           </div>
         )}
 
-        {/* STATES */}
         {loading && (
           <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {t("users.messages.loading")}
@@ -277,7 +278,6 @@ function UsersPage() {
           </div>
         )}
 
-        {/* TABLE */}
         {!loading && !error && (
           <DataTable
             columns={userTableColumns}

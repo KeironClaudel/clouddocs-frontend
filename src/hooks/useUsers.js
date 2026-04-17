@@ -44,6 +44,7 @@ export function useUsersPage() {
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
+    password: "",
     departmentId: "",
     roleId: "",
   });
@@ -156,10 +157,7 @@ export function useUsersPage() {
         fullName: createForm.fullName,
         email: createForm.email,
         password: createForm.password,
-        departmentId:
-          createForm.departmentId && createForm.departmentId !== ""
-            ? createForm.departmentId
-            : null,
+        departmentId: createForm.departmentId || null,
         roleId: createForm.roleId,
       };
 
@@ -192,6 +190,7 @@ export function useUsersPage() {
     setEditForm({
       fullName: "",
       email: "",
+      password: "",
       departmentId: "",
       roleId: "",
     });
@@ -212,6 +211,7 @@ export function useUsersPage() {
       setEditForm({
         fullName: userData.fullName || "",
         email: userData.email || "",
+        password: "",
         departmentId: userData.departmentId
           ? String(userData.departmentId)
           : "",
@@ -243,6 +243,7 @@ export function useUsersPage() {
       const payload = {
         fullName: editForm.fullName,
         email: editForm.email,
+        password: editForm.password.trim() || null,
         departmentId: editForm.departmentId || null,
         roleId: editForm.roleId,
       };
@@ -272,7 +273,6 @@ export function useUsersPage() {
     loading,
     error,
     actionMessage,
-
     showCreateForm,
     setShowCreateForm,
     createForm,
@@ -280,7 +280,6 @@ export function useUsersPage() {
     handleCreateFormChange,
     handleCreateUser,
     resetCreateForm,
-
     showEditForm,
     editForm,
     loadingEditUser,
@@ -289,7 +288,6 @@ export function useUsersPage() {
     handleOpenEditForm,
     handleUpdateUser,
     resetEditForm,
-
     updatingUserId,
     handleDeactivate,
     handleReactivate,
