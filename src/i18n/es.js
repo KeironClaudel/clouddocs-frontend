@@ -287,6 +287,8 @@ const es = {
       error:
         "Error al procesar la solicitud de restablecimiento de contraseña.",
       unexpected: "Ocurrió un error inesperado.",
+      emailRequired: "El correo electrónico es obligatorio.",
+      invalidEmail: "El correo electrónico no tiene un formato válido.",
     },
   },
   profile: {

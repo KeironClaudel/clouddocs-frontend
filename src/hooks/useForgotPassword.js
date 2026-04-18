@@ -4,6 +4,8 @@ import { forgotPassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 import { useNavigate } from "react-router-dom";
+import { validateForgotPasswordForm } from "../validators/forgotPasswordValidators";
+import { buildForgotPasswordPayload } from "../mappers/authMappers";
 
 /**
  * Encapsulates all ForgotPasswordPage state and handlers.
@@ -42,38 +44,48 @@ export function useForgotPassword() {
   /**
    * Handles the forgot password form submission.
    */
-  // async function handleSubmit(event) {
-  //   event.preventDefault();
-
-  //   resetMessages();
-  //   setLoading(true);
-
-  //   try {
-  //     const data = await forgotPassword(email);
-
-  //     setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
-  //   } catch (err) {
-  //     if (axios.isAxiosError(err)) {
-  //       setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
-  //     } else {
-  //       setError(t("forgotPassword.messages.unexpected"));
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setLoading(true);
-    setSuccessMessage(
-      "Demo: El flujo del cambio de contraseña está en desarrollo. Redirigiendo...",
-    );
+    resetMessages();
 
-    setTimeout(() => {
-      navigate("/under-construction");
-    }, 1200);
+    const validationError = validateForgotPasswordForm({
+      email,
+      t,
+    });
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // DEMO MODE
+      setSuccessMessage(
+        "Demo: El flujo del cambio de contraseña está en desarrollo. Redirigiendo...",
+      );
+
+      setTimeout(() => {
+        navigate("/under-construction");
+      }, 1200);
+
+      // REAL MODE (leave ready for later)
+      // const payload = buildForgotPasswordPayload({ email });
+      // const data = await forgotPassword(payload);
+      // setSuccessMessage(
+      //   data?.message || t("forgotPassword.messages.success"),
+      // );
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
+      } else {
+        setError(t("forgotPassword.messages.unexpected"));
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return {

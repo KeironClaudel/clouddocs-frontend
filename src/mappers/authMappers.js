@@ -7,3 +7,12 @@ export function buildLoginPayload({ email, password }) {
     password,
   };
 }
+
+/**
+ * Builds the forgot password payload expected by the API.
+ */
+export function buildForgotPasswordPayload({ email }) {
+  return {
+    email: email.trim(),
+  };
+}
