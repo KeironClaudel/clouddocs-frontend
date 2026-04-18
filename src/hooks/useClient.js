@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   createClient,
   deactivateClient,
@@ -7,7 +6,7 @@ import {
   reactivateClient,
   updateClient,
 } from "../services/clientService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   validateCreateClient,
   validateUpdateClient,
@@ -42,18 +41,6 @@ export function useClientsPage() {
 
   const [editingClientId, setEditingClientId] = useState(null);
 
-  const initialForm = {
-    name: "",
-    legalName: "",
-    identification: "",
-    email: "",
-    phone: "",
-    notes: "",
-  };
-
-  const [createForm, setCreateForm] = useState(initialForm);
-  const [editForm, setEditForm] = useState(initialForm);
-
   useEffect(() => {
     async function loadClients() {
       try {
@@ -65,11 +52,9 @@ export function useClientsPage() {
 
         setClients(normalized);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(getApiErrorMessage(err, t("clients.messages.loadError")));
-        } else {
-          setError(t("clients.messages.unexpected"));
-        }
+        setActionMessage(
+          resolveApiErrorMessage(err, t("clients.messages.loadError")),
+        );
       } finally {
         setLoading(false);
       }
@@ -161,13 +146,9 @@ export function useClientsPage() {
       setActionMessage(t("clients.messages.created"));
       resetCreateForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("clients.messages.createError")),
-        );
-      } else {
-        setActionMessage(t("clients.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("clients.messages.createError")),
+      );
     } finally {
       setCreatingClient(false);
     }
@@ -190,16 +171,16 @@ export function useClientsPage() {
     }
 
     setActionMessage("");
+
+    const validationError = validateUpdateClient(editForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setUpdatingClient(true);
-
     try {
-      const validationError = validateUpdateClient(editForm, t);
-
-      if (validationError) {
-        setActionMessage(validationError);
-        return;
-      }
-
       const payload = buildClientPayload(editForm);
 
       const updatedClient = await updateClient(editingClientId, payload);
@@ -208,21 +189,12 @@ export function useClientsPage() {
         updateClientInState(updatedClient);
       }
 
-      if (!editForm.name.trim()) {
-        setActionMessage(t("clients.messages.nameRequired"));
-        return;
-      }
-
       setActionMessage(t("clients.messages.updated"));
       resetEditForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("clients.messages.updateError")),
-        );
-      } else {
-        setActionMessage(t("clients.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("clients.messages.updateError")),
+      );
     } finally {
       setUpdatingClient(false);
     }
@@ -237,13 +209,9 @@ export function useClientsPage() {
       deactivateClientInState(clientId);
       setActionMessage(t("clients.messages.deactivated"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("clients.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("clients.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("clients.messages.deactivateError")),
+      );
     } finally {
       setDeactivatingClientId(null);
     }
@@ -258,13 +226,9 @@ export function useClientsPage() {
       reactivateClientInState(clientId);
       setActionMessage(t("clients.messages.reactivated"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("clients.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("clients.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("clients.messages.reactivateError")),
+      );
     } finally {
       setReactivatingClientId(null);
     }
