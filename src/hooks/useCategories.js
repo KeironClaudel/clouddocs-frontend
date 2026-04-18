@@ -8,12 +8,21 @@ import {
   reactivateCategory,
 } from "../services/categoryService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import {
+  validateCreateCategory,
+  validateUpdateCategory,
+} from "../validators/categoryValidators";
+
+import {
+  buildCategoryPayload,
+  getInitialCategoryForm,
+  mapCategoryToForm,
+} from "../mappers/categoryMappers";
 import { t } from "../i18n";
 
-/**
- * Encapsulates all CategoriesPage state and handlers.
- */
 export function useCategoriesPage() {
+  const [createForm, setCreateForm] = useState(getInitialCategoryForm());
+  const [editForm, setEditForm] = useState(getInitialCategoryForm());
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,12 +84,12 @@ export function useCategoriesPage() {
   }
 
   function resetCreateForm() {
-    setCreateForm({ name: "", description: "" });
+    setCreateForm(getInitialCategoryForm());
     setShowCreateForm(false);
   }
 
   function resetEditForm() {
-    setEditForm({ name: "", description: "" });
+    setEditForm(getInitialCategoryForm());
     setEditingCategoryId(null);
     setShowEditForm(false);
   }
@@ -109,14 +118,20 @@ export function useCategoriesPage() {
 
   async function handleCreateCategory(e) {
     e.preventDefault();
+
     setActionMessage("");
+
+    const validationError = validateCreateCategory(createForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setCreatingCategory(true);
 
     try {
-      const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
-      };
+      const payload = buildCategoryPayload(createForm);
 
       const created = await createCategory(payload);
 
@@ -138,10 +153,7 @@ export function useCategoriesPage() {
   function handleOpenEditForm(category) {
     setActionMessage("");
     setEditingCategoryId(category.id);
-    setEditForm({
-      name: category.name || "",
-      description: category.description || "",
-    });
+    setEditForm(mapCategoryToForm(category));
     setShowEditForm(true);
   }
 
@@ -153,10 +165,14 @@ export function useCategoriesPage() {
     setUpdatingCategory(true);
 
     try {
-      const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
-      };
+      const validationError = validateUpdateCategory(editForm, t);
+
+      if (validationError) {
+        setActionMessage(validationError);
+        return;
+      }
+
+      const payload = buildCategoryPayload(editForm);
 
       const updated = await updateCategory(editingCategoryId, payload);
 

@@ -29,6 +29,7 @@ const es = {
       reactivateError: "Error al reactivar la categoría.",
       loadError: "Error al cargar las categorías.",
       unexpected: "Ocurrió un error inesperado.",
+      nameRequired: "El nombre de la categoría es obligatorio.",
     },
 
     form: {
