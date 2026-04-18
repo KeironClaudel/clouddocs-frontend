@@ -1,10 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
 import { changePassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 import { validateChangePasswordForm } from "../validators/changePasswordValidators";
 import { buildChangePasswordPayload } from "../mappers/authMappers";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 
 /**
  * Encapsulates all ChangePasswordPage state and handlers.
@@ -83,11 +82,7 @@ export function useChangePassword() {
       setSuccessMessage(t("changePassword.messages.success"));
       resetForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("changePassword.messages.error")));
-      } else {
-        setError(t("changePassword.messages.unexpected"));
-      }
+      setError(resolveApiErrorMessage(err, t("changePassword.messages.error")));
     } finally {
       setLoading(false);
     }
