@@ -27,6 +27,9 @@ import {
 import {
   buildVisibilityPayload,
   buildSendToClientPayload,
+  getInitialDocumentFilters,
+  getInitialSendToClientForm,
+  getInitialVisibilityForm,
 } from "../mappers/documentMappers";
 import { t } from "../i18n";
 
@@ -42,8 +45,7 @@ export function useDocumentsPage(user) {
     useState(null);
 
   const [sendToClientForm, setSendToClientForm] = useState({
-    subject: "",
-    message: "",
+    ...getInitialSendToClientForm(),
   });
 
   const [versionsByDocumentId, setVersionsByDocumentId] = useState({});
@@ -57,8 +59,7 @@ export function useDocumentsPage(user) {
     useState(null);
 
   const [visibilityForm, setVisibilityForm] = useState({
-    accessLevelId: "",
-    departmentIds: [],
+    ...getInitialVisibilityForm(),
   });
 
   const [updatingVisibility, setUpdatingVisibility] = useState(false);
@@ -80,16 +81,7 @@ export function useDocumentsPage(user) {
   const [clientOptions, setClientOptions] = useState([]);
   const [searchingClients, setSearchingClients] = useState(false);
 
-  const [filters, setFilters] = useState({
-    searchTerm: "",
-    categoryId: "",
-    month: "",
-    year: "",
-    documentType: "",
-    expirationPending: "",
-    isActive: "",
-    clientId: "",
-  });
+  const [filters, setFilters] = useState(getInitialDocumentFilters());
 
   const [categories, setCategories] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
@@ -378,10 +370,7 @@ export function useDocumentsPage(user) {
    */
   function handleCloseSendToClientModal() {
     setSendToClientModalDocument(null);
-    setSendToClientForm({
-      subject: "",
-      message: "",
-    });
+    setSendToClientForm(getInitialSendToClientForm());
   }
 
   /**
@@ -584,16 +573,7 @@ export function useDocumentsPage(user) {
   }
 
   function handleClearFilters() {
-    setFilters({
-      searchTerm: "",
-      categoryId: "",
-      month: "",
-      year: "",
-      documentType: "",
-      expirationPending: "",
-      isActive: "",
-      clientId: "",
-    });
+    setFilters(getInitialDocumentFilters());
 
     setClientSearchTerm("");
     setClientOptions([]);
@@ -681,10 +661,7 @@ export function useDocumentsPage(user) {
 
   function handleCancelEditVisibility() {
     setEditingVisibilityDocumentId(null);
-    setVisibilityForm({
-      accessLevelId: "",
-      departmentIds: [],
-    });
+    setVisibilityForm(getInitialVisibilityForm());
   }
 
   return {

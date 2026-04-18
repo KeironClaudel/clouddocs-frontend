@@ -14,6 +14,7 @@ import {
 import {
   buildUploadDocumentPayload,
   getInitialUploadForm,
+  getInitialUploadClientSearchState,
 } from "../mappers/uploadDocumentMappers";
 import { t } from "../i18n";
 
@@ -326,8 +327,12 @@ export function useUploadDocument() {
    * Resets the upload form to its initial state.
    */
   function resetForm() {
+    const initialClientSearchState = getInitialUploadClientSearchState();
+
     setSelectedFile(null);
-    setClientSearchTerm("");
+    setClientSearchTerm(initialClientSearchState.clientSearchTerm);
+    setClientOptions(initialClientSearchState.clientOptions);
+    setHasSearchedClients(initialClientSearchState.hasSearchedClients);
     setForm(getInitialUploadForm());
   }
 

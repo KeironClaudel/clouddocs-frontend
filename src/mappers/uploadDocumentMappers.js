@@ -28,3 +28,14 @@ export function buildUploadDocumentPayload({ file, form, isDepartmentOnly }) {
     clientId: form.clientId,
   };
 }
+
+/**
+ * Returns the initial client search UI state for upload document.
+ */
+export function getInitialUploadClientSearchState() {
+  return {
+    clientSearchTerm: "",
+    clientOptions: [],
+    hasSearchedClients: false,
+  };
+}
