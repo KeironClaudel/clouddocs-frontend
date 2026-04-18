@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   createCategory,
   deactivateCategory,
@@ -7,12 +6,11 @@ import {
   updateCategory,
   reactivateCategory,
 } from "../services/categoryService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   validateCreateCategory,
   validateUpdateCategory,
 } from "../validators/categoryValidators";
-
 import {
   buildCategoryPayload,
   getInitialCategoryForm,
@@ -39,16 +37,6 @@ export function useCategoriesPage() {
 
   const [editingCategoryId, setEditingCategoryId] = useState(null);
 
-  const [createForm, setCreateForm] = useState({
-    name: "",
-    description: "",
-  });
-
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
-
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -60,11 +48,9 @@ export function useCategoriesPage() {
 
         setCategories(normalized);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(getApiErrorMessage(err, t("categories.messages.loadError")));
-        } else {
-          setError(t("categories.messages.unexpected"));
-        }
+        setError(
+          resolveApiErrorMessage(err, t("categories.messages.loadError")),
+        );
       } finally {
         setLoading(false);
       }
@@ -132,18 +118,17 @@ export function useCategoriesPage() {
 
     try {
       const payload = buildCategoryPayload(createForm);
-
       const created = await createCategory(payload);
 
-      if (created?.id) addCategoryToState(created);
+      if (created?.id) {
+        addCategoryToState(created);
+      }
 
       setActionMessage(t("categories.messages.created"));
       resetCreateForm();
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("categories.messages.createError"))
-          : t("categories.messages.unexpected"),
+        resolveApiErrorMessage(err, t("categories.messages.createError")),
       );
     } finally {
       setCreatingCategory(false);
@@ -159,32 +144,33 @@ export function useCategoriesPage() {
 
   async function handleUpdateCategory(e) {
     e.preventDefault();
+
     if (!editingCategoryId) return;
 
     setActionMessage("");
+
+    const validationError = validateUpdateCategory(editForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setUpdatingCategory(true);
 
     try {
-      const validationError = validateUpdateCategory(editForm, t);
-
-      if (validationError) {
-        setActionMessage(validationError);
-        return;
-      }
-
       const payload = buildCategoryPayload(editForm);
-
       const updated = await updateCategory(editingCategoryId, payload);
 
-      if (updated?.id) updateCategoryInState(updated);
+      if (updated?.id) {
+        updateCategoryInState(updated);
+      }
 
       setActionMessage(t("categories.messages.updated"));
       resetEditForm();
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("categories.messages.updateError"))
-          : t("categories.messages.unexpected"),
+        resolveApiErrorMessage(err, t("categories.messages.updateError")),
       );
     } finally {
       setUpdatingCategory(false);
@@ -201,9 +187,7 @@ export function useCategoriesPage() {
       setActionMessage(t("categories.messages.deactivated"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("categories.messages.deactivateError"))
-          : t("categories.messages.unexpected"),
+        resolveApiErrorMessage(err, t("categories.messages.deactivateError")),
       );
     } finally {
       setDeactivatingCategoryId(null);
@@ -220,9 +204,7 @@ export function useCategoriesPage() {
       setActionMessage(t("categories.messages.reactivated"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("categories.messages.reactivateError"))
-          : t("categories.messages.unexpected"),
+        resolveApiErrorMessage(err, t("categories.messages.reactivateError")),
       );
     } finally {
       setReactivatingCategoryId(null);
