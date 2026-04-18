@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   deactivateDocumentAccessLevel,
   getDocumentAccessLevels,
   reactivateDocumentAccessLevel,
   updateDocumentAccessLevel,
 } from "../services/documentAccessLevelService";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { validateDocumentAccessLevel } from "../validators/documentAccessLevelValidators";
-
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   buildUpdateDocumentAccessLevelPayload,
   getInitialDocumentAccessLevelForm,
@@ -44,11 +42,6 @@ export function useDocumentAccessLevelsPage() {
   const [editingDocumentAccessLevelId, setEditingDocumentAccessLevelId] =
     useState(null);
 
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
-
   useEffect(() => {
     async function loadDocumentAccessLevels() {
       try {
@@ -60,16 +53,12 @@ export function useDocumentAccessLevelsPage() {
 
         setDocumentAccessLevels(normalized);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            getApiErrorMessage(
-              err,
-              t("documentAccessLevels.messages.loadError"),
-            ),
-          );
-        } else {
-          setError(t("documentAccessLevels.messages.unexpected"));
-        }
+        setError(
+          resolveApiErrorMessage(
+            err,
+            t("documentAccessLevels.messages.loadError"),
+          ),
+        );
       } finally {
         setLoading(false);
       }
@@ -122,18 +111,16 @@ export function useDocumentAccessLevelsPage() {
     e.preventDefault();
 
     if (!editingDocumentAccessLevelId) return;
-
-    setUpdatingDocumentAccessLevel(true);
     setActionMessage("");
+    const validationError = validateDocumentAccessLevel(editForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+    setUpdatingDocumentAccessLevel(true);
 
     try {
-      const validationError = validateDocumentAccessLevel(editForm, t);
-
-      if (validationError) {
-        setActionMessage(validationError);
-        return;
-      }
-
       const payload = buildUpdateDocumentAccessLevelPayload(editForm);
 
       const updated = await updateDocumentAccessLevel(
@@ -147,12 +134,10 @@ export function useDocumentAccessLevelsPage() {
       resetEditForm();
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(
-              err,
-              t("documentAccessLevels.messages.updateError"),
-            )
-          : t("documentAccessLevels.messages.unexpected"),
+        resolveApiErrorMessage(
+          err,
+          t("documentAccessLevels.messages.updateError"),
+        ),
       );
     } finally {
       setUpdatingDocumentAccessLevel(false);
@@ -169,12 +154,10 @@ export function useDocumentAccessLevelsPage() {
       setActionMessage(t("documentAccessLevels.messages.deactivated"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(
-              err,
-              t("documentAccessLevels.messages.deactivateError"),
-            )
-          : t("documentAccessLevels.messages.unexpected"),
+        resolveApiErrorMessage(
+          err,
+          t("documentAccessLevels.messages.deactivateError"),
+        ),
       );
     } finally {
       setDeactivatingDocumentAccessLevelId(null);
@@ -191,12 +174,10 @@ export function useDocumentAccessLevelsPage() {
       setActionMessage(t("documentAccessLevels.messages.reactivated"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(
-              err,
-              t("documentAccessLevels.messages.reactivateError"),
-            )
-          : t("documentAccessLevels.messages.unexpected"),
+        resolveApiErrorMessage(
+          err,
+          t("documentAccessLevels.messages.reactivateError"),
+        ),
       );
     } finally {
       setReactivatingDocumentAccessLevelId(null);
