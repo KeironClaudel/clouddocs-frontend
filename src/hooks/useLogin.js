@@ -1,11 +1,11 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import { t } from "../i18n";
 import { validateLoginForm } from "../validators/loginValidators";
 import { buildLoginPayload } from "../mappers/authMappers";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 
 /**
  * Encapsulates all LoginPage state and handlers.
@@ -66,11 +66,7 @@ export function useLogin() {
       login(data);
       navigate("/dashboard");
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || t("login.messages.error"));
-      } else {
-        setError(t("login.messages.unexpected"));
-      }
+      setError(resolveApiErrorMessage(err, t("login.messages.error")));
     } finally {
       setLoading(false);
     }
