@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   createDepartment,
   deactivateDepartment,
@@ -11,7 +10,7 @@ import {
   validateCreateDepartment,
   validateUpdateDepartment,
 } from "../validators/departmentValidators";
-
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   buildCreateDepartmentPayload,
   buildUpdateDepartmentPayload,
@@ -19,7 +18,6 @@ import {
   getInitialEditDepartmentForm,
   mapDepartmentToForm,
 } from "../mappers/departmentMappers";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 
 /**
@@ -67,14 +65,6 @@ export function useDepartmentsPage() {
   const [creatingDepartment, setCreatingDepartment] = useState(false);
 
   /**
-   * Stores the create department form values.
-   */
-  const [createForm, setCreateForm] = useState({
-    name: "",
-    description: "",
-  });
-
-  /**
    * Controls whether the edit department form is visible.
    */
   const [showEditForm, setShowEditForm] = useState(false);
@@ -88,14 +78,6 @@ export function useDepartmentsPage() {
    * Stores the ID of the department currently being edited.
    */
   const [editingDepartmentId, setEditingDepartmentId] = useState(null);
-
-  /**
-   * Stores the edit department form values.
-   */
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
 
   /**
    * Tracks which department is currently being updated.
@@ -116,13 +98,7 @@ export function useDepartmentsPage() {
 
         setDepartments(normalizedDepartments);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            getApiErrorMessage(err, t("departments.messages.loadError")),
-          );
-        } else {
-          setError(t("departments.messages.unexpected"));
-        }
+        setError(resolveApiErrorMessage(err, t("departments.loadError")));
       } finally {
         setLoading(false);
       }
@@ -181,18 +157,17 @@ export function useDepartmentsPage() {
    */
   async function handleCreateDepartment(event) {
     event.preventDefault();
-
     setActionMessage("");
+
+    const validationError = validateCreateDepartment(createForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
     setCreatingDepartment(true);
 
     try {
-      const validationError = validateCreateDepartment(createForm, t);
-
-      if (validationError) {
-        setActionMessage(validationError);
-        return;
-      }
-
       const payload = buildCreateDepartmentPayload(createForm);
 
       const createdDepartment = await createDepartment(payload);
@@ -205,13 +180,9 @@ export function useDepartmentsPage() {
       resetCreateForm();
       setShowCreateForm(false);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("departments.messages.createError")),
-        );
-      } else {
-        setActionMessage(t("departments.messages.unexpected"));
-      }
+      setError(
+        resolveApiErrorMessage(err, t("departments.messages.createError")),
+      );
     } finally {
       setCreatingDepartment(false);
     }
@@ -260,16 +231,16 @@ export function useDepartmentsPage() {
     }
 
     setActionMessage("");
+
+    const validationError = validateUpdateDepartment(editForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
     setUpdatingDepartment(true);
 
     try {
-      const validationError = validateUpdateDepartment(editForm, t);
-
-      if (validationError) {
-        setActionMessage(validationError);
-        return;
-      }
-
       const payload = buildUpdateDepartmentPayload(editForm);
 
       const updatedDepartment = await updateDepartment(
@@ -284,13 +255,9 @@ export function useDepartmentsPage() {
       setActionMessage(t("departments.messages.updateSuccess"));
       resetEditForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("departments.messages.updateError")),
-        );
-      } else {
-        setActionMessage(t("departments.messages.unexpected"));
-      }
+      setError(
+        resolveApiErrorMessage(err, t("departments.messages.updateError")),
+      );
     } finally {
       setUpdatingDepartment(false);
     }
@@ -308,13 +275,9 @@ export function useDepartmentsPage() {
       updateDepartmentStatusInState(departmentId, false);
       setActionMessage(t("departments.messages.deactivateSuccess"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("departments.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("departments.messages.unexpected"));
-      }
+      setError(
+        resolveApiErrorMessage(err, t("departments.messages.deactivateError")),
+      );
     } finally {
       setUpdatingDepartmentId(null);
     }
@@ -332,13 +295,9 @@ export function useDepartmentsPage() {
       updateDepartmentStatusInState(departmentId, true);
       setActionMessage(t("departments.messages.reactivateSuccess"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("departments.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("departments.messages.unexpected"));
-      }
+      setError(
+        resolveApiErrorMessage(err, t("departments.messages.reactivateError")),
+      );
     } finally {
       setUpdatingDepartmentId(null);
     }
