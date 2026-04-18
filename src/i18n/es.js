@@ -101,6 +101,10 @@ const es = {
       mismatch: "La nueva contraseña y su confirmación no coinciden.",
       error: "Error al cambiar la contraseña.",
       unexpected: "Ocurrió un error inesperado.",
+      currentPasswordRequired: "La contraseña actual es obligatoria.",
+      newPasswordRequired: "La nueva contraseña es obligatoria.",
+      confirmPasswordRequired: "La confirmación de contraseña es obligatoria.",
+      passwordTooShort: "La nueva contraseña debe tener al menos 8 caracteres.",
     },
   },
   dashboard: {

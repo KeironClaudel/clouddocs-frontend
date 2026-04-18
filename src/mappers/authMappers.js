@@ -16,3 +16,13 @@ export function buildForgotPasswordPayload({ email }) {
     email: email.trim(),
   };
 }
+
+/**
+ * Builds the change password payload expected by the API.
+ */
+export function buildChangePasswordPayload({ currentPassword, newPassword }) {
+  return {
+    currentPassword: currentPassword.trim(),
+    newPassword: newPassword.trim(),
+  };
+}

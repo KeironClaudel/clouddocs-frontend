@@ -3,6 +3,8 @@ import axios from "axios";
 import { changePassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import { validateChangePasswordForm } from "../validators/changePasswordValidators";
+import { buildChangePasswordPayload } from "../mappers/authMappers";
 
 /**
  * Encapsulates all ChangePasswordPage state and handlers.
@@ -56,18 +58,27 @@ export function useChangePassword() {
     setError("");
     setSuccessMessage("");
 
-    if (newPassword !== confirmPassword) {
-      setError(t("changePassword.messages.mismatch"));
+    const validationError = validateChangePasswordForm({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+      t,
+    });
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
 
     try {
-      await changePassword({
+      const payload = buildChangePasswordPayload({
         currentPassword,
         newPassword,
       });
+
+      await changePassword(payload);
 
       setSuccessMessage(t("changePassword.messages.success"));
       resetForm();
