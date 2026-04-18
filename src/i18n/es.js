@@ -190,6 +190,13 @@ const es = {
       loadUserDetailsError: "Error al cargar los datos del usuario.",
       unexpected: "Ocurrió un error inesperado.",
       loadingDetails: "Cargando datos del usuario...",
+      fullNameRequired: "El nombre completo es obligatorio.",
+      emailRequired: "El correo electrónico es obligatorio.",
+      invalidEmail: "El correo electrónico no tiene un formato válido.",
+      passwordRequired: "La contraseña es obligatoria.",
+      passwordTooShort: "La contraseña debe tener al menos 8 caracteres.",
+      departmentRequired: "Debe seleccionar un departamento.",
+      roleRequired: "Debe seleccionar un rol.",
     },
   },
   resetPassword: {

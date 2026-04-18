@@ -12,6 +12,17 @@ import { getDepartments } from "../services/departmentService";
 import { roleOptions } from "../utils/roleOptions";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import {
+  buildCreateUserPayload,
+  buildUpdateUserPayload,
+  getInitialCreateUserForm,
+  getInitialEditUserForm,
+  mapUserToEditForm,
+} from "../mappers/userMappers";
+import {
+  validateCreateUserForm,
+  validateUpdateUserForm,
+} from "../validators/userValidators";
 
 /**
  * Encapsulates all UsersPage state and handlers.
@@ -27,27 +38,13 @@ export function useUsersPage() {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creatingUser, setCreatingUser] = useState(false);
-
-  const [createForm, setCreateForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    departmentId: "",
-    roleId: "",
-  });
+  const [createForm, setCreateForm] = useState(getInitialCreateUserForm());
 
   const [showEditForm, setShowEditForm] = useState(false);
   const [loadingEditUser, setLoadingEditUser] = useState(false);
   const [updatingUser, setUpdatingUser] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
-
-  const [editForm, setEditForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    departmentId: "",
-    roleId: "",
-  });
+  const [editForm, setEditForm] = useState(getInitialEditUserForm());
 
   useEffect(() => {
     async function loadData() {
@@ -137,30 +134,23 @@ export function useUsersPage() {
   }
 
   function resetCreateForm() {
-    setCreateForm({
-      fullName: "",
-      email: "",
-      password: "",
-      departmentId: "",
-      roleId: "",
-    });
+    setCreateForm(getInitialCreateUserForm());
   }
 
   async function handleCreateUser(e) {
     e.preventDefault();
 
+    const validationError = validateCreateUserForm(createForm, t);
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setCreatingUser(true);
     setActionMessage("");
 
     try {
-      const payload = {
-        fullName: createForm.fullName,
-        email: createForm.email,
-        password: createForm.password,
-        departmentId: createForm.departmentId || null,
-        roleId: createForm.roleId,
-      };
-
+      const payload = buildCreateUserPayload(createForm);
       const createdUser = await createUser(payload);
 
       if (createdUser?.id) {
@@ -187,14 +177,7 @@ export function useUsersPage() {
   }
 
   function resetEditForm() {
-    setEditForm({
-      fullName: "",
-      email: "",
-      password: "",
-      departmentId: "",
-      roleId: "",
-    });
-
+    setEditForm(getInitialEditUserForm());
     setEditingUserId(null);
     setShowEditForm(false);
   }
@@ -205,19 +188,9 @@ export function useUsersPage() {
 
     try {
       const userData = await getUserById(userId);
-
       const matchedRole = roleOptions.find((r) => r.label === userData.role);
 
-      setEditForm({
-        fullName: userData.fullName || "",
-        email: userData.email || "",
-        password: "",
-        departmentId: userData.departmentId
-          ? String(userData.departmentId)
-          : "",
-        roleId: userData.roleId || matchedRole?.value || "",
-      });
-
+      setEditForm(mapUserToEditForm(userData, matchedRole));
       setEditingUserId(userId);
     } catch (err) {
       setShowEditForm(false);
@@ -234,20 +207,21 @@ export function useUsersPage() {
   async function handleUpdateUser(e) {
     e.preventDefault();
 
-    if (!editingUserId) return;
+    if (!editingUserId) {
+      return;
+    }
+
+    const validationError = validateUpdateUserForm(editForm, t);
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
 
     setUpdatingUser(true);
     setActionMessage("");
 
     try {
-      const payload = {
-        fullName: editForm.fullName,
-        email: editForm.email,
-        password: editForm.password.trim() || null,
-        departmentId: editForm.departmentId || null,
-        roleId: editForm.roleId,
-      };
-
+      const payload = buildUpdateUserPayload(editForm);
       const updatedUser = await updateUser(editingUserId, payload);
 
       if (updatedUser?.id) {
