@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getAuditLogs } from "../services/auditService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import {
+  buildAuditLogsParams,
+  getInitialAuditFilters,
+} from "../mappers/auditMappers";
 import { t } from "../i18n";
 
 /**
@@ -13,6 +17,10 @@ export function useAuditLogs() {
    */
   const [auditLogs, setAuditLogs] = useState([]);
 
+  /**
+   * Stores the current filter values for the audit table. Initialized from URL parameters.
+   */
+  const [filters, setFilters] = useState(getInitialAuditFilters());
   /**
    * Pagination state.
    */
@@ -85,14 +93,11 @@ export function useAuditLogs() {
       const effectiveFilters = filtersParam ?? debouncedFilters;
       const effectivePageSize = pageSizeParam ?? pageSize;
 
-      const params = {
+      const params = buildAuditLogsParams({
         page: effectivePage,
         pageSize: effectivePageSize,
-        userId: effectiveFilters.userId || undefined,
-        action: effectiveFilters.action || undefined,
-        module: effectiveFilters.module || undefined,
-        date: effectiveFilters.date || undefined,
-      };
+        filters: effectiveFilters,
+      });
 
       const data = await getAuditLogs(params);
 
@@ -172,13 +177,7 @@ export function useAuditLogs() {
    * Clears all audit filters and resets pagination.
    */
   function handleClearFilters() {
-    setFilters({
-      userId: "",
-      action: "",
-      module: "",
-      date: "",
-    });
-
+    setFilters(getInitialAuditFilters());
     setSearchParams({ page: "1" });
   }
 
