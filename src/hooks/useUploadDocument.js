@@ -7,6 +7,15 @@ import { getDocumentAccessLevels } from "../services/documentAccessLevelService"
 import { getDepartments } from "../services/departmentService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { searchClients } from "../services/clientService";
+import {
+  validateFile,
+  validateUploadDocumentForm,
+} from "../validators/uploadDocumentValidators";
+
+import {
+  buildUploadDocumentPayload,
+  getInitialUploadForm,
+} from "../mappers/uploadDocumentMappers";
 import { t } from "../i18n";
 
 const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
@@ -16,6 +25,11 @@ const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
  * validation logic, and submit handlers.
  */
 export function useUploadDocument() {
+  /**
+   * Stores the upload form values.
+   */
+  const [form, setForm] = useState(getInitialUploadForm());
+
   /**
    * Stores the category list available for selection.
    */
@@ -298,19 +312,10 @@ export function useUploadDocument() {
 
     const file = event.target.files?.[0];
 
-    if (!file) {
-      setSelectedFile(null);
-      return;
-    }
+    const validationError = validateFile(file, MAX_FILE_SIZE_BYTES, t);
 
-    if (file.type !== "application/pdf") {
-      setError(t("uploadDocument.messages.onlyPdf"));
-      setSelectedFile(null);
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError(t("uploadDocument.messages.fileTooLarge"));
+    if (validationError) {
+      setError(validationError);
       setSelectedFile(null);
       return;
     }
@@ -324,15 +329,7 @@ export function useUploadDocument() {
   function resetForm() {
     setSelectedFile(null);
     setClientSearchTerm("");
-    setForm({
-      categoryId: "",
-      documentTypeId: "",
-      expirationDate: "",
-      expirationDatePendingDefinition: false,
-      accessLevelId: "",
-      departmentIds: [],
-      clientId: "",
-    });
+    setForm(getInitialUploadForm());
   }
 
   /**
@@ -344,54 +341,26 @@ export function useUploadDocument() {
     setError("");
     setSuccessMessage("");
 
-    if (!selectedFile) {
-      setError(t("uploadDocument.messages.selectFile"));
-      return;
-    }
+    const validationError = validateUploadDocumentForm({
+      selectedFile,
+      form,
+      isDepartmentOnly,
+      t,
+    });
 
-    if (!form.categoryId) {
-      setError(t("uploadDocument.messages.selectCategory"));
-      return;
-    }
-
-    if (!form.clientId) {
-      setError(t("uploadDocument.messages.selectClient"));
-      return;
-    }
-
-    if (!form.documentTypeId) {
-      setError(t("uploadDocument.messages.selectType"));
-      return;
-    }
-
-    if (!form.accessLevelId) {
-      setError(t("uploadDocument.messages.selectAccess"));
-      return;
-    }
-
-    if (!form.expirationDatePendingDefinition && !form.expirationDate) {
-      setError(t("uploadDocument.messages.expirationRequired"));
-      return;
-    }
-
-    if (isDepartmentOnly && form.departmentIds.length === 0) {
-      setError(t("uploadDocument.messages.selectDepartments"));
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setUploading(true);
 
     try {
-      const payload = {
+      const payload = buildUploadDocumentPayload({
         file: selectedFile,
-        categoryId: form.categoryId,
-        documentTypeId: form.documentTypeId,
-        expirationDate: form.expirationDate || null,
-        expirationDatePendingDefinition: form.expirationDatePendingDefinition,
-        accessLevelId: form.accessLevelId,
-        departmentIds: isDepartmentOnly ? form.departmentIds : [],
-        clientId: form.clientId,
-      };
+        form,
+        isDepartmentOnly,
+      });
 
       await uploadDocument(payload);
 
