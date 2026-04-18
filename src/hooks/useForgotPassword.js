@@ -1,11 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
 import { forgotPassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
-import { useNavigate } from "react-router-dom";
 import { validateForgotPasswordForm } from "../validators/forgotPasswordValidators";
 import { buildForgotPasswordPayload } from "../mappers/authMappers";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 
 /**
  * Encapsulates all ForgotPasswordPage state and handlers.
@@ -30,8 +28,6 @@ export function useForgotPassword() {
    * Stores an error message when the request fails.
    */
   const [error, setError] = useState("");
-
-  const navigate = useNavigate();
 
   /**
    * Resets transient feedback messages.
@@ -62,27 +58,12 @@ export function useForgotPassword() {
     setLoading(true);
 
     try {
-      // DEMO MODE
-      setSuccessMessage(
-        "Demo: El flujo del cambio de contraseña está en desarrollo. Redirigiendo...",
-      );
+      const payload = buildForgotPasswordPayload({ email });
+      const data = await forgotPassword(payload);
 
-      setTimeout(() => {
-        navigate("/under-construction");
-      }, 1200);
-
-      // REAL MODE (leave ready for later)
-      // const payload = buildForgotPasswordPayload({ email });
-      // const data = await forgotPassword(payload);
-      // setSuccessMessage(
-      //   data?.message || t("forgotPassword.messages.success"),
-      // );
+      setSuccessMessage(data?.message || t("forgotPassword.messages.success"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("forgotPassword.messages.error")));
-      } else {
-        setError(t("forgotPassword.messages.unexpected"));
-      }
+      setError(resolveApiErrorMessage(err, t("forgotPassword.messages.error")));
     } finally {
       setLoading(false);
     }
