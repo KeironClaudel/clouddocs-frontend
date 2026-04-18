@@ -7,12 +7,20 @@ import {
   updateDocumentAccessLevel,
 } from "../services/documentAccessLevelService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import { validateDocumentAccessLevel } from "../validators/documentAccessLevelValidators";
+
+import {
+  buildUpdateDocumentAccessLevelPayload,
+  getInitialDocumentAccessLevelForm,
+  mapDocumentAccessLevelToForm,
+} from "../mappers/documentAccessLevelMappers";
 import { t } from "../i18n";
 
 /**
  * Encapsulates all DocumentAccessLevelsPage state and handlers.
  */
 export function useDocumentAccessLevelsPage() {
+  const [editForm, setEditForm] = useState(getInitialDocumentAccessLevelForm());
   const [documentAccessLevels, setDocumentAccessLevels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -99,16 +107,13 @@ export function useDocumentAccessLevelsPage() {
     setActionMessage("");
     setEditingDocumentAccessLevelId(item.id);
 
-    setEditForm({
-      name: item.name || "",
-      description: item.description || "",
-    });
+    setEditForm(mapDocumentAccessLevelToForm(item));
 
     setShowEditForm(true);
   }
 
   function resetEditForm() {
-    setEditForm({ name: "", description: "" });
+    setEditForm(getInitialDocumentAccessLevelForm());
     setEditingDocumentAccessLevelId(null);
     setShowEditForm(false);
   }
@@ -122,10 +127,14 @@ export function useDocumentAccessLevelsPage() {
     setActionMessage("");
 
     try {
-      const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
-      };
+      const validationError = validateDocumentAccessLevel(editForm, t);
+
+      if (validationError) {
+        setActionMessage(validationError);
+        return;
+      }
+
+      const payload = buildUpdateDocumentAccessLevelPayload(editForm);
 
       const updated = await updateDocumentAccessLevel(
         editingDocumentAccessLevelId,

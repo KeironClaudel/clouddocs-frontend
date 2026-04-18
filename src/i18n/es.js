@@ -589,6 +589,7 @@ const es = {
       deactivateError: "Error al desactivar el nivel de acceso.",
       reactivateError: "Error al reactivar el nivel de acceso.",
       unexpected: "Ocurrió un error inesperado.",
+      nameRequired: "El nombre del nivel de acceso es obligatorio.",
     },
   },
   departments: {
