@@ -513,6 +513,7 @@ const es = {
       deactivateError: "Error al desactivar el tipo documental.",
       reactivateError: "Error al reactivar el tipo documental.",
       unexpected: "Ocurrió un error inesperado.",
+      nameRequired: "El nombre del tipo de documento es obligatorio.",
     },
   },
   notFound: {

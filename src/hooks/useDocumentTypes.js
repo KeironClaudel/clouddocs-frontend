@@ -8,12 +8,30 @@ import {
   updateDocumentType,
 } from "../services/documentTypeService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import {
+  validateCreateDocumentType,
+  validateUpdateDocumentType,
+} from "../validators/documentTypeValidators";
+
+import {
+  buildCreateDocumentTypePayload,
+  buildUpdateDocumentTypePayload,
+  getInitialCreateDocumentTypeForm,
+  getInitialEditDocumentTypeForm,
+  mapDocumentTypeToEditForm,
+} from "../mappers/documentTypeMappers";
 import { t } from "../i18n";
 
 /**
  * Encapsulates all DocumentTypesPage state and handlers.
  */
 export function useDocumentTypesPage() {
+  const [createForm, setCreateForm] = useState(
+    getInitialCreateDocumentTypeForm(),
+  );
+
+  const [editForm, setEditForm] = useState(getInitialEditDocumentTypeForm());
+
   const [documentTypes, setDocumentTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -87,11 +105,14 @@ export function useDocumentTypesPage() {
   }
 
   function resetCreateForm() {
-    setCreateForm({
-      name: "",
-      description: "",
-    });
+    setCreateForm(getInitialCreateDocumentTypeForm());
     setShowCreateForm(false);
+  }
+
+  function resetEditForm() {
+    setEditForm(getInitialEditDocumentTypeForm());
+    setEditingDocumentTypeId(null);
+    setShowEditForm(false);
   }
 
   function resetEditForm() {
@@ -140,14 +161,18 @@ export function useDocumentTypesPage() {
   async function handleCreateDocumentType(event) {
     event.preventDefault();
 
+    const validationError = validateCreateDocumentType(createForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setActionMessage("");
     setCreatingDocumentType(true);
 
     try {
-      const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
-      };
+      const payload = buildCreateDocumentTypePayload(createForm);
 
       const createdDocumentType = await createDocumentType(payload);
 
@@ -173,17 +198,21 @@ export function useDocumentTypesPage() {
   function handleOpenEditForm(documentType) {
     setActionMessage("");
     setEditingDocumentTypeId(documentType.id);
-    setEditForm({
-      name: documentType.name || "",
-      description: documentType.description || "",
-    });
+
+    setEditForm(mapDocumentTypeToEditForm(documentType));
+
     setShowEditForm(true);
   }
 
   async function handleUpdateDocumentType(event) {
     event.preventDefault();
 
-    if (!editingDocumentTypeId) {
+    if (!editingDocumentTypeId) return;
+
+    const validationError = validateUpdateDocumentType(editForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
       return;
     }
 
@@ -191,10 +220,7 @@ export function useDocumentTypesPage() {
     setUpdatingDocumentType(true);
 
     try {
-      const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
-      };
+      const payload = buildUpdateDocumentTypePayload(editForm);
 
       const updatedDocumentType = await updateDocumentType(
         editingDocumentTypeId,
