@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { getCategories } from "../services/categoryService";
 import { uploadDocument } from "../services/documentService";
 import { getDocumentTypes } from "../services/documentTypeService";
 import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import { getDepartments } from "../services/departmentService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import { searchClients } from "../services/clientService";
 import {
   validateFile,
@@ -88,7 +87,8 @@ export function useUploadDocument() {
   const [searchingClients, setSearchingClients] = useState(false);
 
   /*
-   * Tracks whether the user has performed a client search to conditionally
+   * Tracks whether the user has performed a client search
+   * to control UI states such as showing "no results".
    */
   const [hasSearchedClients, setHasSearchedClients] = useState(false);
 
@@ -122,7 +122,12 @@ export function useUploadDocument() {
 
         setDocumentTypes(activeDocumentTypes);
       } catch (err) {
-        console.error("Failed to load document types:", err);
+        setError(
+          resolveApiErrorMessage(
+            err,
+            t("uploadDocument.messages.loaddocumentTypesError"),
+          ),
+        );
       }
     }
 
@@ -147,7 +152,12 @@ export function useUploadDocument() {
 
         setDocumentAccessLevels(activeAccessLevels);
       } catch (err) {
-        console.error("Failed to load document access levels:", err);
+        setError(
+          resolveApiErrorMessage(
+            err,
+            t("uploadDocument.messages.loadAccessLevelsError"),
+          ),
+        );
       }
     }
 
@@ -172,14 +182,12 @@ export function useUploadDocument() {
 
         setCategories(activeCategories);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            err.response?.data?.message ||
-              t("uploadDocument.messages.loadCategoriesError"),
-          );
-        } else {
-          setError(t("uploadDocument.messages.unexpected"));
-        }
+        setError(
+          resolveApiErrorMessage(
+            err,
+            t("uploadDocument.messages.loadCategoriesError"),
+          ),
+        );
       } finally {
         setLoadingCategories(false);
       }
@@ -206,7 +214,12 @@ export function useUploadDocument() {
 
         setDepartments(activeDepartments);
       } catch (err) {
-        console.error("Failed to load departments:", err);
+        setError(
+          resolveApiErrorMessage(
+            err,
+            t("uploadDocument.messages.loadDepartmentsError"),
+          ),
+        );
       } finally {
         setLoadingDepartments(false);
       }
@@ -226,7 +239,7 @@ export function useUploadDocument() {
         departmentIds: [],
       }));
     }
-  }, [isDepartmentOnly, form.departmentIds.length]);
+  }, [isDepartmentOnly, form.departmentIds]);
 
   /*
    * Performs a debounced search for clients when the search term changes.
@@ -251,7 +264,6 @@ export function useUploadDocument() {
         setClientOptions(normalized);
         setHasSearchedClients(true);
       } catch (error) {
-        console.error("Failed to search clients:", error);
         setClientOptions([]);
         setHasSearchedClients(true);
       } finally {
@@ -354,13 +366,9 @@ export function useUploadDocument() {
       setSuccessMessage(t("uploadDocument.messages.success"));
       resetForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(
-          getApiErrorMessage(err, t("uploadDocument.messages.uploadError")),
-        );
-      } else {
-        setError(t("uploadDocument.messages.unexpected"));
-      }
+      setError(
+        resolveApiErrorMessage(err, t("uploadDocument.messages.uploadError")),
+      );
     } finally {
       setUploading(false);
     }

@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios";
 import { resetPassword } from "../services/authService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import { t } from "../i18n";
 import { validateResetPasswordForm } from "../validators/resetPasswordValidators";
 import { buildResetPasswordPayload } from "../mappers/resetPasswordMappers";
@@ -95,11 +94,9 @@ export function useResetPassword() {
       setSuccessMessage(t("resetPassword.messages.success"));
       resetForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(getApiErrorMessage(err, t("resetPassword.messages.error")));
-      } else {
-        setError(t("resetPassword.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("resetPassword.messages.error")),
+      );
     } finally {
       setLoading(false);
     }
