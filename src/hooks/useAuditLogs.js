@@ -36,16 +36,6 @@ export function useAuditLogs() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   /**
-   * Stores the current filter values for the audit table.
-   */
-  const [filters, setFilters] = useState({
-    userId: "",
-    action: "",
-    module: "",
-    date: "",
-  });
-
-  /**
    * Debounced filters used for API requests.
    */
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
