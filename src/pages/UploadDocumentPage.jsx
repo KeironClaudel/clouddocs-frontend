@@ -1,6 +1,7 @@
 import { t } from "../i18n";
 import { useUploadDocument } from "../hooks/useUploadDocument";
 import ClientAutocomplete from "../components/ClientAutocomplete";
+import { useNavigate } from "react-router-dom";
 function UploadDocumentPage() {
   const {
     categories,
@@ -25,6 +26,8 @@ function UploadDocumentPage() {
     searchingClients,
     setClientSearchTerm,
   } = useUploadDocument();
+
+  const navigate = useNavigate();
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
@@ -238,24 +241,40 @@ function UploadDocumentPage() {
             </label>
 
             {/* ACTIONS */}
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:bg-blue-300"
-                disabled={uploading || loadingCategories}
-              >
-                {uploading
-                  ? t("uploadDocument.buttons.uploading")
-                  : t("uploadDocument.buttons.submit")}
-              </button>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              {/* LEFT BUTTONS */}
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:bg-blue-300"
+                  disabled={uploading || loadingCategories}
+                >
+                  {uploading
+                    ? t("uploadDocument.buttons.uploading")
+                    : t("uploadDocument.buttons.submit")}
+                </button>
 
+                <button
+                  type="button"
+                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
+                  onClick={resetForm}
+                  disabled={uploading}
+                >
+                  {t("uploadDocument.buttons.reset")}
+                </button>
+              </div>
+
+              {/* RIGHT BUTTON */}
               <button
                 type="button"
-                className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
-                onClick={resetForm}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                onClick={() => {
+                  resetForm();
+                  navigate("/documents");
+                }}
                 disabled={uploading}
               >
-                {t("uploadDocument.buttons.reset")}
+                {t("common.cancel")}
               </button>
             </div>
           </form>

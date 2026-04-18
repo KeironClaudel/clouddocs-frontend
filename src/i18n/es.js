@@ -1,4 +1,7 @@
 const es = {
+  common: {
+    cancel: "Cancelar",
+  },
   categories: {
     title: "Categorías",
     subtitle:
