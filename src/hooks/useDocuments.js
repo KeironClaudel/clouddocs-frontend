@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import {
   deactivateDocument,
   downloadDocument,
@@ -18,7 +17,7 @@ import { getDocumentTypes } from "../services/documentTypeService";
 import { getCategories } from "../services/categoryService";
 import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import { isAdmin } from "../utils/permissionUtils";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   validateRename,
   validateVisibilityForm,
@@ -248,11 +247,9 @@ export function useDocumentsPage(user) {
         setDocuments(items);
         setTotalCount(data?.totalCount || 0);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(getApiErrorMessage(err, t("documents.messages.loadError")));
-        } else {
-          setError(t("documents.messages.unexpected"));
-        }
+        setActionMessage(
+          resolveApiErrorMessage(err, t("documents.messages.loadError")),
+        );
       } finally {
         setLoading(false);
       }
@@ -360,56 +357,6 @@ export function useDocumentsPage(user) {
   }
 
   /**
-   * Sends the selected document to its assigned client.
-   */
-  async function handleSendToClient(document) {
-    if (!document?.clientName) {
-      setActionMessage("El documento no tiene un cliente asociado.");
-      return;
-    }
-
-    const subjectInput = window.prompt(
-      "Asunto del correo:",
-      `Documento: ${document.originalFileName}`,
-    );
-
-    if (subjectInput === null) {
-      return;
-    }
-
-    const messageInput = window.prompt(
-      "Mensaje del correo:",
-      "Adjuntamos el documento solicitado.",
-    );
-
-    if (messageInput === null) {
-      return;
-    }
-
-    setActionMessage("");
-    setSendingToClientDocumentId(document.id);
-
-    try {
-      await sendDocumentToClient(document.id, {
-        subject: subjectInput.trim() || null,
-        message: messageInput.trim() || null,
-      });
-
-      setActionMessage("Documento enviado al cliente correctamente.");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, "Error al enviar el documento al cliente."),
-        );
-      } else {
-        setActionMessage("Ocurrió un error inesperado.");
-      }
-    } finally {
-      setSendingToClientDocumentId(null);
-    }
-  }
-
-  /**
    * Opens the send-to-client modal for the selected document.
    */
   function handleOpenSendToClientModal(document) {
@@ -466,13 +413,9 @@ export function useDocumentsPage(user) {
       setActionMessage(t("documents.sendToClient.success"));
       handleCloseSendToClientModal();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documents.sendToClient.error")),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documents.messages.sendToClientError")),
+      );
     } finally {
       setSendingToClientDocumentId(null);
     }
@@ -505,13 +448,9 @@ export function useDocumentsPage(user) {
 
       setActionMessage(t("documents.messages.uploadSuccess"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documents.messages.uploadError")),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documents.messages.uploadVersionError")),
+      );
     } finally {
       setUploadingVersionDocumentId(null);
     }
@@ -580,13 +519,9 @@ export function useDocumentsPage(user) {
       setActionMessage(t("documents.messages.renameSuccess"));
       handleCancelRename();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documents.messages.renameError")),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documents.messages.renameError")),
+      );
     }
   }
 
@@ -599,13 +534,9 @@ export function useDocumentsPage(user) {
       deactivateDocumentInState(documentId);
       setActionMessage(t("documents.messages.deactivateSuccess"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documents.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documents.messages.deactivateError")),
+      );
     } finally {
       setDeactivatingDocumentId(null);
     }
@@ -620,13 +551,9 @@ export function useDocumentsPage(user) {
       reactivateDocumentInState(documentId);
       setActionMessage(t("documents.messages.reactivateSuccess"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documents.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documents.messages.reactivateError")),
+      );
     } finally {
       setReactivatingDocumentId(null);
     }
@@ -741,16 +668,12 @@ export function useDocumentsPage(user) {
         ),
       );
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(
-            err,
-            t("documents.messages.visibilityUpdateError"),
-          ),
-        );
-      } else {
-        setActionMessage(t("documents.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(
+          err,
+          t("documents.messages.visibilityUpdateError"),
+        ),
+      );
     } finally {
       setUpdatingVisibility(false);
     }
@@ -800,7 +723,6 @@ export function useDocumentsPage(user) {
     isVisibilityDepartmentOnly,
     loading,
     pageSize,
-    reactivateDocumentInState,
     reactivatingDocumentId,
     renameValue,
     renamingDocumentId,
@@ -817,7 +739,6 @@ export function useDocumentsPage(user) {
     versionsByDocumentId,
     visibleDocuments,
     visibilityForm,
-    handleSendToClient,
     handleCloseSendToClientModal,
     handleConfirmSendToClient,
     handleOpenSendToClientModal,
