@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   createUser,
   deactivateUser,
@@ -10,7 +9,7 @@ import {
 } from "../services/userService";
 import { getDepartments } from "../services/departmentService";
 import { roleOptions } from "../utils/roleOptions";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import { t } from "../i18n";
 import {
   buildCreateUserPayload,
@@ -65,11 +64,7 @@ export function useUsersPage() {
         setUsers(normalizedUsers);
         setDepartments(normalizedDepts);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(getApiErrorMessage(err, t("users.messages.loadError")));
-        } else {
-          setError(t("users.messages.unexpected"));
-        }
+        setError(resolveApiErrorMessage(err, t("users.messages.loadError")));
       } finally {
         setLoading(false);
       }
@@ -100,9 +95,7 @@ export function useUsersPage() {
       setActionMessage(t("users.messages.deactivateSuccess"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("users.messages.deactivateError"))
-          : t("users.messages.unexpected"),
+        resolveApiErrorMessage(err, t("users.messages.deactivateError")),
       );
     } finally {
       setUpdatingUserId(null);
@@ -119,9 +112,7 @@ export function useUsersPage() {
       setActionMessage(t("users.messages.reactivateSuccess"));
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("users.messages.reactivateError"))
-          : t("users.messages.unexpected"),
+        resolveApiErrorMessage(err, t("users.messages.reactivateError")),
       );
     } finally {
       setUpdatingUserId(null);
@@ -135,6 +126,7 @@ export function useUsersPage() {
 
   function resetCreateForm() {
     setCreateForm(getInitialCreateUserForm());
+    setShowCreateForm(false);
   }
 
   async function handleCreateUser(e) {
@@ -159,12 +151,9 @@ export function useUsersPage() {
 
       setActionMessage(t("users.messages.createSuccess"));
       resetCreateForm();
-      setShowCreateForm(false);
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("users.messages.createError"))
-          : t("users.messages.unexpected"),
+        resolveApiErrorMessage(err, t("users.messages.createError")),
       );
     } finally {
       setCreatingUser(false);
@@ -183,21 +172,19 @@ export function useUsersPage() {
   }
 
   async function handleOpenEditForm(userId) {
+    setActionMessage("");
     setLoadingEditUser(true);
-    setShowEditForm(true);
-
     try {
       const userData = await getUserById(userId);
       const matchedRole = roleOptions.find((r) => r.label === userData.role);
 
       setEditForm(mapUserToEditForm(userData, matchedRole));
       setEditingUserId(userId);
+      setShowEditForm(true);
     } catch (err) {
       setShowEditForm(false);
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("users.messages.loadError"))
-          : t("users.messages.unexpected"),
+        resolveApiErrorMessage(err, t("users.messages.loadUserError")),
       );
     } finally {
       setLoadingEditUser(false);
@@ -216,9 +203,8 @@ export function useUsersPage() {
       setActionMessage(validationError);
       return;
     }
-
-    setUpdatingUser(true);
     setActionMessage("");
+    setUpdatingUser(true);
 
     try {
       const payload = buildUpdateUserPayload(editForm);
@@ -232,9 +218,7 @@ export function useUsersPage() {
       resetEditForm();
     } catch (err) {
       setActionMessage(
-        axios.isAxiosError(err)
-          ? getApiErrorMessage(err, t("users.messages.updateError"))
-          : t("users.messages.unexpected"),
+        resolveApiErrorMessage(err, t("users.messages.updateError")),
       );
     } finally {
       setUpdatingUser(false);
