@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   createDocumentType,
   deactivateDocumentType,
@@ -7,7 +6,7 @@ import {
   reactivateDocumentType,
   updateDocumentType,
 } from "../services/documentTypeService";
-import { getApiErrorMessage } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   validateCreateDocumentType,
   validateUpdateDocumentType,
@@ -61,13 +60,9 @@ export function useDocumentTypesPage() {
 
         setDocumentTypes(normalizedDocumentTypes);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            getApiErrorMessage(err, t("documentTypes.messages.loadError")),
-          );
-        } else {
-          setError(t("documentTypes.messages.unexpected"));
-        }
+        setError(
+          resolveApiErrorMessage(err, t("documentTypes.messages.loadError")),
+        );
       } finally {
         setLoading(false);
       }
@@ -101,15 +96,6 @@ export function useDocumentTypesPage() {
 
   function resetEditForm() {
     setEditForm(getInitialEditDocumentTypeForm());
-    setEditingDocumentTypeId(null);
-    setShowEditForm(false);
-  }
-
-  function resetEditForm() {
-    setEditForm({
-      name: "",
-      description: "",
-    });
     setEditingDocumentTypeId(null);
     setShowEditForm(false);
   }
@@ -173,13 +159,9 @@ export function useDocumentTypesPage() {
       setActionMessage(t("documentTypes.messages.created"));
       resetCreateForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documentTypes.messages.createError")),
-        );
-      } else {
-        setActionMessage(t("documentTypes.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documentTypes.messages.createError")),
+      );
     } finally {
       setCreatingDocumentType(false);
     }
@@ -224,13 +206,9 @@ export function useDocumentTypesPage() {
       setActionMessage(t("documentTypes.messages.updated"));
       resetEditForm();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documentTypes.messages.updateError")),
-        );
-      } else {
-        setActionMessage(t("documentTypes.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(err, t("documentTypes.messages.updateError")),
+      );
     } finally {
       setUpdatingDocumentType(false);
     }
@@ -245,13 +223,12 @@ export function useDocumentTypesPage() {
       deactivateDocumentTypeInState(documentTypeId);
       setActionMessage(t("documentTypes.messages.deactivated"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documentTypes.messages.deactivateError")),
-        );
-      } else {
-        setActionMessage(t("documentTypes.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(
+          err,
+          t("documentTypes.messages.deactivateError"),
+        ),
+      );
     } finally {
       setDeactivatingDocumentTypeId(null);
     }
@@ -266,13 +243,12 @@ export function useDocumentTypesPage() {
       reactivateDocumentTypeInState(documentTypeId);
       setActionMessage(t("documentTypes.messages.reactivated"));
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setActionMessage(
-          getApiErrorMessage(err, t("documentTypes.messages.reactivateError")),
-        );
-      } else {
-        setActionMessage(t("documentTypes.messages.unexpected"));
-      }
+      setActionMessage(
+        resolveApiErrorMessage(
+          err,
+          t("documentTypes.messages.reactivateError"),
+        ),
+      );
     } finally {
       setReactivatingDocumentTypeId(null);
     }

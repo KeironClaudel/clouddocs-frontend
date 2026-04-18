@@ -247,7 +247,7 @@ export function useDocumentsPage(user) {
         setDocuments(items);
         setTotalCount(data?.totalCount || 0);
       } catch (err) {
-        setActionMessage(
+        setError(
           resolveApiErrorMessage(err, t("documents.messages.loadError")),
         );
       } finally {
@@ -413,7 +413,7 @@ export function useDocumentsPage(user) {
       setActionMessage(t("documents.sendToClient.success"));
       handleCloseSendToClientModal();
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(err, t("documents.messages.sendToClientError")),
       );
     } finally {
@@ -448,7 +448,7 @@ export function useDocumentsPage(user) {
 
       setActionMessage(t("documents.messages.uploadSuccess"));
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(err, t("documents.messages.uploadVersionError")),
       );
     } finally {
@@ -519,7 +519,7 @@ export function useDocumentsPage(user) {
       setActionMessage(t("documents.messages.renameSuccess"));
       handleCancelRename();
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(err, t("documents.messages.renameError")),
       );
     }
@@ -534,7 +534,7 @@ export function useDocumentsPage(user) {
       deactivateDocumentInState(documentId);
       setActionMessage(t("documents.messages.deactivateSuccess"));
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(err, t("documents.messages.deactivateError")),
       );
     } finally {
@@ -551,7 +551,7 @@ export function useDocumentsPage(user) {
       reactivateDocumentInState(documentId);
       setActionMessage(t("documents.messages.reactivateSuccess"));
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(err, t("documents.messages.reactivateError")),
       );
     } finally {
@@ -668,7 +668,7 @@ export function useDocumentsPage(user) {
         ),
       );
     } catch (err) {
-      setActionMessage(
+      setError(
         resolveApiErrorMessage(
           err,
           t("documents.messages.visibilityUpdateError"),

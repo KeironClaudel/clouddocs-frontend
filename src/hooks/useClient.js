@@ -52,9 +52,7 @@ export function useClientsPage() {
 
         setClients(normalized);
       } catch (err) {
-        setActionMessage(
-          resolveApiErrorMessage(err, t("clients.messages.loadError")),
-        );
+        setError(resolveApiErrorMessage(err, t("clients.messages.loadError")));
       } finally {
         setLoading(false);
       }
