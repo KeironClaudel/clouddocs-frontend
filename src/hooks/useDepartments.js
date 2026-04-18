@@ -7,6 +7,18 @@ import {
   reactivateDepartment,
   updateDepartment,
 } from "../services/departmentService";
+import {
+  validateCreateDepartment,
+  validateUpdateDepartment,
+} from "../validators/departmentValidators";
+
+import {
+  buildCreateDepartmentPayload,
+  buildUpdateDepartmentPayload,
+  getInitialCreateDepartmentForm,
+  getInitialEditDepartmentForm,
+  mapDepartmentToForm,
+} from "../mappers/departmentMappers";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
 
@@ -14,6 +26,16 @@ import { t } from "../i18n";
  * Encapsulates all DepartmentsPage state and handlers.
  */
 export function useDepartmentsPage() {
+  /**
+   * Stores the create department form values.
+   */
+  const [createForm, setCreateForm] = useState(
+    getInitialCreateDepartmentForm(),
+  );
+  /**
+   * Stores the edit department form values.
+   */
+  const [editForm, setEditForm] = useState(getInitialEditDepartmentForm());
   /**
    * Stores the department list returned by the API.
    */
@@ -151,10 +173,7 @@ export function useDepartmentsPage() {
    * Resets the create department form to its initial state.
    */
   function resetCreateForm() {
-    setCreateForm({
-      name: "",
-      description: "",
-    });
+    setCreateForm(getInitialCreateDepartmentForm());
   }
 
   /**
@@ -167,10 +186,14 @@ export function useDepartmentsPage() {
     setCreatingDepartment(true);
 
     try {
-      const payload = {
-        name: createForm.name,
-        description: createForm.description || null,
-      };
+      const validationError = validateCreateDepartment(createForm, t);
+
+      if (validationError) {
+        setActionMessage(validationError);
+        return;
+      }
+
+      const payload = buildCreateDepartmentPayload(createForm);
 
       const createdDepartment = await createDepartment(payload);
 
@@ -210,11 +233,7 @@ export function useDepartmentsPage() {
    * Resets the edit department form to its initial state.
    */
   function resetEditForm() {
-    setEditForm({
-      name: "",
-      description: "",
-    });
-
+    setEditForm(getInitialEditDepartmentForm());
     setEditingDepartmentId(null);
     setShowEditForm(false);
   }
@@ -227,10 +246,7 @@ export function useDepartmentsPage() {
     setShowEditForm(true);
     setEditingDepartmentId(department.id);
 
-    setEditForm({
-      name: department.name || "",
-      description: department.description || "",
-    });
+    setEditForm(mapDepartmentToForm(department));
   }
 
   /**
@@ -247,10 +263,14 @@ export function useDepartmentsPage() {
     setUpdatingDepartment(true);
 
     try {
-      const payload = {
-        name: editForm.name,
-        description: editForm.description || null,
-      };
+      const validationError = validateUpdateDepartment(editForm, t);
+
+      if (validationError) {
+        setActionMessage(validationError);
+        return;
+      }
+
+      const payload = buildUpdateDepartmentPayload(editForm);
 
       const updatedDepartment = await updateDepartment(
         editingDepartmentId,

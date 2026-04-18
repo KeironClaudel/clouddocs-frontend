@@ -639,6 +639,7 @@ const es = {
       deactivateError: "Error al desactivar el departamento.",
       reactivateError: "Error al reactivar el departamento.",
       unexpected: "Ocurrió un error inesperado.",
+      nameRequired: "El nombre del departamento es obligatorio.",
     },
   },
   underConstruction: {
