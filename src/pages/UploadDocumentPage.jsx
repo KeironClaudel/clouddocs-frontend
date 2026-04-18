@@ -267,7 +267,7 @@ function UploadDocumentPage() {
               {/* RIGHT BUTTON */}
               <button
                 type="button"
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                className="rounded-lg bg-red-100 px-4 py-2 text-sm text-red-700 transition hover:bg-red-200"
                 onClick={() => {
                   resetForm();
                   navigate("/documents");
