@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getDashboardStats } from "../services/dashboardService";
 import { isAdmin } from "../utils/permissionUtils";
+import { getInitialDashboardStats } from "../mappers/dashboardMappers";
 import { t } from "../i18n";
+import { resolveApiError } from "../utils/errorUtils";
 
 /**
  * Encapsulates all DashboardPage state and handlers.
  */
 export function useDashboard(user) {
+  /**
+   * Stores the dashboard statistics displayed in the cards.
+   */
+  const [stats, setStats] = useState(getInitialDashboardStats());
   /**
    * Stores the dashboard statistics displayed in the cards.
    */
@@ -40,11 +46,7 @@ export function useDashboard(user) {
         const data = await getDashboardStats(isAdmin(user));
         setStats(data);
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || t("dashboard.loadError"));
-        } else {
-          setError(t("dashboard.unexpected"));
-        }
+        setError(resolveApiError(err, t("dashboard.loadError"), t));
       } finally {
         setLoading(false);
       }
