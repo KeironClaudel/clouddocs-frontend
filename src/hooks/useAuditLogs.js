@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getAuditLogs } from "../services/auditService";
-import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import {
   buildAuditLogsParams,
   getInitialAuditFilters,
