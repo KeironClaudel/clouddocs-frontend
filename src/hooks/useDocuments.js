@@ -19,6 +19,16 @@ import { getCategories } from "../services/categoryService";
 import { getDocumentAccessLevels } from "../services/documentAccessLevelService";
 import { isAdmin } from "../utils/permissionUtils";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import {
+  validateRename,
+  validateVisibilityForm,
+  validateUploadVersion,
+} from "../validators/documentValidators";
+
+import {
+  buildVisibilityPayload,
+  buildSendToClientPayload,
+} from "../mappers/documentMappers";
 import { t } from "../i18n";
 
 export function useDocumentsPage(user) {
@@ -449,10 +459,9 @@ export function useDocumentsPage(user) {
     setSendingToClientDocumentId(sendToClientModalDocument.id);
 
     try {
-      await sendDocumentToClient(sendToClientModalDocument.id, {
-        subject: sendToClientForm.subject.trim() || null,
-        message: sendToClientForm.message.trim() || null,
-      });
+      const payload = buildSendToClientPayload(sendToClientForm);
+
+      await sendDocumentToClient(sendToClientModalDocument.id, payload);
 
       setActionMessage(t("documents.sendToClient.success"));
       handleCloseSendToClientModal();
@@ -470,12 +479,10 @@ export function useDocumentsPage(user) {
   }
 
   async function handleUploadVersion(documentId, file) {
-    if (!file) {
-      return;
-    }
+    const validationError = validateUploadVersion(file, t);
 
-    if (file.type !== "application/pdf") {
-      setActionMessage(t("documents.messages.onlyPdf"));
+    if (validationError) {
+      setActionMessage(validationError);
       return;
     }
 
@@ -558,8 +565,10 @@ export function useDocumentsPage(user) {
   }
 
   async function handleConfirmRename(documentId) {
-    if (!renameValue.trim()) {
-      setActionMessage(t("documents.messages.emptyName"));
+    const validationError = validateRename(renameValue, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
       return;
     }
 
@@ -690,16 +699,14 @@ export function useDocumentsPage(user) {
   }
 
   async function handleSaveVisibility(documentId) {
-    if (!visibilityForm.accessLevelId) {
-      setActionMessage(t("documents.messages.selectAccessLevel"));
-      return;
-    }
+    const validationError = validateVisibilityForm({
+      visibilityForm,
+      isDepartmentOnly: isVisibilityDepartmentOnly,
+      t,
+    });
 
-    if (
-      isVisibilityDepartmentOnly &&
-      visibilityForm.departmentIds.length === 0
-    ) {
-      setActionMessage(t("documents.messages.selectDepartments"));
+    if (validationError) {
+      setActionMessage(validationError);
       return;
     }
 
@@ -707,12 +714,13 @@ export function useDocumentsPage(user) {
     setActionMessage("");
 
     try {
-      await updateDocumentVisibility(documentId, {
-        accessLevelId: visibilityForm.accessLevelId,
-        departmentIds: isVisibilityDepartmentOnly
-          ? visibilityForm.departmentIds
-          : [],
-      });
+      await updateDocumentVisibility(
+        documentId,
+        buildVisibilityPayload({
+          visibilityForm,
+          isDepartmentOnly: isVisibilityDepartmentOnly,
+        }),
+      );
 
       setActionMessage(t("documents.messages.visibilityUpdated"));
       setEditingVisibilityDocumentId(null);
@@ -814,7 +822,6 @@ export function useDocumentsPage(user) {
     handleConfirmSendToClient,
     handleOpenSendToClientModal,
     handleSendToClientFormChange,
-    handleSendToClient,
     sendToClientForm,
     sendToClientModalDocument,
     sendingToClientDocumentId,
