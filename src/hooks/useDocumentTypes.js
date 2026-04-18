@@ -50,16 +50,6 @@ export function useDocumentTypesPage() {
 
   const [editingDocumentTypeId, setEditingDocumentTypeId] = useState(null);
 
-  const [createForm, setCreateForm] = useState({
-    name: "",
-    description: "",
-  });
-
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-  });
-
   useEffect(() => {
     async function loadDocumentTypes() {
       try {

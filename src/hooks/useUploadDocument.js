@@ -93,19 +93,6 @@ export function useUploadDocument() {
   const [hasSearchedClients, setHasSearchedClients] = useState(false);
 
   /**
-   * Stores the upload form values.
-   */
-  const [form, setForm] = useState({
-    categoryId: "",
-    documentTypeId: "",
-    expirationDate: "",
-    expirationDatePendingDefinition: false,
-    accessLevelId: "",
-    departmentIds: [],
-    clientId: "",
-  });
-
-  /**
    * Retrieves the currently selected access level object.
    */
   const selectedAccessLevel = documentAccessLevels.find(
