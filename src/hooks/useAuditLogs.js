@@ -6,6 +6,8 @@ import {
   buildAuditLogsParams,
   getInitialAuditFilters,
 } from "../mappers/auditMappers";
+import { getUniqueValues } from "../utils/collectionUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 import { t } from "../i18n";
 
 /**
@@ -105,7 +107,7 @@ export function useAuditLogs() {
       setPage(data.page || effectivePage);
       setTotalCount(data.totalCount || 0);
     } catch (err) {
-      setError(getApiErrorMessage(err, t("auditLogs.loadError")));
+      setError(resolveApiErrorMessage(err, t("auditLogs.loadError")));
     } finally {
       setLoading(false);
     }
@@ -185,27 +187,21 @@ export function useAuditLogs() {
    * Builds unique user ID options from currently loaded logs.
    */
   const userOptions = useMemo(() => {
-    return [...new Set(auditLogs.map((log) => log.userId))]
-      .filter(Boolean)
-      .sort();
+    return getUniqueValues(auditLogs, "userId");
   }, [auditLogs]);
 
   /**
    * Builds unique action options from currently loaded logs.
    */
   const actionOptions = useMemo(() => {
-    return [...new Set(auditLogs.map((log) => log.action))]
-      .filter(Boolean)
-      .sort();
+    return getUniqueValues(auditLogs, "action");
   }, [auditLogs]);
 
   /**
    * Builds unique module options from currently loaded logs.
    */
   const moduleOptions = useMemo(() => {
-    return [...new Set(auditLogs.map((log) => log.module))]
-      .filter(Boolean)
-      .sort();
+    return getUniqueValues(auditLogs, "module");
   }, [auditLogs]);
 
   return {
