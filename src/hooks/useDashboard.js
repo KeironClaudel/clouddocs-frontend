@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { getDashboardStats } from "../services/dashboardService";
 import { isAdmin } from "../utils/permissionUtils";
 import { getInitialDashboardStats } from "../mappers/dashboardMappers";
 import { t } from "../i18n";
-import { resolveApiError } from "../utils/errorUtils";
+import { resolveApiErrorMessage } from "../utils/apiErrorHandler";
 
 /**
  * Encapsulates all DashboardPage state and handlers.
@@ -14,15 +13,6 @@ export function useDashboard(user) {
    * Stores the dashboard statistics displayed in the cards.
    */
   const [stats, setStats] = useState(getInitialDashboardStats());
-  /**
-   * Stores the dashboard statistics displayed in the cards.
-   */
-  const [stats, setStats] = useState({
-    totalDocuments: 0,
-    totalUsers: null,
-    activeUsers: null,
-    inactiveUsers: null,
-  });
 
   /**
    * Indicates whether dashboard data is currently loading.
@@ -46,7 +36,7 @@ export function useDashboard(user) {
         const data = await getDashboardStats(isAdmin(user));
         setStats(data);
       } catch (err) {
-        setError(resolveApiError(err, t("dashboard.loadError"), t));
+        setError(resolveApiErrorMessage(err, t("dashboard.loadError")));
       } finally {
         setLoading(false);
       }
