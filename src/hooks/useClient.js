@@ -8,12 +8,24 @@ import {
   updateClient,
 } from "../services/clientService";
 import { getApiErrorMessage } from "../utils/errorUtils";
+import {
+  validateCreateClient,
+  validateUpdateClient,
+} from "../validators/clientValidators";
+
+import {
+  buildClientPayload,
+  getInitialClientForm,
+  mapClientToForm,
+} from "../mappers/clientMappers";
 import { t } from "../i18n";
 
 /**
  * Encapsulates all ClientsPage state and handlers.
  */
 export function useClientsPage() {
+  const [createForm, setCreateForm] = useState(getInitialClientForm());
+  const [editForm, setEditForm] = useState(getInitialClientForm());
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,12 +97,12 @@ export function useClientsPage() {
   }
 
   function resetCreateForm() {
-    setCreateForm(initialForm);
+    setCreateForm(getInitialClientForm());
     setShowCreateForm(false);
   }
 
   function resetEditForm() {
-    setEditForm(initialForm);
+    setEditForm(getInitialClientForm());
     setEditingClientId(null);
     setShowEditForm(false);
   }
@@ -127,27 +139,23 @@ export function useClientsPage() {
     event.preventDefault();
 
     setActionMessage("");
+
+    const validationError = validateCreateClient(createForm, t);
+
+    if (validationError) {
+      setActionMessage(validationError);
+      return;
+    }
+
     setCreatingClient(true);
 
     try {
-      const payload = {
-        name: createForm.name.trim(),
-        legalName: createForm.legalName.trim() || null,
-        identification: createForm.identification.trim() || null,
-        email: createForm.email.trim() || null,
-        phone: createForm.phone.trim() || null,
-        notes: createForm.notes.trim() || null,
-      };
+      const payload = buildClientPayload(createForm);
 
       const createdClient = await createClient(payload);
 
       if (createdClient?.id) {
         addClientToState(createdClient);
-      }
-
-      if (!createForm.name.trim()) {
-        setActionMessage(t("clients.messages.nameRequired"));
-        return;
       }
 
       setActionMessage(t("clients.messages.created"));
@@ -169,14 +177,7 @@ export function useClientsPage() {
     setActionMessage("");
     setEditingClientId(client.id);
 
-    setEditForm({
-      name: client.name || "",
-      legalName: client.legalName || "",
-      identification: client.identification || "",
-      email: client.email || "",
-      phone: client.phone || "",
-      notes: client.notes || "",
-    });
+    setEditForm(mapClientToForm(client));
 
     setShowEditForm(true);
   }
@@ -192,14 +193,14 @@ export function useClientsPage() {
     setUpdatingClient(true);
 
     try {
-      const payload = {
-        name: editForm.name.trim(),
-        legalName: editForm.legalName.trim() || null,
-        identification: editForm.identification.trim() || null,
-        email: editForm.email.trim() || null,
-        phone: editForm.phone.trim() || null,
-        notes: editForm.notes.trim() || null,
-      };
+      const validationError = validateUpdateClient(editForm, t);
+
+      if (validationError) {
+        setActionMessage(validationError);
+        return;
+      }
+
+      const payload = buildClientPayload(editForm);
 
       const updatedClient = await updateClient(editingClientId, payload);
 

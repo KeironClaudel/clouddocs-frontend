@@ -703,6 +703,7 @@ const es = {
       reactivateError: "Error al reactivar el cliente.",
       unexpected: "Ocurrió un error inesperado.",
       nameRequired: "El nombre del cliente es obligatorio.",
+      invalidEmail: "El correo electrónico no es válido.",
     },
   },
 };
