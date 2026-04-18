@@ -253,6 +253,9 @@ const es = {
     messages: {
       error: "Error al iniciar sesión.",
       unexpected: "Ocurrió un error inesperado.",
+      emailRequired: "El correo electrónico es obligatorio.",
+      invalidEmail: "El correo electrónico no tiene un formato válido.",
+      passwordRequired: "La contraseña es obligatoria.",
     },
 
     footer: {
