@@ -221,6 +221,9 @@ const es = {
       mismatch: "La nueva contraseña y su confirmación no coinciden.",
       error: "Error al restablecer la contraseña.",
       unexpected: "Ocurrió un error inesperado.",
+      passwordRequired: "La nueva contraseña es obligatoria.",
+      confirmPasswordRequired: "La confirmación de contraseña es obligatoria.",
+      passwordTooShort: "La contraseña debe tener al menos 8 caracteres.",
     },
 
     navigation: {

@@ -4,6 +4,8 @@ import axios from "axios";
 import { resetPassword } from "../services/authService";
 import { getApiErrorMessage } from "../utils/errorUtils";
 import { t } from "../i18n";
+import { validateResetPasswordForm } from "../validators/resetPasswordValidators";
+import { buildResetPasswordPayload } from "../mappers/resetPasswordMappers";
 
 /**
  * Encapsulates all ResetPasswordPage state and handlers.
@@ -68,23 +70,27 @@ export function useResetPassword() {
 
     resetMessages();
 
-    if (!token) {
-      setError(t("resetPassword.messages.invalidToken"));
-      return;
-    }
+    const validationError = validateResetPasswordForm({
+      token,
+      newPassword,
+      confirmPassword,
+      t,
+    });
 
-    if (newPassword !== confirmPassword) {
-      setError(t("resetPassword.messages.mismatch"));
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setLoading(true);
 
     try {
-      await resetPassword({
+      const payload = buildResetPasswordPayload({
         token,
         newPassword,
       });
+
+      await resetPassword(payload);
 
       setSuccessMessage(t("resetPassword.messages.success"));
       resetForm();
