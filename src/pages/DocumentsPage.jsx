@@ -1,7 +1,12 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { canManageAdminPanels } from "../utils/permissionUtils";
+import {
+  canRenameDocuments,
+  canUploadDocumentVersions,
+  canDeactivateDocuments,
+  canEditDocumentVisibility,
+} from "../utils/permissionUtils";
 import { formatLocalDateForDisplay } from "../utils/dateUtils";
 import DataTable from "../components/DataTable";
 import { t } from "../i18n";
@@ -71,6 +76,11 @@ function DocumentsPage() {
     sendToClientModalDocument,
     sendingToClientDocumentId,
   } = useDocumentsPage(user);
+
+  const canRename = canRenameDocuments(user);
+  const canUploadVersion = canUploadDocumentVersions(user);
+  const canDeactivate = canDeactivateDocuments(user);
+  const canEditVisibility = canEditDocumentVisibility(user);
 
   const documentTableColumns = [
     { key: "name", label: t("documents.table.name") },
@@ -232,7 +242,7 @@ function DocumentsPage() {
               </select>
             </div>
 
-            {canManage && (
+            {canRename && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   {t("documents.filters.statusLabel")}
@@ -408,7 +418,7 @@ function DocumentsPage() {
 
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
-                      {canManage && (
+                      {canRename && (
                         <button
                           className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
                           onClick={() => handleStartRename(document)}
@@ -421,7 +431,7 @@ function DocumentsPage() {
                         </button>
                       )}
 
-                      {canManage && (
+                      {canUploadVersion && (
                         <>
                           <input
                             id={`upload-version-${document.id}`}
@@ -511,7 +521,7 @@ function DocumentsPage() {
                           </button>
                         ))}
 
-                      {canManage && (
+                      {canEditVisibility && (
                         <button
                           className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 transition hover:bg-purple-100"
                           onClick={() => handleStartEditVisibility(document)}

@@ -61,3 +61,29 @@ export function canViewDepartments(user) {
 export function canViewDocumentTypes(user) {
   return canManageAdminPanels(user);
 }
+
+/*
+ * Returns true when the user can rename documents.
+ */
+export function canRenameDocuments(user) {
+  return true;
+}
+
+/* Returns true when the user can upload document versions. */
+export function canUploadDocumentVersions(user) {
+  return true;
+}
+
+/**
+ * Returns true when the user can de activate documents.
+ */
+export function canDeactivateDocuments(user) {
+  return true;
+}
+
+/**
+ * Returns true when the user can edit document visibility.
+ **/
+export function canEditDocumentVisibility(user) {
+  return true;
+}
