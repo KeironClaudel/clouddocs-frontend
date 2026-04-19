@@ -18,7 +18,6 @@ import { getDocumentTableColumns } from "../config/documentTableConfig";
 
 function DocumentsPage() {
   const { user } = useAuth();
-  const canManage = canManageAdminPanels(user);
 
   const {
     actionMessage,
@@ -484,7 +483,7 @@ function DocumentsPage() {
                           : t("documents.buttons.sendToClient")}
                       </button>
 
-                      {canManage &&
+                      {canDeactivateDocuments &&
                         (document.isActive ? (
                           <button
                             className="rounded-lg bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
