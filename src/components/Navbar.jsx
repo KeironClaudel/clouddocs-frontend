@@ -12,13 +12,30 @@ import {
   faUsers,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import { canManageAdminPanels } from "../utils/permissionUtils";
+import {
+  canManageAdminPanels,
+  canViewAuditLogs,
+  canViewCategories,
+  canViewClients,
+  canViewDepartments,
+  canViewDocumentAccessLevels,
+  canViewDocumentTypes,
+  canViewUsers,
+} from "../utils/permissionUtils";
 import { t } from "../i18n";
 
 function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
   const isAdmin = canManageAdminPanels(user);
+  const canSeeClients = canViewClients(user);
+  const canSeeUsers = canViewUsers(user);
+  const canSeeAuditLogs = canViewAuditLogs(user);
+  const canSeeDocumentAccessLevels = canViewDocumentAccessLevels(user);
+  const canSeeCategories = canViewCategories(user);
+  const canSeeDepartments = canViewDepartments(user);
+  const canSeeDocumentTypes = canViewDocumentTypes(user);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -149,14 +166,14 @@ function Navbar() {
                       faUser,
                     )}
 
-                    {isAdmin &&
+                    {canSeeUsers &&
                       renderMenuLink(
                         "/users",
                         t("navbar.links.users"),
                         faUsers,
                       )}
 
-                    {isAdmin &&
+                    {canSeeAuditLogs &&
                       renderMenuLink(
                         "/audit-logs",
                         t("navbar.links.auditLogs"),
@@ -189,18 +206,18 @@ function Navbar() {
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
             {renderNavLink("/dashboard", t("navbar.links.dashboard"))}
             {renderNavLink("/documents", t("navbar.links.documents"))}
-
-            {isAdmin && renderNavLink("/clients", t("navbar.links.clients"))}
-            {isAdmin &&
+            {canSeeClients &&
+              renderNavLink("/clients", t("navbar.links.clients"))}
+            {canSeeDocumentAccessLevels &&
               renderNavLink(
                 "/document-access-levels",
                 t("navbar.links.documentAccessLevels"),
               )}
-            {isAdmin &&
+            {canSeeCategories &&
               renderNavLink("/categories", t("navbar.links.categories"))}
-            {isAdmin &&
+            {canSeeDepartments &&
               renderNavLink("/departments", t("navbar.links.departments"))}
-            {isAdmin &&
+            {canSeeDocumentTypes &&
               renderNavLink("/document-types", t("navbar.links.documentTypes"))}
           </div>
         </div>
@@ -224,18 +241,18 @@ function Navbar() {
           <div className="flex items-center justify-end gap-4">
             {renderNavLink("/dashboard", t("navbar.links.dashboard"))}
             {renderNavLink("/documents", t("navbar.links.documents"))}
-
-            {isAdmin && renderNavLink("/clients", t("navbar.links.clients"))}
-            {isAdmin &&
+            {canSeeClients &&
+              renderNavLink("/clients", t("navbar.links.clients"))}
+            {canSeeDocumentAccessLevels &&
               renderNavLink(
                 "/document-access-levels",
                 t("navbar.links.documentAccessLevels"),
               )}
-            {isAdmin &&
+            {canSeeCategories &&
               renderNavLink("/categories", t("navbar.links.categories"))}
-            {isAdmin &&
+            {canSeeDepartments &&
               renderNavLink("/departments", t("navbar.links.departments"))}
-            {isAdmin &&
+            {canSeeDocumentTypes &&
               renderNavLink("/document-types", t("navbar.links.documentTypes"))}
           </div>
 
@@ -266,10 +283,10 @@ function Navbar() {
                     faUser,
                   )}
 
-                  {isAdmin &&
+                  {canSeeUsers &&
                     renderMenuLink("/users", t("navbar.links.users"), faUsers)}
 
-                  {isAdmin &&
+                  {canSeeAuditLogs &&
                     renderMenuLink(
                       "/audit-logs",
                       t("navbar.links.auditLogs"),
