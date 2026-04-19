@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getClientLabel } from "../utils/clientUtils";
 
 /**
  * Renders an autocomplete input for selecting a client.
@@ -55,7 +56,9 @@ function ClientAutocomplete({
       />
 
       {selectedClient && !searchTerm.trim() && (
-        <p className="mt-1 text-xs text-gray-500">{selectedClient.name}</p>
+        <p className="mt-1 text-xs text-gray-500">
+          {getClientLabel(selectedClient)}
+        </p>
       )}
 
       {isOpen && searchTerm.trim() && (
@@ -70,11 +73,11 @@ function ClientAutocomplete({
                 className="block w-full px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100"
                 onClick={() => {
                   onSelectClient(client);
-                  setSearchTerm(client.name);
+                  setSearchTerm(getClientLabel(client));
                   setIsOpen(false);
                 }}
               >
-                {client.name}
+                {getClientLabel(client)}
               </button>
             ))
           ) : (
