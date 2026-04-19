@@ -1,5 +1,32 @@
-import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import Navbar from "./Navbar";
+import { AuthContext } from "../context/authContextValue";
+
+const createAuthValue = (role, fullName) => ({
+  user: {
+    fullName,
+    role,
+  },
+  login: () => {},
+  logout: () => {},
+  isAuthReady: true,
+});
+
+const withProviders =
+  (authValue, initialEntries = ["/dashboard"]) =>
+  (Story) => {
+    const StoryComponent = Story;
+
+    return (
+      <MemoryRouter initialEntries={initialEntries}>
+        <AuthContext.Provider value={authValue}>
+          <div className="min-h-screen bg-gray-100">
+            <StoryComponent />
+          </div>
+        </AuthContext.Provider>
+      </MemoryRouter>
+    );
+  };
 
 export default {
   title: "Components/Navbar",
@@ -14,10 +41,13 @@ export default {
  * Propiedades del componente Navbar
  */
 
-export const Default = () => <Navbar />;
+export const AdminView = () => <Navbar />;
 
-Default.storyName = "Navbar";
-Default.parameters = {
+AdminView.storyName = "Admin Navbar";
+AdminView.decorators = [
+  withProviders(createAuthValue("Admin", "Ana Admin"), ["/clients"]),
+];
+AdminView.parameters = {
   docs: {
     description: {
       component: `
@@ -28,12 +58,14 @@ La barra de navegación principal de la aplicación. Incluye:
 - **Links dinámicos**: Se muestran basados en los permisos del usuario
 - **Estado activo**: Destaca el link de la ruta actual
 - **Logout**: Botón para cerrar sesión
-- **Admin Panel**: Links a funcionalidades administrativas (solo para admins)
+- **Responsive**: Tiene variantes móvil y desktop
+- **Admin Panel**: Links administrativos visibles para admins
 
 ## Características
 
-- Validación automática de permisos
-- Navegación contextual según rol del usuario
+- Navegación contextual según rol
+- Integración con React Router
+- Integración con AuthContext
 - Estilos responsivos con Tailwind CSS
 - Iconos con FontAwesome
 
@@ -41,27 +73,27 @@ La barra de navegación principal de la aplicación. Incluye:
 
 \`\`\`jsx
 import Navbar from './components/Navbar';
+import { MemoryRouter } from 'react-router-dom';
+import { AuthContext } from './context/authContextValue';
 
-function AppLayout() {
+function StoryWrapper() {
   return (
-    <div>
-      <Navbar />
-      {/* resto del contenido */}
-    </div>
+    <MemoryRouter>
+      <AuthContext.Provider value={mockAuthValue}>
+        <Navbar />
+      </AuthContext.Provider>
+    </MemoryRouter>
   );
 }
 \`\`\`
-
-## Rutas disponibles
-
-- \`/dashboard\`: Panel de control (protegido)
-- \`/documents\`: Gestor de documentos (protegido)
-- \`/profile\`: Perfil del usuario (protegido)
-- \`/users\`: Gestión de usuarios (admin)
-- \`/categories\`: Gestión de categorías (admin)
-- \`/departments\`: Gestión de departamentos (admin)
-- \`/clients\`: Gestión de clientes (protegido)
       `,
     },
   },
 };
+
+export const UserView = () => <Navbar />;
+
+UserView.storyName = "Standard User Navbar";
+UserView.decorators = [
+  withProviders(createAuthValue("User", "Uriel Usuario"), ["/documents"]),
+];

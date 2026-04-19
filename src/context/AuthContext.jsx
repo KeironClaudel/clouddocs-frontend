@@ -1,10 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { useContext, useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
-
-/**
- * Creates a context to store authentication state globally.
- */
-const AuthContext = createContext();
+import { AuthContext } from "./authContextValue";
 
 /**
  * Provides authentication state and helpers to the entire app.

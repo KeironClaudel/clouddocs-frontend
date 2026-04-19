@@ -8,36 +8,60 @@ export default {
 
 /**
  * @typedef {Object} SendToClientModalProps
- * @property {Object} document - Documento a enviar
- * @property {boolean} isOpen - Estado del modal (abierto/cerrado)
- * @property {Function} onClose - Callback al cerrar modal
- * @property {Function} onSend - Callback al enviar
+ * @property {string} documentName - Nombre del documento
+ * @property {string} clientName - Cliente destinatario
+ * @property {string} subject - Asunto del correo
+ * @property {string} message - Mensaje a enviar
  */
-
-const mockDocument = {
-  id: "123",
-  name: "Documento Importante.pdf",
-  size: "2.5MB",
-};
 
 export const Default = () => {
   const [isOpen, setIsOpen] = React.useState(true);
+  const [subject, setSubject] = React.useState(
+    "CloudDocs: Documento Importante.pdf",
+  );
+  const [message, setMessage] = React.useState(
+    "Adjuntamos el documento solicitado para su revisión.",
+  );
+
+  if (!isOpen) {
+    return <button onClick={() => setIsOpen(true)}>Abrir modal</button>;
+  }
 
   return (
-    <div>
-      <button onClick={() => setIsOpen(true)}>Abrir Modal</button>
+    <div style={{ padding: "20px" }}>
       <SendToClientModal
-        document={mockDocument}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onSend={(data) => {
-          console.log("Enviando:", data);
+        documentName="Documento Importante.pdf"
+        clientName="Acme Corp"
+        subject={subject}
+        message={message}
+        onSubjectChange={setSubject}
+        onMessageChange={setMessage}
+        onCancel={() => setIsOpen(false)}
+        onConfirm={() => {
+          console.log("Enviando:", { subject, message });
           setIsOpen(false);
         }}
+        sending={false}
       />
     </div>
   );
 };
+
+export const Sending = () => (
+  <div style={{ padding: "20px" }}>
+    <SendToClientModal
+      documentName="Estado Financiero.pdf"
+      clientName="Globex"
+      subject="CloudDocs: Estado Financiero.pdf"
+      message="Estamos procesando el envio del documento."
+      onSubjectChange={() => {}}
+      onMessageChange={() => {}}
+      onCancel={() => {}}
+      onConfirm={() => {}}
+      sending={true}
+    />
+  </div>
+);
 
 Default.storyName = "SendToClientModal";
 Default.parameters = {
@@ -50,32 +74,37 @@ Modal para enviar documentos a clientes con opciones de asunto y mensaje.
 
 ## Propiedades
 
-- **document**: Objeto con información del documento
-- **isOpen**: Boolean para controlar visibilidad del modal
-- **onClose**: Callback ejecutado al cerrar
-- **onSend**: Callback ejecutado al enviar el documento
+- **documentName**: Nombre del documento
+- **clientName**: Cliente destino
+- **subject**: Asunto editable
+- **message**: Mensaje editable
+- **onCancel**: Callback al cerrar
+- **onConfirm**: Callback al confirmar
+- **sending**: Estado de envio en progreso
 
 ## Características
 
-- Formulario de envío con validación
+- Resumen del documento y cliente
 - Campo para asunto
 - Área de texto para mensaje
-- Selección de cliente
 - Estados de carga
-- Manejo de errores
 
 ## Ejemplo de uso
 
 \`\`\`jsx
-const [isOpen, setIsOpen] = React.useState(false);
+const [subject, setSubject] = React.useState('');
+const [message, setMessage] = React.useState('');
 
 <SendToClientModal
-  document={selectedDocument}
-  isOpen={isOpen}
-  onClose={() => setIsOpen(false)}
-  onSend={async (data) => {
-    await sendDocumentToClient(data);
-  }}
+  documentName={selectedDocument.originalFileName}
+  clientName={selectedDocument.clientName}
+  subject={subject}
+  message={message}
+  onSubjectChange={setSubject}
+  onMessageChange={setMessage}
+  onCancel={() => setIsOpen(false)}
+  onConfirm={handleConfirmSendToClient}
+  sending={isSending}
 />
 \`\`\`
       `,

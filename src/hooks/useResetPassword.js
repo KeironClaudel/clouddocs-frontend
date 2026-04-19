@@ -94,9 +94,7 @@ export function useResetPassword() {
       setSuccessMessage(t("resetPassword.messages.success"));
       resetForm();
     } catch (err) {
-      setActionMessage(
-        resolveApiErrorMessage(err, t("resetPassword.messages.error")),
-      );
+      setError(resolveApiErrorMessage(err, t("resetPassword.messages.error")));
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import DataTable from "./DataTable";
 
 export default {
@@ -29,33 +28,44 @@ const mockData = [
 ];
 
 export const Default = () => (
-  <DataTable
-    columns={mockColumns}
-    data={mockData}
-    loading={false}
-    onEdit={(row) => console.log("Editing:", row)}
-    onDelete={(row) => console.log("Deleting:", row)}
-  />
+  <div style={{ padding: "20px" }}>
+    <DataTable
+      columns={mockColumns}
+      hasData={mockData.length > 0}
+      footer={<span>3 registros cargados</span>}
+    >
+      {mockData.map((row) => (
+        <tr key={row.id}>
+          <td className="px-6 py-4">{row.id}</td>
+          <td className="px-6 py-4">{row.name}</td>
+          <td className="px-6 py-4">{row.email}</td>
+          <td className="px-6 py-4">{row.role}</td>
+        </tr>
+      ))}
+    </DataTable>
+  </div>
 );
 
 export const Loading = () => (
-  <DataTable
-    columns={mockColumns}
-    data={[]}
-    loading={true}
-    onEdit={() => {}}
-    onDelete={() => {}}
-  />
+  <div style={{ padding: "20px" }}>
+    <DataTable columns={mockColumns} hasData={true}>
+      <tr>
+        <td className="px-6 py-4 text-gray-500" colSpan={mockColumns.length}>
+          Cargando filas...
+        </td>
+      </tr>
+    </DataTable>
+  </div>
 );
 
 export const Empty = () => (
-  <DataTable
-    columns={mockColumns}
-    data={[]}
-    loading={false}
-    onEdit={() => {}}
-    onDelete={() => {}}
-  />
+  <div style={{ padding: "20px" }}>
+    <DataTable
+      columns={mockColumns}
+      hasData={false}
+      emptyMessage="No hay registros para mostrar."
+    />
+  </div>
 );
 
 Default.storyName = "DataTable";
@@ -70,18 +80,18 @@ Tabla genérica y reutilizable para mostrar datos en la aplicación.
 ## Propiedades
 
 - **columns**: Array de objetos con \`key\` y \`label\`
-- **data**: Array de objetos con los datos a mostrar
-- **loading**: Boolean para mostrar estado de carga
-- **onEdit**: Callback ejecutado al hacer click en editar
-- **onDelete**: Callback ejecutado al hacer click en eliminar
+- **children**: Filas renderizadas dentro de \`tbody\`
+- **hasData**: Boolean para mostrar la tabla o el estado vacío
+- **emptyMessage**: Mensaje para estado sin resultados
+- **footer**: Nodo opcional para paginación o resumen
 
 ## Características
 
-- Soporte para datos dinámicos
-- Estado de carga visual
-- Botones de edición y eliminación
-- Responsive
-- Manejo de filas vacías
+- Tabla desacoplada de la lógica de negocio
+- Responsive con scroll horizontal
+- Footer opcional para paginación
+- Manejo de estado vacío
+- Compatible con filas complejas y acciones custom
 
 ## Ejemplo de uso
 
@@ -91,11 +101,15 @@ Tabla genérica y reutilizable para mostrar datos en la aplicación.
     { key: 'id', label: 'ID' },
     { key: 'name', label: 'Nombre' },
   ]}
-  data={users}
-  loading={isLoading}
-  onEdit={handleEdit}
-  onDelete={handleDelete}
-/>
+  hasData={users.length > 0}
+>
+  {users.map((user) => (
+    <tr key={user.id}>
+      <td>{user.id}</td>
+      <td>{user.name}</td>
+    </tr>
+  ))}
+</DataTable>
 \`\`\`
       `,
     },

@@ -18,7 +18,34 @@ import {
 } from "../mappers/uploadDocumentMappers";
 import { t } from "../i18n";
 
-const MAX_FILE_SIZE_BYTES = import.meta.env.VITE_MAX_FILE_SIZE_BYTES;
+const DEFAULT_MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+
+function parseMaxFileSizeBytes(rawValue) {
+  if (typeof rawValue !== "string") {
+    return DEFAULT_MAX_FILE_SIZE_BYTES;
+  }
+
+  const normalizedValue = rawValue.replace(/;/g, "").trim();
+
+  if (/^\d+$/.test(normalizedValue)) {
+    return Number(normalizedValue);
+  }
+
+  const factors = normalizedValue
+    .split("*")
+    .map((factor) => factor.trim())
+    .filter(Boolean);
+
+  if (factors.length > 1 && factors.every((factor) => /^\d+$/.test(factor))) {
+    return factors.reduce((total, factor) => total * Number(factor), 1);
+  }
+
+  return DEFAULT_MAX_FILE_SIZE_BYTES;
+}
+
+const MAX_FILE_SIZE_BYTES = parseMaxFileSizeBytes(
+  import.meta.env.VITE_MAX_FILE_SIZE_BYTES,
+);
 
 /**
  * Encapsulates all UploadDocumentPage state, data loading,
@@ -264,7 +291,7 @@ export function useUploadDocument() {
 
         setClientOptions(normalized);
         setHasSearchedClients(true);
-      } catch (error) {
+      } catch {
         setClientOptions([]);
         setHasSearchedClients(true);
       } finally {

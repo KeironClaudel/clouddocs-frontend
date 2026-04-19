@@ -1,203 +1,122 @@
-# CloudDocs - Document Management System
+# CloudDocs Frontend
 
-A modern, secure, and scalable document management system built with React and Vite. CloudDocs provides organizations with a comprehensive solution for managing, organizing, and securing their digital documents with role-based access control and audit capabilities.
+CloudDocs frontend built with React 19 and Vite. The application covers authentication with `httpOnly` cookies, document management, admin catalogs, client management, user profile flows, and Storybook-based component documentation.
 
-## 🚀 Features
+## Current status
 
-### Core Functionality
+- The app is organized around `pages`, `hooks`, `services`, `mappers`, `validators`, and `utils`.
+- The UI is primarily built with Tailwind CSS and FontAwesome.
+- Storybook is configured and documents the reusable domain components.
+- The active i18n dictionary is Spanish (`src/i18n/es.js`).
 
-- **Document Management**: Upload, organize, and manage documents with advanced search and filtering
-- **Role-Based Access Control**: Granular permissions system with Admin, User, and custom roles
-- **Secure Authentication**: HTTP-only cookies with JWT tokens for enhanced security
-- **Real-time Dashboard**: Comprehensive analytics and document insights
-- **Audit Logging**: Complete tracking of all document operations and user activities
+## Implemented features
 
-### Document Organization
+- Login, forgot password, and reset password flows.
+- PDF upload with validation, categories, types, client selection, access levels, and visible departments.
+- Document listing with filters, pagination, preview, download, rename, versioning, and send-to-client actions.
+- Admin catalogs for users, clients, categories, departments, document types, and document access levels.
+- Dashboard, profile, change password, and audit logs.
+- Route guards through `ProtectedRoute` and `AdminRoute`.
 
-- **Categories & Types**: Flexible categorization system for document classification
-- **Access Levels**: Multiple security levels (Public, Internal, Confidential, Restricted)
-- **Department Management**: Organize documents by organizational departments
-- **Metadata Management**: Rich document metadata and tagging system
+## Stack
 
-### User Experience
+- React 19
+- Vite 8
+- React Router DOM 7
+- Axios
+- Tailwind CSS 4
+- FontAwesome
+- Storybook 8
+- ESLint
 
-- **Responsive Design**: Modern UI built with Tailwind CSS
-- **Internationalization**: Multi-language support (Currently Spanish, code-ready for English addition)
-- **Real-time Notifications**: Instant feedback on operations
-- **Advanced Search**: Full-text search with filters and sorting
+## Actual structure
 
-### Security & Compliance
-
-- **HTTPS Support**: Secure development environment with SSL certificates
-- **Session Management**: Automatic session handling and timeout
-- **Data Encryption**: Secure data transmission and storage
-- **Audit Trails**: Complete compliance logging
-
-## 🛠️ Technology Stack
-
-### Frontend Framework
-
-- **React 19** - Modern React with hooks and concurrent features
-- **Vite** - Fast build tool and development server
-- **React Router** - Client-side routing and navigation
-
-### UI & Styling
-
-- **Tailwind CSS** - Utility-first CSS framework
-- **FontAwesome** - Icon library for consistent UI elements
-- **Responsive Design** - Mobile-first approach
-
-### HTTP & API
-
-- **Axios** - HTTP client with interceptors and error handling
-- **RESTful API** - Clean API design with proper error responses
-
-### Development Tools
-
-- **ESLint** - Code linting and quality assurance
-- **Vite Plugins** - Hot module replacement and optimization
-- **Environment Configuration** - Secure environment variable management
-
-### Security
-
-- **HTTP-Only Cookies** - Secure token storage
-- **JWT Authentication** - Stateless authentication
-- **CORS Configuration** - Cross-origin resource sharing
-
-## 📁 Project Structure
-
-```
+```text
 src/
-├── api/                 # API configuration and interceptors
-├── components/          # Reusable UI components
-│   ├── AdminRoute.jsx   # Admin-only route protection
-│   ├── AppLayout.jsx    # Main application layout
-│   ├── DataTable.jsx    # Data display component
-│   ├── Navbar.jsx       # Navigation component
-│   └── ProtectedRoute.jsx # Authentication route guard
-├── context/             # React context providers
-│   └── AuthContext.jsx  # Authentication state management
-├── hooks/               # Custom React hooks
-├── i18n/                # Internationalization files
-├── pages/               # Application pages/routes
-│   ├── DashboardPage.jsx
-│   ├── DocumentsPage.jsx
-│   ├── LoginPage.jsx
-│   ├── ProfilePage.jsx
-│   └── UsersPage.jsx
-├── services/            # API service layer
-├── utils/               # Utility functions
-└── assets/              # Static assets
+├── api/              # Axios instance and global 401 handling
+├── components/       # Reusable components and domain stories
+├── context/          # AuthContext and exported context value
+├── hooks/            # Page/use-case hooks
+├── i18n/             # Spanish dictionary and t() helper
+├── mappers/          # Initial state and payload builders
+├── pages/            # Route-level screens
+├── services/         # Backend API clients
+├── stories/          # Storybook scaffold demo stories
+├── utils/            # Permissions, dates, errors, and role options
+└── validators/       # Form validation
 ```
 
-## 🚀 Getting Started
+## Routes
 
-### Prerequisites
+### Public
 
-- Node.js 18+ and npm
-- Backend API server running
-- Modern web browser
+- `/` redirects to `/login`
+- `/login`
+- `/reset-password`
+- `/under-construction`
 
-### Installation
+### Protected
 
-1. **Clone the repository**
+- `/dashboard`
+- `/documents`
+- `/documents/upload`
+- `/profile`
+- `/change-password`
+- `/clients`
+- `/document-types`
 
-   ```bash
-   git clone <repository-url>
-   cd clouddocs-frontend
-   ```
+### Protected + `AdminRoute`
 
-2. **Install dependencies**
+- `/users`
+- `/categories`
+- `/departments`
+- `/audit-logs`
+- `/document-access-levels`
 
-   ```bash
-   npm install
-   ```
+## Environment variables
 
-3. **Environment Configuration**
-   Create a `.env` file in the root directory:
+Create a `.env` file with:
 
-   ```env
-   VITE_API_BASE_URL=https://your-api-domain.com/api
-   ```
+```env
+VITE_API_BASE_URL=https://localhost:7121/api
+VITE_ADMIN_GUID=<admin-role-guid>
+VITE_USER_GUID=<user-role-guid>
+VITE_MAX_FILE_SIZE_BYTES=20971520
+```
 
-4. **Start development server**
+Note: the frontend now tolerates either a plain byte value or a simple multiplicative expression for `VITE_MAX_FILE_SIZE_BYTES`, but an integer is the recommended format.
 
-   ```bash
-   npm run dev
-   ```
+## Scripts
 
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
+- `npm run dev`: start the HTTPS development server.
+- `npm run build`: create a production build with Vite.
+- `npm run preview`: preview the production build locally.
+- `npm run lint`: run ESLint.
+- `npm run storybook`: start Storybook locally.
+- `npm run build-storybook`: generate the static Storybook build.
 
-## 🔧 Available Scripts
+## Recently reflected changes
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint for code quality
+- Initial hook state moved into `mappers` for `useDocuments` and `useUploadDocument`.
+- Responsive cancel button adjustment in `UploadDocumentPage`.
+- Component stories realigned with the current APIs for `Navbar`, `DataTable`, `ClientAutocomplete`, and `SendToClientModal`.
+- Fixed `VITE_MAX_FILE_SIZE_BYTES` parsing so PDF size validation actually works.
 
-## 🔒 Security Features
+## Extended documentation
 
-### Authentication Flow
+Expanded project documentation lives in `C:\Users\Keiron\Desktop\DOC FRONTEND` and was updated to match the current codebase:
 
-1. **Login**: Secure credential validation
-2. **Token Management**: HTTP-only cookies prevent XSS attacks
-3. **Session Validation**: Server-side session verification
-4. **Automatic Logout**: Session timeout and invalidation
+- `README.md`
+- `RESUMEN_EJECUTIVO.md`
+- `API_REFERENCE.md`
+- `HOOKS_DOCUMENTATION.md`
+- `SERVICES_DOCUMENTATION.md`
+- `COMPONENTS_JSDoc.md`
+- `STORYBOOK_GUIDE.md`
+- `INDEX.md`
 
-### Data Protection
+## Useful notes
 
-- **Encrypted Transmission**: HTTPS-only communication
-- **Input Validation**: Client and server-side validation
-- **SQL Injection Prevention**: Parameterized queries
-- **XSS Protection**: Sanitized user inputs
-
-## 🌐 Internationalization
-
-The application supports multiple languages:
-
-- **Spanish (es)** - Primary language
-- **English (en)** - Secondary language (PENDING TO BE ADDED)
-
-Language files are located in `src/i18n/` and can be easily extended.
-
-## 📊 API Integration
-
-### Authentication Endpoints
-
-- `POST /auth/login` - User authentication
-- `POST /auth/logout` - Session termination
-- `GET /auth/me` - Current user information
-- `POST /auth/refresh-token` - Token refresh
-
-### Document Management
-
-- `GET /documents` - List documents with pagination
-- `POST /documents` - Upload new document
-- `GET /documents/:id` - Get document details
-- `PUT /documents/:id` - Update document
-- `DELETE /documents/:id` - Delete document
-
-### Administrative Endpoints
-
-- `GET /users` - User management
-- `GET /audit-logs` - Audit trail access
-- `GET /categories` - Document categories
-- `GET /departments` - Department management
-
-## 📝 License
-
-This project is proprietary software. All rights reserved.
-
-## 🔄 Recent Updates
-
-- Migrated to HTTP-only cookies for enhanced security
-- Implemented HTTPS development environment
-- Updated authentication flow
-- Improved session management
-
----
-
-**Built with ❤️ using React, Vite, and modern web technologies**
+- `Navbar` shows admin links according to `canManageAdminPanels(user)`.
+- The active UI dictionary is Spanish; there is no language switcher in the interface yet.
+- Vitest and Playwright packages are installed, but there is still no test script in `package.json`.

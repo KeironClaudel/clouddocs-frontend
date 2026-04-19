@@ -62,7 +62,6 @@ function DocumentsPage() {
     versionLoadingByDocumentId,
     versionsByDocumentId,
     visibleDocuments,
-    handleSendToClient,
     visibilityForm,
     handleCloseSendToClientModal,
     handleConfirmSendToClient,
