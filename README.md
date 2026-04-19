@@ -34,6 +34,7 @@ CloudDocs frontend built with React 19 and Vite. The application covers authenti
 ```text
 src/
 ├── api/              # Axios instance and global 401 handling
+├── assets/           # Static assets used by the frontend
 ├── components/       # Reusable components and domain stories
 ├── context/          # AuthContext and exported context value
 ├── hooks/            # Page/use-case hooks
