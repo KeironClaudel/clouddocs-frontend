@@ -123,15 +123,18 @@ const es = {
     cards: {
       documents: "Documentos",
       totalDocuments: "Total de documentos registrados",
-
       users: "Usuarios",
       totalUsers: "Total de usuarios registrados",
-
       activeUsers: "Usuarios activos",
       activeUsersDesc: "Cuentas actualmente activas",
-
       inactiveUsers: "Usuarios inactivos",
       inactiveUsersDesc: "Cuentas actualmente inactivas",
+      clients: "Clientes",
+      totalClients: "Clientes registrados",
+      activeClients: "Clientes activos",
+      activeClientsDesc: "Clientes habilitados en el sistema",
+      inactiveClients: "Clientes inactivos",
+      inactiveClientsDesc: "Clientes deshabilitados en el sistema",
     },
 
     quickAccess: {
@@ -139,6 +142,7 @@ const es = {
       documents: "Documentos",
       profile: "Perfil",
       users: "Usuarios",
+      clients: "Clientes",
     },
   },
   users: {

@@ -17,18 +17,38 @@ async function fetchUsers() {
 }
 
 /**
+ * Requests all clients from the backend API.
+ */
+async function fetchClients() {
+  const response = await axiosInstance.get("/clients");
+  return response.data;
+}
+
+/**
  * Builds dashboard statistics from existing backend endpoints.
- * For non-admin users, user statistics are omitted.
+ * For non-admin users, user and client status statistics are omitted.
  */
 export async function getDashboardStats(isAdmin) {
-  const documentsData = await fetchDocuments();
+  const [documentsData, clientsData] = await Promise.all([
+    fetchDocuments(),
+    fetchClients(),
+  ]);
 
   const documents = Array.isArray(documentsData)
     ? documentsData
     : documentsData.documents || documentsData.items || [];
 
+  const clients = Array.isArray(clientsData)
+    ? clientsData
+    : clientsData.clients || clientsData.items || [];
+
   const stats = {
     totalDocuments: documents.length,
+
+    totalClients: clients.length,
+    activeClients: null,
+    inactiveClients: null,
+
     totalUsers: null,
     activeUsers: null,
     inactiveUsers: null,
@@ -44,6 +64,9 @@ export async function getDashboardStats(isAdmin) {
     stats.totalUsers = users.length;
     stats.activeUsers = users.filter((user) => user.isActive).length;
     stats.inactiveUsers = users.filter((user) => !user.isActive).length;
+
+    stats.activeClients = clients.filter((client) => client.isActive).length;
+    stats.inactiveClients = clients.filter((client) => !client.isActive).length;
   }
 
   return stats;

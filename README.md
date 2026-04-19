@@ -17,6 +17,7 @@ CloudDocs frontend built with React 19 and Vite. The application covers authenti
 - Admin catalogs for users, clients, categories, departments, document types, and document access levels.
 - Dashboard, profile, change password, and audit logs.
 - Route guards through `ProtectedRoute` and `AdminRoute`.
+- Granular navigation visibility through dedicated permission helpers in `permissionUtils`.
 
 ## Stack
 
@@ -118,6 +119,8 @@ Expanded project documentation lives in `C:\Users\Keiron\Desktop\DOC FRONTEND` a
 
 ## Useful notes
 
-- `Navbar` shows admin links according to `canManageAdminPanels(user)`.
+- `Navbar` now combines direct navigation links with a profile/actions dropdown menu.
+- Navigation visibility is controlled through dedicated permission helpers such as `canViewClients`, `canViewUsers`, `canViewAuditLogs`, `canViewCategories`, `canViewDepartments`, `canViewDocumentAccessLevels`, and `canViewDocumentTypes`.
+- `canManageAdminPanels(user)` still identifies admin-level access, but navigation is no longer documented as a single admin-only toggle.
 - The active UI dictionary is Spanish; there is no language switcher in the interface yet.
 - Vitest and Playwright packages are installed, but there is still no test script in `package.json`.

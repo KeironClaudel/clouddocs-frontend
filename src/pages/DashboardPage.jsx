@@ -7,6 +7,8 @@ import {
   faUsers,
   faUserCheck,
   faUserSlash,
+  faBuilding,
+  faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../context/AuthContext";
 import { isAdmin } from "../utils/permissionUtils";
@@ -44,7 +46,7 @@ function DashboardPage() {
 
         {!loading && !error && (
           <>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">
@@ -59,6 +61,23 @@ function DashboardPage() {
                 </p>
                 <p className="mt-2 text-sm text-gray-500">
                   {t("dashboard.cards.totalDocuments")}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {t("dashboard.cards.clients")}
+                  </h2>
+                  <span className="text-cyan-500">
+                    <FontAwesomeIcon icon={faBuilding} size="lg" />
+                  </span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">
+                  {stats.totalClients ?? 0}
+                </p>
+                <p className="mt-2 text-sm text-gray-500">
+                  {t("dashboard.cards.totalClients")}
                 </p>
               </div>
 
@@ -114,6 +133,40 @@ function DashboardPage() {
                       {t("dashboard.cards.inactiveUsersDesc")}
                     </p>
                   </div>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {t("dashboard.cards.activeClients")}
+                      </h2>
+                      <span className="text-green-500">
+                        <FontAwesomeIcon icon={faUserTie} size="lg" />
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stats.activeClients ?? 0}
+                    </p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {t("dashboard.cards.activeClientsDesc")}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {t("dashboard.cards.inactiveClients")}
+                      </h2>
+                      <span className="text-amber-500">
+                        <FontAwesomeIcon icon={faUserSlash} size="lg" />
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {stats.inactiveClients ?? 0}
+                    </p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {t("dashboard.cards.inactiveClientsDesc")}
+                    </p>
+                  </div>
                 </>
               )}
             </div>
@@ -130,6 +183,14 @@ function DashboardPage() {
                 >
                   <FontAwesomeIcon icon={faFolderOpen} />
                   <span>{t("dashboard.quickAccess.documents")}</span>
+                </Link>
+
+                <Link
+                  to="/clients"
+                  className="inline-flex items-center gap-2 rounded-lg bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-700 transition hover:bg-teal-100"
+                >
+                  <FontAwesomeIcon icon={faBuilding} />
+                  <span>{t("dashboard.quickAccess.clients")}</span>
                 </Link>
 
                 <Link
