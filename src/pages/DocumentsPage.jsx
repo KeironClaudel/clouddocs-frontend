@@ -14,6 +14,7 @@ import { useDocumentsPage } from "../hooks/useDocuments";
 import DocumentVisibilityEditorRow from "../components/DocumentVisibilityEditorRow";
 import ClientAutocomplete from "../components/ClientAutocomplete";
 import SendToClientModal from "../components/SendToClientModal";
+import { getDocumentTableColumns } from "../config/documentTableConfig";
 
 function DocumentsPage() {
   const { user } = useAuth();
@@ -82,18 +83,7 @@ function DocumentsPage() {
   const canDeactivate = canDeactivateDocuments(user);
   const canEditVisibility = canEditDocumentVisibility(user);
 
-  const documentTableColumns = [
-    { key: "name", label: t("documents.table.name") },
-    { key: "client", label: t("documents.table.client") },
-    { key: "category", label: t("documents.table.category") },
-    { key: "uploadedBy", label: t("documents.table.uploadedBy") },
-    { key: "department", label: t("documents.table.department") },
-    { key: "documentType", label: t("documents.table.type") },
-    { key: "created", label: t("documents.table.created") },
-    { key: "status", label: t("documents.table.status") },
-    { key: "version", label: t("documents.table.version") },
-    { key: "actions", label: t("documents.table.actions") },
-  ];
+  const documentTableColumns = getDocumentTableColumns(t);
 
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
