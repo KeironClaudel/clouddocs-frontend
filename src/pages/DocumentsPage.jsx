@@ -84,6 +84,18 @@ function DocumentsPage() {
 
   const documentTableColumns = getDocumentTableColumns(t);
 
+  function renderExpirationDate(document) {
+    if (document.expirationDate) {
+      return formatLocalDateForDisplay(document.expirationDate);
+    }
+
+    if (document.expirationDatePendingDefinition) {
+      return t("documents.table.expirationPending");
+    }
+
+    return t("documents.table.notAvailable");
+  }
+
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
@@ -365,6 +377,10 @@ function DocumentsPage() {
 
                   <td className="px-6 py-4 text-gray-600">
                     {formatLocalDateForDisplay(document.createdAt)}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600">
+                    {renderExpirationDate(document)}
                   </td>
 
                   <td className="px-6 py-4">
