@@ -96,6 +96,20 @@ function DocumentsPage() {
     return t("documents.table.notAvailable");
   }
 
+  function renderVisibleDepartments(document) {
+    if (!Array.isArray(document.visibleDepartments)) {
+      return t("documents.table.notAvailable");
+    }
+
+    const departmentNames = document.visibleDepartments
+      .map((department) => department?.name?.trim())
+      .filter(Boolean);
+
+    return departmentNames.length > 0
+      ? departmentNames.join(", ")
+      : t("documents.table.notAvailable");
+  }
+
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
@@ -368,7 +382,7 @@ function DocumentsPage() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-600">
-                    {document.department || t("documents.table.notAvailable")}
+                    {renderVisibleDepartments(document)}
                   </td>
 
                   <td className="px-6 py-4 text-gray-700">
