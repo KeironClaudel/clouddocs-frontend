@@ -18,6 +18,19 @@ import {
 } from "../mappers/clientMappers";
 import { t } from "../i18n";
 
+function normalizeClient(client) {
+  return {
+    ...client,
+    createdAt: client?.createdAt ?? client?.CreatedAt ?? null,
+    updatedAt: client?.updatedAt ?? client?.UpdatedAt ?? null,
+  };
+}
+
+function normalizeClientsResponse(data) {
+  const normalized = Array.isArray(data) ? data : data.clients || data.items || [];
+  return normalized.map(normalizeClient);
+}
+
 /**
  * Encapsulates all ClientsPage state and handlers.
  */
@@ -47,12 +60,7 @@ export function useClientsPage() {
     async function loadClients() {
       try {
         const data = await getClients();
-
-        const normalized = Array.isArray(data)
-          ? data
-          : data.clients || data.items || [];
-
-        setClients(normalized);
+        setClients(normalizeClientsResponse(data));
       } catch (err) {
         setError(resolveApiErrorMessage(err, t("clients.messages.loadError")));
       } finally {
@@ -125,13 +133,22 @@ export function useClientsPage() {
   }
 
   function addClientToState(client) {
-    setClients((prev) => [client, ...prev]);
+    setClients((prev) => [normalizeClient(client), ...prev]);
   }
 
   function updateClientInState(updatedClient) {
     setClients((prev) =>
       prev.map((client) =>
-        client.id === updatedClient.id ? updatedClient : client,
+        client.id === updatedClient.id
+          ? {
+              ...client,
+              ...normalizeClient(updatedClient),
+              updatedAt:
+                updatedClient?.updatedAt ??
+                updatedClient?.UpdatedAt ??
+                new Date().toISOString(),
+            }
+          : client,
       ),
     );
   }
