@@ -6,32 +6,34 @@ import { useCategoriesPage } from "../hooks/useCategories";
 function CategoriesPage() {
   const {
     actionMessage,
-    categories,
+    filteredCategories,
     createForm,
     creatingCategory,
     deactivatingCategoryId,
     editForm,
     error,
+    handleClearFilters,
     handleCreateCategory,
     handleCreateFormChange,
     handleDeactivateCategory,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateCategory,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateCategory,
     loading,
     reactivatingCategoryId,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingCategory,
   } = useCategoriesPage();
 
-  /**
-   * Defines the columns to display in the category table.
-   */
   const categoryTableColumns = [
     { key: "name", label: t("categories.table.name") },
     { key: "description", label: t("categories.table.description") },
@@ -54,7 +56,7 @@ function CategoriesPage() {
 
           <div className="mt-4">
             <button
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
               onClick={() => setShowCreateForm((prev) => !prev)}
             >
               {showCreateForm
@@ -70,7 +72,6 @@ function CategoriesPage() {
           </div>
         )}
 
-        {/* CREATE FORM */}
         {showCreateForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -110,7 +111,7 @@ function CategoriesPage() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition disabled:opacity-70"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700 disabled:opacity-70"
                   disabled={creatingCategory}
                 >
                   {creatingCategory
@@ -120,7 +121,7 @@ function CategoriesPage() {
 
                 <button
                   type="button"
-                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
                   onClick={resetCreateForm}
                   disabled={creatingCategory}
                 >
@@ -131,7 +132,6 @@ function CategoriesPage() {
           </div>
         )}
 
-        {/* EDIT FORM */}
         {showEditForm && (
           <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -171,7 +171,7 @@ function CategoriesPage() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 transition"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white transition hover:bg-indigo-700"
                   disabled={updatingCategory}
                 >
                   {updatingCategory
@@ -181,7 +181,7 @@ function CategoriesPage() {
 
                 <button
                   type="button"
-                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition"
+                  className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-300"
                   onClick={resetEditForm}
                   disabled={updatingCategory}
                 >
@@ -192,28 +192,71 @@ function CategoriesPage() {
           </div>
         )}
 
-        {/* LOADING */}
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            {t("categories.filters.title")}
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("categories.filters.searchLabel")}
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchTermChange}
+                placeholder={t("categories.filters.searchPlaceholder")}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("categories.filters.statusLabel")}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="">{t("categories.filters.allStatuses")}</option>
+                <option value="true">{t("categories.filters.active")}</option>
+                <option value="false">
+                  {t("categories.filters.inactive")}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
+          >
+            {t("categories.filters.clear")}
+          </button>
+        </div>
+
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {t("categories.messages.loading")}
           </div>
         )}
 
-        {/* ERROR */}
         {!loading && error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {/* TABLE */}
         {!loading && !error && (
           <DataTable
             columns={categoryTableColumns}
-            hasData={categories.length > 0}
+            hasData={filteredCategories.length > 0}
             emptyMessage={t("categories.messages.empty")}
           >
-            {categories.map((category) => (
+            {filteredCategories.map((category) => (
               <tr key={category.id} className="transition hover:bg-gray-50/80">
                 <td className="px-6 py-4 font-medium text-gray-900">
                   {category.name}

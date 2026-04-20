@@ -27,6 +27,12 @@ function DocumentTypesPage() {
     showCreateForm,
     showEditForm,
     updatingDocumentType,
+    filteredDocumentTypes,
+    searchTerm,
+    statusFilter,
+    handleSearchTermChange,
+    handleStatusFilterChange,
+    handleClearFilters,
   } = useDocumentTypesPage();
 
   const documentTypeTableColumns = [
@@ -199,13 +205,63 @@ function DocumentTypesPage() {
           </div>
         )}
 
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            {t("documentTypes.filters.title")}
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documentTypes.filters.searchLabel")}
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchTermChange}
+                placeholder={t("documentTypes.filters.searchPlaceholder")}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("documentTypes.filters.statusLabel")}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              >
+                <option value="">
+                  {t("documentTypes.filters.allStatuses")}
+                </option>
+                <option value="true">
+                  {t("documentTypes.filters.active")}
+                </option>
+                <option value="false">
+                  {t("documentTypes.filters.inactive")}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm"
+          >
+            {t("documentTypes.filters.clear")}
+          </button>
+        </div>
+
         {!loading && !error && (
           <DataTable
             columns={documentTypeTableColumns}
-            hasData={documentTypes.length > 0}
+            hasData={filteredDocumentTypes.length > 0}
             emptyMessage={t("documentTypes.table.noData")}
           >
-            {documentTypes.map((documentType) => (
+            {filteredDocumentTypes.map((documentType) => (
               <tr
                 key={documentType.id}
                 className="transition hover:bg-gray-50/80"

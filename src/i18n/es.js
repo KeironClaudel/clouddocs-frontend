@@ -52,6 +52,16 @@ const es = {
       inactive: "Inactivo",
       noDescription: "N/A",
     },
+    filters: {
+      title: "Búsqueda y filtros",
+      searchLabel: "Buscar",
+      searchPlaceholder: "Buscar por nombre o descripción",
+      statusLabel: "Estado",
+      allStatuses: "Todos",
+      active: "Activas",
+      inactive: "Inactivas",
+      clear: "Limpiar filtros",
+    },
   },
 
   auditLogs: {
@@ -496,6 +506,17 @@ const es = {
       processing: "Procesando...",
     },
 
+    filters: {
+      title: "Búsqueda y filtros",
+      searchLabel: "Buscar",
+      searchPlaceholder: "Buscar por nombre o descripción",
+      statusLabel: "Estado",
+      allStatuses: "Todos",
+      active: "Activos",
+      inactive: "Inactivos",
+      clear: "Limpiar filtros",
+    },
+
     form: {
       createTitle: "Crear tipo documental",
       editTitle: "Editar tipo documental",
@@ -655,6 +676,16 @@ const es = {
       unexpected: "Ocurrió un error inesperado.",
       nameRequired: "El nombre del departamento es obligatorio.",
     },
+    filters: {
+      title: "Búsqueda y filtros",
+      searchLabel: "Buscar",
+      searchPlaceholder: "Buscar por nombre o descripción",
+      statusLabel: "Estado",
+      allStatuses: "Todos",
+      active: "Activos",
+      inactive: "Inactivos",
+      clear: "Limpiar filtros",
+    },
   },
   underConstruction: {
     title: "En construcción",
@@ -676,6 +707,17 @@ const es = {
       deactivate: "Desactivar",
       reactivate: "Reactivar",
       processing: "Procesando...",
+    },
+    filters: {
+      title: "Búsqueda y filtros",
+      searchLabel: "Buscar",
+      searchPlaceholder:
+        "Buscar por nombre, razón social, identificación, correo o teléfono",
+      statusLabel: "Estado",
+      allStatuses: "Todos",
+      active: "Activos",
+      inactive: "Inactivos",
+      clear: "Limpiar filtros",
     },
 
     form: {

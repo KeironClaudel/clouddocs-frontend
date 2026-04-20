@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createCategory,
   deactivateCategory,
@@ -37,6 +37,9 @@ export function useCategoriesPage() {
 
   const [editingCategoryId, setEditingCategoryId] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -58,6 +61,35 @@ export function useCategoriesPage() {
 
     loadCategories();
   }, []);
+
+  const filteredCategories = useMemo(() => {
+    return categories.filter((category) => {
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch ||
+        category.name?.toLowerCase().includes(normalizedSearch) ||
+        category.description?.toLowerCase().includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === "" ? true : String(category.isActive) === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [categories, searchTerm, statusFilter]);
+
+  function handleSearchTermChange(event) {
+    setSearchTerm(event.target.value);
+  }
+
+  function handleStatusFilterChange(event) {
+    setStatusFilter(event.target.value);
+  }
+
+  function handleClearFilters() {
+    setSearchTerm("");
+    setStatusFilter("");
+  }
 
   function handleCreateFormChange(e) {
     const { name, value } = e.target;
@@ -214,25 +246,31 @@ export function useCategoriesPage() {
   return {
     actionMessage,
     categories,
+    filteredCategories,
     createForm,
     creatingCategory,
     deactivatingCategoryId,
     editForm,
     error,
+    handleClearFilters,
     handleCreateCategory,
     handleCreateFormChange,
     handleDeactivateCategory,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateCategory,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateCategory,
     loading,
     reactivatingCategoryId,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingCategory,
   };
 }

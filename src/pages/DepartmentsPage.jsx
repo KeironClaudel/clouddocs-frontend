@@ -8,22 +8,27 @@ function DepartmentsPage() {
     actionMessage,
     createForm,
     creatingDepartment,
-    departments,
     editForm,
     error,
+    filteredDepartments,
+    handleClearFilters,
     handleCreateDepartment,
     handleCreateFormChange,
     handleDeactivateDepartment,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateDepartment,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateDepartment,
     loading,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingDepartment,
     updatingDepartmentId,
   } = useDepartmentsPage();
@@ -39,7 +44,6 @@ function DepartmentsPage() {
   return (
     <section className="min-h-screen bg-gray-100 px-4 py-8">
       <div className="mx-auto max-w-7xl">
-        {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             {t("departments.title")}
@@ -66,7 +70,6 @@ function DepartmentsPage() {
           </div>
         </div>
 
-        {/* CREATE FORM */}
         {showCreateForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -109,10 +112,7 @@ function DepartmentsPage() {
                 <button
                   type="button"
                   className="rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
-                  onClick={() => {
-                    resetCreateForm();
-                    setShowCreateForm(false);
-                  }}
+                  onClick={resetCreateForm}
                 >
                   {t("departments.buttons.cancel")}
                 </button>
@@ -121,7 +121,6 @@ function DepartmentsPage() {
           </div>
         )}
 
-        {/* EDIT FORM */}
         {showEditForm && (
           <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
@@ -173,7 +172,52 @@ function DepartmentsPage() {
           </div>
         )}
 
-        {/* STATES */}
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            {t("departments.filters.title")}
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("departments.filters.searchLabel")}
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchTermChange}
+                placeholder={t("departments.filters.searchPlaceholder")}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("departments.filters.statusLabel")}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="">{t("departments.filters.allStatuses")}</option>
+                <option value="true">{t("departments.filters.active")}</option>
+                <option value="false">
+                  {t("departments.filters.inactive")}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
+          >
+            {t("departments.filters.clear")}
+          </button>
+        </div>
+
         {loading && (
           <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {t("departments.messages.loading")}
@@ -186,14 +230,13 @@ function DepartmentsPage() {
           </div>
         )}
 
-        {/* TABLE */}
         {!loading && !error && (
           <DataTable
             columns={departmentTableColumns}
-            hasData={departments.length > 0}
+            hasData={filteredDepartments.length > 0}
             emptyMessage={t("departments.table.noData")}
           >
-            {departments.map((departmentItem) => (
+            {filteredDepartments.map((departmentItem) => (
               <tr
                 key={departmentItem.id}
                 className="transition hover:bg-gray-50/80"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createDocumentType,
   deactivateDocumentType,
@@ -49,6 +49,9 @@ export function useDocumentTypesPage() {
 
   const [editingDocumentTypeId, setEditingDocumentTypeId] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   useEffect(() => {
     async function loadDocumentTypes() {
       try {
@@ -70,6 +73,24 @@ export function useDocumentTypesPage() {
 
     loadDocumentTypes();
   }, []);
+
+  const filteredDocumentTypes = useMemo(() => {
+    return documentTypes.filter((documentType) => {
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch ||
+        documentType.name?.toLowerCase().includes(normalizedSearch) ||
+        documentType.description?.toLowerCase().includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === ""
+          ? true
+          : String(documentType.isActive) === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [documentTypes, searchTerm, statusFilter]);
 
   function handleCreateFormChange(event) {
     const { name, value } = event.target;
@@ -254,6 +275,19 @@ export function useDocumentTypesPage() {
     }
   }
 
+  function handleSearchTermChange(event) {
+    setSearchTerm(event.target.value);
+  }
+
+  function handleStatusFilterChange(event) {
+    setStatusFilter(event.target.value);
+  }
+
+  function handleClearFilters() {
+    setSearchTerm("");
+    setStatusFilter("");
+  }
+
   return {
     actionMessage,
     createForm,
@@ -277,5 +311,11 @@ export function useDocumentTypesPage() {
     showCreateForm,
     showEditForm,
     updatingDocumentType,
+    filteredDocumentTypes,
+    searchTerm,
+    statusFilter,
+    handleSearchTermChange,
+    handleStatusFilterChange,
+    handleClearFilters,
   };
 }

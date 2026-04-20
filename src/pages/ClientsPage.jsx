@@ -6,26 +6,31 @@ import { useClientsPage } from "../hooks/useClient";
 function ClientsPage() {
   const {
     actionMessage,
-    clients,
+    filteredClients,
     createForm,
     creatingClient,
     deactivatingClientId,
     editForm,
     error,
+    handleClearFilters,
     handleCreateClient,
     handleCreateFormChange,
     handleDeactivateClient,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateClient,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateClient,
     loading,
     reactivatingClientId,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingClient,
   } = useClientsPage();
 
@@ -290,6 +295,50 @@ function ClientsPage() {
           </div>
         )}
 
+        <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            {t("clients.filters.title")}
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("clients.filters.searchLabel")}
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchTermChange}
+                placeholder={t("clients.filters.searchPlaceholder")}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                {t("clients.filters.statusLabel")}
+              </label>
+              <select
+                value={statusFilter}
+                onChange={handleStatusFilterChange}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              >
+                <option value="">{t("clients.filters.allStatuses")}</option>
+                <option value="true">{t("clients.filters.active")}</option>
+                <option value="false">{t("clients.filters.inactive")}</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="mt-4 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
+          >
+            {t("clients.filters.clear")}
+          </button>
+        </div>
+
         {loading && (
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             {t("clients.messages.loading")}
@@ -305,10 +354,10 @@ function ClientsPage() {
         {!loading && !error && (
           <DataTable
             columns={clientTableColumns}
-            hasData={clients.length > 0}
+            hasData={filteredClients.length > 0}
             emptyMessage={t("clients.table.noData")}
           >
-            {clients.map((client) => (
+            {filteredClients.map((client) => (
               <tr key={client.id} className="transition hover:bg-gray-50/80">
                 <td className="px-6 py-4 font-medium text-gray-900">
                   {client.name}

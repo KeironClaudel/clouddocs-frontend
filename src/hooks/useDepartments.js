@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createDepartment,
   deactivateDepartment,
@@ -30,10 +30,12 @@ export function useDepartmentsPage() {
   const [createForm, setCreateForm] = useState(
     getInitialCreateDepartmentForm(),
   );
+
   /**
    * Stores the edit department form values.
    */
   const [editForm, setEditForm] = useState(getInitialEditDepartmentForm());
+
   /**
    * Stores the department list returned by the API.
    */
@@ -85,6 +87,12 @@ export function useDepartmentsPage() {
   const [updatingDepartmentId, setUpdatingDepartmentId] = useState(null);
 
   /**
+   * Stores filter values for the departments table.
+   */
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  /**
    * Loads the department list when the page is rendered for the first time.
    */
   useEffect(() => {
@@ -98,7 +106,9 @@ export function useDepartmentsPage() {
 
         setDepartments(normalizedDepartments);
       } catch (err) {
-        setError(resolveApiErrorMessage(err, t("departments.loadError")));
+        setError(
+          resolveApiErrorMessage(err, t("departments.messages.loadError")),
+        );
       } finally {
         setLoading(false);
       }
@@ -106,6 +116,27 @@ export function useDepartmentsPage() {
 
     loadDepartments();
   }, []);
+
+  /**
+   * Returns departments filtered by search term and status.
+   */
+  const filteredDepartments = useMemo(() => {
+    return departments.filter((departmentItem) => {
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch ||
+        departmentItem.name?.toLowerCase().includes(normalizedSearch) ||
+        departmentItem.description?.toLowerCase().includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === ""
+          ? true
+          : String(departmentItem.isActive) === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [departments, searchTerm, statusFilter]);
 
   /**
    * Updates a department's active status in local state after a successful API request.
@@ -134,6 +165,28 @@ export function useDepartmentsPage() {
   }
 
   /**
+   * Updates the search term filter.
+   */
+  function handleSearchTermChange(event) {
+    setSearchTerm(event.target.value);
+  }
+
+  /**
+   * Updates the status filter.
+   */
+  function handleStatusFilterChange(event) {
+    setStatusFilter(event.target.value);
+  }
+
+  /**
+   * Clears all filters.
+   */
+  function handleClearFilters() {
+    setSearchTerm("");
+    setStatusFilter("");
+  }
+
+  /**
    * Updates the create department form state when an input changes.
    */
   function handleCreateFormChange(event) {
@@ -150,6 +203,7 @@ export function useDepartmentsPage() {
    */
   function resetCreateForm() {
     setCreateForm(getInitialCreateDepartmentForm());
+    setShowCreateForm(false);
   }
 
   /**
@@ -165,6 +219,7 @@ export function useDepartmentsPage() {
       setActionMessage(validationError);
       return;
     }
+
     setCreatingDepartment(true);
 
     try {
@@ -178,9 +233,8 @@ export function useDepartmentsPage() {
 
       setActionMessage(t("departments.messages.createSuccess"));
       resetCreateForm();
-      setShowCreateForm(false);
     } catch (err) {
-      setError(
+      setActionMessage(
         resolveApiErrorMessage(err, t("departments.messages.createError")),
       );
     } finally {
@@ -216,7 +270,6 @@ export function useDepartmentsPage() {
     setActionMessage("");
     setShowEditForm(true);
     setEditingDepartmentId(department.id);
-
     setEditForm(mapDepartmentToForm(department));
   }
 
@@ -238,6 +291,7 @@ export function useDepartmentsPage() {
       setActionMessage(validationError);
       return;
     }
+
     setUpdatingDepartment(true);
 
     try {
@@ -255,7 +309,7 @@ export function useDepartmentsPage() {
       setActionMessage(t("departments.messages.updateSuccess"));
       resetEditForm();
     } catch (err) {
-      setError(
+      setActionMessage(
         resolveApiErrorMessage(err, t("departments.messages.updateError")),
       );
     } finally {
@@ -275,7 +329,7 @@ export function useDepartmentsPage() {
       updateDepartmentStatusInState(departmentId, false);
       setActionMessage(t("departments.messages.deactivateSuccess"));
     } catch (err) {
-      setError(
+      setActionMessage(
         resolveApiErrorMessage(err, t("departments.messages.deactivateError")),
       );
     } finally {
@@ -295,7 +349,7 @@ export function useDepartmentsPage() {
       updateDepartmentStatusInState(departmentId, true);
       setActionMessage(t("departments.messages.reactivateSuccess"));
     } catch (err) {
-      setError(
+      setActionMessage(
         resolveApiErrorMessage(err, t("departments.messages.reactivateError")),
       );
     } finally {
@@ -310,19 +364,26 @@ export function useDepartmentsPage() {
     departments,
     editForm,
     error,
+    filteredDepartments,
+    handleClearFilters,
     handleCreateDepartment,
     handleCreateFormChange,
     handleDeactivateDepartment,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateDepartment,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateDepartment,
     loading,
+    reactivatingDepartmentId: updatingDepartmentId,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingDepartment,
     updatingDepartmentId,
   };

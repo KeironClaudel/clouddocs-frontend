@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createClient,
   deactivateClient,
@@ -11,7 +11,6 @@ import {
   validateCreateClient,
   validateUpdateClient,
 } from "../validators/clientValidators";
-
 import {
   buildClientPayload,
   getInitialClientForm,
@@ -41,6 +40,9 @@ export function useClientsPage() {
 
   const [editingClientId, setEditingClientId] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   useEffect(() => {
     async function loadClients() {
       try {
@@ -60,6 +62,38 @@ export function useClientsPage() {
 
     loadClients();
   }, []);
+
+  const filteredClients = useMemo(() => {
+    return clients.filter((client) => {
+      const normalizedSearch = searchTerm.trim().toLowerCase();
+
+      const matchesSearch =
+        !normalizedSearch ||
+        client.name?.toLowerCase().includes(normalizedSearch) ||
+        client.legalName?.toLowerCase().includes(normalizedSearch) ||
+        client.identification?.toLowerCase().includes(normalizedSearch) ||
+        client.email?.toLowerCase().includes(normalizedSearch) ||
+        client.phone?.toLowerCase().includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === "" ? true : String(client.isActive) === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [clients, searchTerm, statusFilter]);
+
+  function handleSearchTermChange(event) {
+    setSearchTerm(event.target.value);
+  }
+
+  function handleStatusFilterChange(event) {
+    setStatusFilter(event.target.value);
+  }
+
+  function handleClearFilters() {
+    setSearchTerm("");
+    setStatusFilter("");
+  }
 
   function handleCreateFormChange(event) {
     const { name, value } = event.target;
@@ -134,7 +168,6 @@ export function useClientsPage() {
 
     try {
       const payload = buildClientPayload(createForm);
-
       const createdClient = await createClient(payload);
 
       if (createdClient?.id) {
@@ -155,9 +188,7 @@ export function useClientsPage() {
   function handleOpenEditForm(client) {
     setActionMessage("");
     setEditingClientId(client.id);
-
     setEditForm(mapClientToForm(client));
-
     setShowEditForm(true);
   }
 
@@ -178,9 +209,9 @@ export function useClientsPage() {
     }
 
     setUpdatingClient(true);
+
     try {
       const payload = buildClientPayload(editForm);
-
       const updatedClient = await updateClient(editingClientId, payload);
 
       if (updatedClient?.id) {
@@ -235,25 +266,31 @@ export function useClientsPage() {
   return {
     actionMessage,
     clients,
+    filteredClients,
     createForm,
     creatingClient,
     deactivatingClientId,
     editForm,
     error,
+    handleClearFilters,
     handleCreateClient,
     handleCreateFormChange,
     handleDeactivateClient,
     handleEditFormChange,
     handleOpenEditForm,
     handleReactivateClient,
+    handleSearchTermChange,
+    handleStatusFilterChange,
     handleUpdateClient,
     loading,
     reactivatingClientId,
     resetCreateForm,
     resetEditForm,
+    searchTerm,
     setShowCreateForm,
     showCreateForm,
     showEditForm,
+    statusFilter,
     updatingClient,
   };
 }
