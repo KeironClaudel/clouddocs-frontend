@@ -10,23 +10,19 @@ export async function loginUser(credentials) {
 }
 
 /**
- * Sends the refresh token to obtain a new access token pair.
+ * Requests a new access token pair using the httpOnly refresh cookie.
  */
-export async function refreshToken(refreshTokenValue) {
-  const response = await axiosInstance.post("/auth/refresh-token", {
-    refreshToken: refreshTokenValue,
-  });
+export async function refreshToken() {
+  const response = await axiosInstance.post("/auth/refresh-token", {});
 
   return response.data;
 }
 
 /**
- * Sends the refresh token to invalidate the current session on logout.
+ * Invalidates the current session using the httpOnly refresh cookie.
  */
-export async function logoutUser(refreshTokenValue) {
-  const response = await axiosInstance.post("/auth/logout", {
-    refreshToken: refreshTokenValue,
-  });
+export async function logoutUser() {
+  const response = await axiosInstance.post("/auth/logout", {});
 
   return response.data;
 }

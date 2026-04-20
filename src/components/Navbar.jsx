@@ -13,7 +13,6 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import {
-  canManageAdminPanels,
   canViewAuditLogs,
   canViewCategories,
   canViewClients,
@@ -28,7 +27,6 @@ function Navbar() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const isAdmin = canManageAdminPanels(user);
   const canSeeClients = canViewClients(user);
   const canSeeUsers = canViewUsers(user);
   const canSeeAuditLogs = canViewAuditLogs(user);
@@ -71,9 +69,7 @@ function Navbar() {
 
   async function handleLogout() {
     try {
-      if (user?.refreshToken) {
-        await logoutUser(user.refreshToken);
-      }
+      await logoutUser();
     } catch (error) {
       console.error("Logout request failed:", error);
     } finally {
