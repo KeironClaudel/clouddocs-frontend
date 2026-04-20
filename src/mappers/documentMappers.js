@@ -15,6 +15,7 @@ export function buildSendToClientPayload(form) {
   return {
     subject: form.subject.trim() || null,
     message: form.message.trim() || null,
+    versionId: form.versionId || null,
   };
 }
 

@@ -395,7 +395,13 @@ export function useDocumentsPage(user) {
     setSendingToClientDocumentId(sendToClientModalDocument.id);
 
     try {
-      const payload = buildSendToClientPayload(sendToClientForm);
+      const selectedVersionId =
+        selectedVersionByDocumentId[sendToClientModalDocument.id] || null;
+
+      const payload = buildSendToClientPayload({
+        ...sendToClientForm,
+        versionId: selectedVersionId,
+      });
 
       await sendDocumentToClient(sendToClientModalDocument.id, payload);
 
